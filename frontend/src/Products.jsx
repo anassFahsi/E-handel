@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import AddProduct from "./AddProduct";
+import Product from "./Product";
 
 export default function Products() {
   const [products, setProducts] = useState([]);
@@ -36,13 +37,9 @@ export default function Products() {
       {products.length === 0 ? (
         <p>Inga produkter hittades.</p>
       ) : (
-        <ul>
-          {products.map((p) => (
-            <li key={p.id}>
-              <strong>{p.name}</strong> – {p.price} kr
-            </li>
-          ))}
-        </ul>
+        
+          <Product products={products} fetchProducts={fetchProducts} />
+        
       )}
        <AddProduct  onProductAdded={fetchProducts} />
     </div>
