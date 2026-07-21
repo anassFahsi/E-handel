@@ -49,7 +49,7 @@ export default function AddProduct({ onProductAdded }) {
           required
         />
         <button type="submit" disabled={loading}>
-          {loading ? "Lägger till..." : "Lägg till"}
+          {loading ? "Adding..." : "Add"}
         </button>
       </form>
 
