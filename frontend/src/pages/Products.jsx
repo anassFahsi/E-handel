@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-
-const Products = () => {
+import { Link } from "react-router-dom";
+const Products = ({addToCart}) => {
     const [products, setProducts]=useState([])
 
     const fetchProducts=async()=>{
@@ -20,10 +20,11 @@ const Products = () => {
             {products.map((p)=>(
                 <li key={p.id}><strong>{p.name}
                    </strong>- {p.price}
+                   <button onClick={()=>addToCart(p)}>Add to cart</button>
                 </li>
                 ))}
         </ul>
-      
+      <Link to={'/cart'}>Go to cart.</Link>
     </div>
   )
 }
