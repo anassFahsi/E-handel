@@ -1,13 +1,16 @@
-
-import Products from "./Products";
-
+import {BrowserRouter, Routes, Route} from 'react-router-dom';
+import Products from "./pages/Products";
+import AdminProducts from './pages/AdminProducts';
 
 const App = () => {
   return (
-    <div>
-      <Products />
-      
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route path='/' element={<Products />} />
+          
+        <Route path='/admin/products' element={<AdminProducts />} />
+      </Routes>
+    </BrowserRouter>
   )
 }
 
