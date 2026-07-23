@@ -4,7 +4,7 @@ import AdminProducts from './pages/AdminProducts';
 import Cart from './pages/Cart';
 import { useState } from 'react';
 import Header from './pages/Header';
-
+import Checkout from './pages/Checkout';
 
 const App = () => {
   const [cart,setCart]=useState([])
@@ -34,6 +34,11 @@ const App = () => {
          element ={<Cart  cart={cart} removeFromCart={removeFromCart}/>} />
 
         <Route path='/admin/products' element={<AdminProducts />} />
+
+        <Route 
+        path='/checkout'
+        element={<Checkout cart={cart} total={cart.reduce((sum,item)=>sum+item.price,0)} />}
+        />
       </Routes>
     </BrowserRouter>
   )

@@ -17,7 +17,13 @@ const Cart = ({cart, removeFromCart}) => {
             ))}
         </ul>
         <h2>Total: {total} kr</h2>
-        <Link to={'/'}>Back to products</Link>
+        
+        <Link to={'/checkout'}>
+          <button>Go to checkout</button>
+        </Link>
+        <Link to={'/'}>
+          <button>Back to products</button>
+        </Link>
     </div>
   )
 }
