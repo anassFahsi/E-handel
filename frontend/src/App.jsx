@@ -3,6 +3,7 @@ import Products from "./pages/Products";
 import AdminProducts from './pages/AdminProducts';
 import Cart from './pages/Cart';
 import { useState } from 'react';
+import Header from './pages/Header';
 
 
 const App = () => {
@@ -22,6 +23,7 @@ const App = () => {
 
   return (
     <BrowserRouter>
+     <Header cartCount={cart.length} />
       <Routes>
         <Route
          path='/' 
