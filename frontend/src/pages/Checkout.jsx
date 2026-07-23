@@ -1,0 +1,80 @@
+import { useState } from "react"
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
+
+const Checkout = ({total,cart,clearCart}) => {
+    const navigate=useNavigate();
+    const [form,setForm]=useState({
+        name:'',
+        email:'',
+        address:''
+    });
+
+    const handleChange=(e)=>{
+        const {name,value}=e.target;
+        setForm(prev=>({...prev,[name]:value}))
+    };
+
+    const handleSubmit=async(e)=>{
+        e.preventDefault();
+        const order={customer:form,cart,total}
+        try{
+            const res=await axios.post('http://localhost:3000/orders',order);
+            const data=res.data;
+            if(data.success){
+                clearCart();
+                navigate(`/thankyou/${data.orderId}`)
+            }
+        
+        }catch(error){
+            console.error(error);
+            alert('Order failed')
+        }
+       
+    };
+
+  return (
+    <div>
+        <h1>Checkout</h1>
+        <h2>Total: {total} kr</h2>
+        <form onSubmit={handleSubmit}>
+            <label>
+                Name:
+                <input
+                    type='text'
+                    name="name"
+                    value={form.name}
+                    onChange={handleChange}
+                    >
+                </input>
+            </label>
+
+             <label>
+                Email:
+                <input
+                    type='email'
+                    name="email"
+                    value={form.email}
+                    onChange={handleChange}
+                    >
+                </input>
+            </label>
+
+             <label>
+                Address:
+                <input
+                    type='text'
+                    name="address"
+                    value={form.address}
+                    onChange={handleChange}
+                    >
+                </input>
+            </label>
+            <button type="submit">Confirm order</button>
+        </form>
+      
+    </div>
+  )
+}
+
+export default Checkout
