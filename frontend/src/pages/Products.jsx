@@ -6,7 +6,7 @@ const Products = ({addToCart}) => {
 
     const fetchProducts=async()=>{
         const res=await axios.get('http://localhost:3000/products');
-        setProducts(res.data)
+        setProducts(res.data.map(p=>({...p,price:Number(p.price)})))
     }
 
     useEffect(()=>{
