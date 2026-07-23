@@ -5,6 +5,7 @@ import Cart from './pages/Cart';
 import { useState } from 'react';
 import Header from './pages/Header';
 import Checkout from './pages/Checkout';
+import ThankYou from './pages/thankyou';
 
 const App = () => {
   const [cart,setCart]=useState([])
@@ -17,27 +18,34 @@ const App = () => {
   const removeFromCart=(id)=>{
        setCart(prev=>prev.filter(item=>item.id!==id) );
   }
-
-  
-
+   
+  const clearCart=()=>setCart([])
 
   return (
     <BrowserRouter>
      <Header cartCount={cart.length} />
       <Routes>
         <Route
-         path='/' 
-         element={<Products  addToCart={addToCart}/>} />
+          path='/' 
+          element={<Products  addToCart={addToCart}/>} 
+        />
 
         <Route
-         path='/cart' 
-         element ={<Cart  cart={cart} removeFromCart={removeFromCart}/>} />
-
-        <Route path='/admin/products' element={<AdminProducts />} />
+          path='/cart' 
+          element ={<Cart  cart={cart} removeFromCart={removeFromCart}/>} 
+         />
 
         <Route 
-        path='/checkout'
-        element={<Checkout cart={cart} total={cart.reduce((sum,item)=>sum+item.price,0)} />}
+          path='/admin/  products'     element={<AdminProducts />}
+         />
+
+        <Route 
+          path='/checkout'
+          element={<Checkout cart={cart} total={cart.reduce((sum,item)=>sum+item.price,0)} clearCart={clearCart} />}
+        />
+
+        <Route path='/thankyou/:id'
+          element={<ThankYou />}
         />
       </Routes>
     </BrowserRouter>

@@ -1,7 +1,9 @@
 import { useState } from "react"
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
-
-const Checkout = ({total,cart}) => {
+const Checkout = ({total,cart,clearCart}) => {
+    const navigate=useNavigate();
     const [form,setForm]=useState({
         name:'',
         email:'',
@@ -13,13 +15,23 @@ const Checkout = ({total,cart}) => {
         setForm(prev=>({...prev,[name]:value}))
     };
 
-    const handleSubmit=(e)=>{
+    const handleSubmit=async(e)=>{
         e.preventDefault();
-        console.log('Order submitted:')
-        console.log('Customer:',form)
-        console.log('Cart:',cart)
-        console.log('Total:',total)
-    }
+        const order={customer:form,cart,total}
+        try{
+            const res=await axios.post('http://localhost:3000/orders',order);
+            const data=res.data;
+            if(data.success){
+                clearCart();
+                navigate(`/thankyou/${data.orderId}`)
+            }
+        
+        }catch(error){
+            console.error(error);
+            alert('Order failed')
+        }
+       
+    };
 
   return (
     <div>
