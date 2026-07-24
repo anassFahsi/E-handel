@@ -7,6 +7,7 @@ import Header from './pages/Header';
 import Checkout from './pages/Checkout';
 import ThankYou from './pages/thankyou';
 
+
 const App = () => {
   const [cart,setCart]=useState([])
   
@@ -36,7 +37,7 @@ const App = () => {
          />
 
         <Route 
-          path='/admin/  products'     element={<AdminProducts />}
+          path='/admin/products'     element={<AdminProducts />}
          />
 
         <Route 
@@ -44,9 +45,11 @@ const App = () => {
           element={<Checkout cart={cart} total={cart.reduce((sum,item)=>sum+item.price,0)} clearCart={clearCart} />}
         />
 
-        <Route path='/thankyou/:id'
+        <Route
+           path='/thankyou/:id'
           element={<ThankYou />}
         />
+
       </Routes>
     </BrowserRouter>
   )
