@@ -6,7 +6,8 @@ import { useState } from 'react';
 import Header from './pages/Header';
 import Checkout from './pages/Checkout';
 import ThankYou from './pages/thankyou';
-
+import AdminOrders from './pages/AdminOrders';
+import AdminOrderDetails from './pages/AdminOrderDetails';
 
 const App = () => {
   const [cart,setCart]=useState([])
@@ -49,6 +50,17 @@ const App = () => {
            path='/thankyou/:id'
           element={<ThankYou />}
         />
+
+        <Route
+            path='/admin/orders'
+            element={<AdminOrders />}
+        />
+
+        <Route 
+            path='/admin/orders/:id'
+            element={<AdminOrderDetails />}
+            />
+
 
       </Routes>
     </BrowserRouter>

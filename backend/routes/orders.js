@@ -57,7 +57,7 @@ router.get('/:id', async (req, res) => {
       FROM order_items
       WHERE order_id = $1
     `, [id]);
-
+     
     res.json({
       order: orderResult.rows[0],
       items: itemsResult.rows
