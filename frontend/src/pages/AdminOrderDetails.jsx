@@ -48,7 +48,7 @@ const AdminOrderDetails=()=> {
         <table>
           <thead>
             <tr>
-              <th>Product ID</th>
+              <th>Product </th>
               <th>Quantity</th>
               <th>Price at purchase</th>
             </tr>
@@ -56,7 +56,7 @@ const AdminOrderDetails=()=> {
           <tbody>
             {items.map(item => (
               <tr key={item.product_id}>
-                <td>{item.product_id}</td>
+                <td>{item.name}</td>
                 <td>{item.quantity}</td>
                 <td>{item.price_at_purchase} kr</td>
               </tr>
