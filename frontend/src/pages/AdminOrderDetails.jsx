@@ -28,6 +28,20 @@ const AdminOrderDetails=()=> {
     fetchOrderDetails();
   }, [id]);
 
+  const handleDelete = async () => {
+  if (!confirm("Are you sure you want to delete this order?")) return;
+
+  try {
+    await axios.delete(`http://localhost:3000/orders/${id}`);
+    alert("Order deleted");
+    window.location.href = "/admin/orders"; // redirect
+  } catch (err) {
+    console.error(err);
+    alert("Could not delete order");
+  }
+};
+
+
   if (loading) return <p>Loading order details...</p>;
   if (error) return <p>{error}</p>;
   if (!order) return <p>No order found.</p>;
@@ -73,6 +87,7 @@ const AdminOrderDetails=()=> {
       <Link to="/admin/orders">
         <button>Back to orders</button>
       </Link>
+      <button onClick={handleDelete}>Delete order</button>
     </div>
   );
 }

@@ -53,7 +53,7 @@ router.get('/:id', async (req, res) => {
     }
 
     const itemsResult = await pool.query(`
-      SELECT p.name, oi.quantity, oi.price_at_purchase
+      SELECT oi.product_id, p.name, oi.quantity, oi.price_at_purchase
       FROM order_items oi inner join products p on p.id = oi.product_id
       WHERE order_id = $1
     `, [id]);
@@ -68,6 +68,24 @@ router.get('/:id', async (req, res) => {
     res.status(500).json({ error: 'Could not fetch order details' });
   }
 });
+
+router.delete('/:id',async(req,res)=>{
+  const {id}=req.params;
+  try{
+    const result=await pool.query(`
+    DELETE FROM orders WHERE id=$1 RETURNING *`,[id]);
+    
+    if(result.rows.length===0){
+      return res.status(404).json({error:' Order not found'})
+    }
+    res.json({message:'Order deleted successfully'})
+
+  }catch(error){
+    console.error(error)
+    res.status(500).json({error:'Could not delete order'})
+  }
+ 
+})
 
 
 export default router
