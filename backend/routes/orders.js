@@ -14,7 +14,7 @@ router.post('/',async(req,res)=>{
             const orderId=orderResult.rows[0].id;
     
             for(const item of cart){
-                await pool.query(`INSERT INTO order_items (order_id,product_id, quantity, price_at_purchase) VALUES($1,$2,$3,$4)`,[orderId,item.id,1,item.price])
+                await pool.query(`INSERT INTO order_items (order_id,product_id, quantity, price_at_purchase) VALUES($1,$2,$3,$4)`,[orderId,item.id,item.quantity,item.price])
             }
         res.json({success:true,orderId})
 
@@ -58,7 +58,7 @@ router.get('/:id', async (req, res) => {
     }
 
     const itemsResult = await pool.query(`
-      SELECT oi.product_id, p.name, oi.quantity, oi.price_at_purchase
+      SELECT oi.product_id, p.name, oi.quantity, oi.price_at_purchase ,(oi.quantity * oi.price_at_purchase) AS subtotal
       FROM order_items oi inner join products p on p.id = oi.product_id
       WHERE order_id = $1
     `, [id]);

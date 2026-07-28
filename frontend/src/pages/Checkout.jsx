@@ -18,6 +18,7 @@ const Checkout = ({total,cart,clearCart}) => {
     const handleSubmit=async(e)=>{
         e.preventDefault();
         const order={customer:form,cart,total}
+        console.log(order.cart)
         try{
             const res=await axios.post('http://localhost:3000/orders',order);
             const data=res.data;

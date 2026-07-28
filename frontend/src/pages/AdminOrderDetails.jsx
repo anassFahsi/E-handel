@@ -65,6 +65,7 @@ const AdminOrderDetails=()=> {
               <th>Product </th>
               <th>Quantity</th>
               <th>Price at purchase</th>
+              <th>Subtotal</th>
             </tr>
           </thead>
           <tbody>
@@ -73,6 +74,7 @@ const AdminOrderDetails=()=> {
                 <td>{item.name}</td>
                 <td>{item.quantity}</td>
                 <td>{item.price_at_purchase} kr</td>
+                <td>{item.subtotal} kr</td>
               </tr>
             ))}
           </tbody>

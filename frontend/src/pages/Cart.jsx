@@ -3,7 +3,7 @@ import { Link } from "react-router-dom"
 
 const Cart = ({cart, removeFromCart}) => {
 
-    const total=cart.reduce((sum,item)=>sum+item.price,0)
+    const total=cart.reduce((sum,item)=>sum+item.price*item.quantity,0)
   return (
     <div>
         <h1>Cart</h1>
@@ -11,7 +11,9 @@ const Cart = ({cart, removeFromCart}) => {
         <ul>
             {cart.map((item,index)=>(
             
-                <li key={index}>{item.name}
+                <li key={index}>
+                  {`${item.quantity} x `}
+                  {item.name}
                 - {item.price} kr
                 <button onClick={()=>removeFromCart(item.id)}>Remove</button></li>
             ))}
