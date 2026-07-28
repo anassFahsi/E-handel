@@ -6,11 +6,12 @@ const  AdminOrders=() =>{
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [search,setSearch]=useState('');
 
   const fetchOrders = async () => {
     try {
       setLoading(true);
-      const res = await axios.get("http://localhost:3000/orders");
+      const res = await axios.get("http://localhost:3000/orders",{params:{search}});
       setOrders(res.data);
     } catch (err) {
       console.error("Error fetching orders:", err);
@@ -22,10 +23,9 @@ const  AdminOrders=() =>{
 
   useEffect(() => {
     fetchOrders();
-  }, []);
+  }, [search]);
 
-  if (loading) return <p>Loading orders...</p>;
-  if (error) return <p>{error}</p>;
+  
 
   return (
     <div>
@@ -34,6 +34,15 @@ const  AdminOrders=() =>{
       {orders.length === 0 ? (
         <p>No orders found.</p>
       ) : (
+        <>
+        <input
+            type="text" 
+            value={search}
+            placeholder="Search order by id, customer name or email"
+            onChange={(e)=>setSearch(e.target.value)}>
+        </input>
+         { (loading) &&<p>Loading orders...</p>}
+         {(error) &&<p>{error}</p>}
         <table>
           <thead>
             <tr>
@@ -61,6 +70,7 @@ const  AdminOrders=() =>{
             ))}
           </tbody>
         </table>
+        </>
       )}
     </div>
   );

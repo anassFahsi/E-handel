@@ -32,8 +32,8 @@ const AdminOrderDetails=()=> {
   if (!confirm("Are you sure you want to delete this order?")) return;
 
   try {
-    await axios.delete(`http://localhost:3000/orders/${id}`);
-    alert("Order deleted");
+    const res=await axios.delete(`http://localhost:3000/orders/${id}`);
+    alert(res.data.message);
     window.location.href = "/admin/orders"; // redirect
   } catch (err) {
     console.error(err);

@@ -1,5 +1,6 @@
 import express from 'express';
 import pool from '../db.js';
+import { Query } from 'pg';
 
 const router=express.Router();
 
@@ -24,12 +25,16 @@ router.post('/',async(req,res)=>{
 });
 
 router.get('/', async (req, res) => {
+  const {search}=req.query;
   try {
-    const result = await pool.query(`
-      SELECT id, customer_name, customer_email, customer_address, total, created_at
-      FROM orders
-      ORDER BY created_at DESC
-    `);
+    let query=`SELECT * FROM orders ORDER BY id DESC`;
+    let params=[]
+    if (search){
+    
+      query=`SELECT * FROM orders WHERE customer_name ILIKE $1 OR customer_email ILIKE $1 OR CAST(id AS TEXT) ILIKE $1 ORDER BY id DESC `;
+      params=[`%${search}%`]
+    }
+    const result = await pool.query(query,params);
 
     res.json(result.rows);
   } catch (error) {
