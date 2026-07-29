@@ -1,6 +1,6 @@
 import express from 'express';
 import pool from '../db.js';
-import { Query } from 'pg';
+//import { Query } from 'pg';
 
 const router=express.Router();
 
@@ -25,23 +25,47 @@ router.post('/',async(req,res)=>{
 });
 
 router.get('/', async (req, res) => {
-  const {search}=req.query;
-  try {
-    let query=`SELECT * FROM orders ORDER BY id DESC`;
-    let params=[]
-    if (search){
-    
-      query=`SELECT * FROM orders WHERE customer_name ILIKE $1 OR customer_email ILIKE $1 OR CAST(id AS TEXT) ILIKE $1 ORDER BY id DESC `;
-      params=[`%${search}%`]
-    }
-    const result = await pool.query(query,params);
+  const { search, page = 1, limit = 5} = req.query;
 
-    res.json(result.rows);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Could not fetch orders' });
+  const offset = (page - 1) * limit;
+
+  try {
+    let baseQuery = `
+      FROM orders
+      WHERE ($1::TEXT IS NULL OR customer_name ILIKE $1 OR customer_email ILIKE $1 OR CAST(id AS TEXT) ILIKE $1)
+    `;
+
+    // total count (för pagination)
+    const countRes = await pool.query(
+      `SELECT COUNT(*) ${baseQuery}`,
+      [search ? `%${search}%` : null]
+    );
+    const total = parseInt(countRes.rows[0].count);
+
+    // hämta orders för denna sida
+    const ordersRes = await pool.query(
+      `
+      SELECT *
+      ${baseQuery}
+      ORDER BY id DESC
+      LIMIT $2 OFFSET $3
+      `,
+      [search ? `%${search}%` : null, limit, offset]
+    );
+
+    res.json({
+      orders: ordersRes.rows,
+      total,
+      page: Number(page),
+      pages: Math.ceil(total / limit)
+    });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Could not load orders" });
   }
 });
+
 
 router.get('/:id', async (req, res) => {
   const { id } = req.params;

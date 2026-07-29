@@ -7,12 +7,19 @@ const  AdminOrders=() =>{
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [search,setSearch]=useState('');
+  const [page,setPage]=useState(1);
+  const [totalPages,setTotalPages]=useState(1);
+  const [limit,setLimit]=useState(null)
 
   const fetchOrders = async () => {
     try {
       setLoading(true);
-      const res = await axios.get("http://localhost:3000/orders",{params:{search}});
-      setOrders(res.data);
+      const res = await axios.get("http://localhost:3000/orders",{params:{search,page,limit}});
+
+      setOrders(res.data.orders);
+     
+      setTotalPages(res.data.pages);
+
     } catch (err) {
       console.error("Error fetching orders:", err);
       setError("Could not load orders");
@@ -23,7 +30,11 @@ const  AdminOrders=() =>{
 
   useEffect(() => {
     fetchOrders();
-  }, [search]);
+  }, [search, page,limit]);
+
+  useEffect(()=>{
+    setPage(1);},[limit,search]
+  )
 
   
 
@@ -43,6 +54,19 @@ const  AdminOrders=() =>{
         </input>
          { (loading) &&<p>Loading orders...</p>}
          {(error) &&<p>{error}</p>}
+        <select value={limit} 
+            onChange={(e)=>{setLimit(Number(e.target.value));setPage(1)}}>
+          <option value='5'>
+              5 per page
+          </option>
+          <option value='10'>
+              10 per page
+          </option>
+          <option value='20'>
+              20 per page
+          </option>
+
+        </select>
         <table>
           <thead>
             <tr>
@@ -72,6 +96,15 @@ const  AdminOrders=() =>{
         </table>
         </>
       )}
+      <div>
+        <button disabled={page===1}
+        onClick={()=>setPage(page-1)}
+        >Previous</button>
+        <span>Page {page}of {totalPages}</span>
+        <button disabled={page===totalPages}
+        onClick={()=>setPage(page+1)}
+        >Next</button>
+      </div>
     </div>
   );
 }
