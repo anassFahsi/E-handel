@@ -8,6 +8,7 @@ const AdminProducts = () => {
   
      const fetchProducts = async () => {
     const res = await axios.get("http://localhost:3000/products");
+    console.log(res)
     setProducts(res.data);
   };
 

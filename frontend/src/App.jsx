@@ -6,14 +6,28 @@ import { useState } from 'react';
 import Header from './pages/Header';
 import Checkout from './pages/Checkout';
 import ThankYou from './pages/thankyou';
+import AdminOrders from './pages/AdminOrders';
+import AdminOrderDetails from './pages/AdminOrderDetails';
 
 const App = () => {
   const [cart,setCart]=useState([])
   
   const addToCart = (product) => {
-  setCart(prev=>([...prev, product]))
-   
-  };
+   console.log(product)
+  setCart(prev => {
+  const existing = prev.find(item => item.id === product.id);
+
+  if (existing) {
+    return prev.map(item =>
+      item.id === product.id
+        ? { ...item, quantity: item.quantity + 1 }
+        : item
+    );
+  }
+  
+  return [...prev, { ...product, quantity: 1 }];
+});
+}
 
   const removeFromCart=(id)=>{
        setCart(prev=>prev.filter(item=>item.id!==id) );
@@ -23,7 +37,7 @@ const App = () => {
 
   return (
     <BrowserRouter>
-     <Header cartCount={cart.length} />
+     <Header cartCount={cart.reduce((sum,item)=>sum+item.quantity,0)}/>
       <Routes>
         <Route
           path='/' 
@@ -36,17 +50,30 @@ const App = () => {
          />
 
         <Route 
-          path='/admin/  products'     element={<AdminProducts />}
+          path='/admin/products'     element={<AdminProducts />}
          />
 
         <Route 
           path='/checkout'
-          element={<Checkout cart={cart} total={cart.reduce((sum,item)=>sum+item.price,0)} clearCart={clearCart} />}
+          element={<Checkout cart={cart} total={cart.reduce((sum,item)=>sum+item.price*item.quantity,0)} clearCart={clearCart} />}
         />
 
-        <Route path='/thankyou/:id'
+        <Route
+           path='/thankyou/:id'
           element={<ThankYou />}
         />
+
+        <Route
+            path='/admin/orders'
+            element={<AdminOrders />}
+        />
+
+        <Route 
+            path='/admin/orders/:id'
+            element={<AdminOrderDetails />}
+            />
+
+
       </Routes>
     </BrowserRouter>
   )
