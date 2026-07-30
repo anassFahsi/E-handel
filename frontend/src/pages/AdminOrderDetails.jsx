@@ -9,6 +9,7 @@ const AdminOrderDetails=()=> {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [orderStatus,setOrderStatus]=useState(order.status);
 
   const fetchOrderDetails = async () => {
     try {
@@ -16,6 +17,8 @@ const AdminOrderDetails=()=> {
       const res = await axios.get(`http://localhost:3000/orders/${id}`);
       setOrder(res.data.order);
       setItems(res.data.items);
+      setOrderStatus(res.data.order.status);
+      
     } catch (err) {
       console.error("Error fetching order details:", err);
       setError("Could not load order details");
@@ -41,6 +44,15 @@ const AdminOrderDetails=()=> {
   }
 };
 
+const updateStatus = async () => {
+ 
+  await axios.put(`http://localhost:3000/orders/${order.id}/status`, {status:orderStatus
+  });
+
+  alert("Order status updated");
+};
+
+
 
   if (loading) return <p>Loading order details...</p>;
   if (error) return <p>{error}</p>;
@@ -54,6 +66,7 @@ const AdminOrderDetails=()=> {
       <p><strong>Name:</strong> {order.customer_name}</p>
       <p><strong>Email:</strong> {order.customer_email}</p>
       <p><strong>Address:</strong> {order.customer_address}</p>
+      <p><strong>Status:</strong> {order.status}</p>
 
       <h2>Order Items</h2>
       {items.length === 0 ? (
@@ -84,7 +97,19 @@ const AdminOrderDetails=()=> {
       <h2>Total</h2>
       <p>{order.total} kr</p>
 
-      <p><strong>Date:</strong> {new Date(order.created_at).toLocaleString()}</p>
+      <p><strong>Created:</strong> {new Date(order.created_at).toLocaleString()}</p>
+      <div><p><strong>Status:</strong>{orderStatus}</p>
+      <select 
+           value={orderStatus} 
+           onChange={(e)=>setOrderStatus(e.target.value)}>
+        <option value={'Ordered'}>Ordered</option>
+        <option value={'Processing'}>Processing</option>
+        <option value={'Delivered'}>Delivered</option>
+        <option value={'Refunded'}>refunded</option>
+      </select>
+      <button onClick={updateStatus}>Update status</button>
+      
+      </div>
 
       <Link to="/admin/orders">
         <button>Back to orders</button>

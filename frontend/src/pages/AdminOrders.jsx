@@ -74,6 +74,7 @@ const  AdminOrders=() =>{
               <th>Customer</th>
               <th>Total</th>
               <th>Date</th>
+              <th>Status</th>
               <th></th>
             </tr>
           </thead>
@@ -85,6 +86,7 @@ const  AdminOrders=() =>{
                 <td>{order.customer_name}</td>
                 <td>{order.total} kr</td>
                 <td>{new Date(order.created_at).toLocaleString()}</td>
+                <td>{order.status}</td>
                 <td>
                   <Link to={`/admin/orders/${order.id}`}>
                     <button>View</button>

@@ -25,7 +25,7 @@ router.post('/',async(req,res)=>{
 });
 
 router.get('/', async (req, res) => {
-  const { search, page = 1, limit = 5} = req.query;
+  const { search, page=1, limit=5 } = req.query;
 
   const offset = (page - 1) * limit;
 
@@ -35,14 +35,13 @@ router.get('/', async (req, res) => {
       WHERE ($1::TEXT IS NULL OR customer_name ILIKE $1 OR customer_email ILIKE $1 OR CAST(id AS TEXT) ILIKE $1)
     `;
 
-    // total count (för pagination)
     const countRes = await pool.query(
       `SELECT COUNT(*) ${baseQuery}`,
       [search ? `%${search}%` : null]
     );
+   
     const total = parseInt(countRes.rows[0].count);
 
-    // hämta orders för denna sida
     const ordersRes = await pool.query(
       `
       SELECT *
@@ -52,6 +51,7 @@ router.get('/', async (req, res) => {
       `,
       [search ? `%${search}%` : null, limit, offset]
     );
+    
 
     res.json({
       orders: ordersRes.rows,
@@ -72,7 +72,7 @@ router.get('/:id', async (req, res) => {
 
   try {
     const orderResult = await pool.query(`
-      SELECT id, customer_name, customer_email, customer_address, total, created_at
+      SELECT id, customer_name, customer_email, customer_address, total, created_at, status
       FROM orders
       WHERE id = $1
     `, [id]);
@@ -115,6 +115,24 @@ router.delete('/:id',async(req,res)=>{
   }
  
 })
+
+router.put('/:id/status', async (req, res) => {
+  const { status } = req.body;
+  console.log(req.body.status)
+  const orderId = req.params.id;
+
+  try {
+    await pool.query(
+      `UPDATE orders SET status = $1 WHERE id = $2`,
+      [status, orderId]
+    );
+
+    res.json({ message: "Order status updated" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Could not update order status" });
+  }
+});
 
 
 export default router
