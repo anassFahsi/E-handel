@@ -19,7 +19,7 @@ export default function AddProduct({ onProductAdded }) {
     try {
       await axios.post("http://localhost:3000/products", formData);
       setFormData({ name: "", price: "" });
-      if (onProductAdded) onProductAdded(); // uppdaterar listan i Products.jsx
+      if (onProductAdded) onProductAdded(); 
     } catch (err) {
       console.error("Error adding product:", err);
       setError(err.message);

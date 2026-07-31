@@ -1,6 +1,6 @@
 import express from 'express';
 import pool from '../db.js';
-//import { Query } from 'pg';
+
 
 const router=express.Router();
 
