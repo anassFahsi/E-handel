@@ -65,11 +65,12 @@ router.post("/cart/items", async (req, res) => {
   }
 });
 
+// fetch cart
 router.get("/cart/:sessionId", async (req, res) => {
   const { sessionId } = req.params;
 
   try {
-    // fetch cart
+    
     const cartRes = await pool.query(
       `SELECT id FROM carts WHERE session_id = $1`,
       [sessionId]
@@ -119,6 +120,54 @@ router.delete('/cart/items/:itemId', async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Could not remove item' });
+  }
+});
+
+router.put('/cart/items/:itemId/increase',async(req,res)=>{
+  const {itemId}=req.params;
+  try{
+  const result=await pool.query(`UPDATE cart_items SET quantity=quantity+1 WHERE id=$1`,[itemId])
+  res.json({message:'quantity increased'})
+
+  }
+  catch(error){
+    console.error(error)
+    res.status(500).json({error:'Could not increase quantity'})
+  }
+});
+
+router.put("/cart/items/:itemId/decrease", async (req, res) => {
+  const { itemId } = req.params;
+
+  try {
+    const itemRes = await pool.query(
+      `SELECT quantity FROM cart_items WHERE id = $1`,
+      [itemId]
+    );
+
+    if (itemRes.rows.length === 0) {
+      return res.status(404).json({ error: "Item not found" });
+    }
+
+    const quantity = itemRes.rows[0].quantity;
+
+    if (quantity > 1) {
+      await pool.query(
+        `UPDATE cart_items SET quantity = quantity - 1 WHERE id = $1`,
+        [itemId]
+      );
+    } else {
+      await pool.query(
+        `DELETE FROM cart_items WHERE id = $1`,
+        [itemId]
+      );
+    }
+
+    res.json({ success: true , message: 'quantity decreased'});
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Could not decrease quantity" });
   }
 });
 

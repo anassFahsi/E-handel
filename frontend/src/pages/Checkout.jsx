@@ -42,7 +42,7 @@ const Checkout = ({ sessionId }) => {
       cart: items,
       total
     };
-
+    console.log(order)
     try {
       const res = await axios.post("http://localhost:3000/orders", order);
       const data = res.data;

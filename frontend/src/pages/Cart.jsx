@@ -40,6 +40,30 @@ const Cart = ({ sessionId,handleCartCount}) => {
     }
   };
 
+  const increaseQuantity=async(itemId)=>{
+    try{
+      const res= await axios.put(`http://localhost:3000/cart/items/${itemId}/increase`)
+      alert(res.data.message)
+      await fetchCart();
+      await handleCartCount();
+    }
+    catch(error){
+      console.error('Could not increase quantity',error)
+    }
+  };
+
+   const decreaseQuantity=async(itemId)=>{
+    try{
+      const res= await axios.put(`http://localhost:3000/cart/items/${itemId}/decrease`)
+      alert(res.data.message)
+      await fetchCart();
+      await handleCartCount();
+    }
+    catch(error){
+      console.error('Could not increase quantity',error)
+    }
+  }
+
 
   return (
     <div>
@@ -51,6 +75,8 @@ const Cart = ({ sessionId,handleCartCount}) => {
         {items.map(item => (
           <li key={item.id}>
             {item.quantity} x {item.name} - {item.price} kr
+            <button onClick={()=>decreaseQuantity(item.id)}>-</button>
+            <button onClick={()=>increaseQuantity(item.id)}>+</button>
             <button onClick={() => removeItem(item.id)}>Remove</button>
           </li>
         ))}
@@ -59,7 +85,7 @@ const Cart = ({ sessionId,handleCartCount}) => {
       <h2>Total: {total} kr</h2>
 
       <Link to="/checkout">
-        <button>Go to checkout</button>
+        <button disabled={total===0}>Go to checkout</button>
       </Link>
 
       <Link to="/">
