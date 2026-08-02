@@ -13,24 +13,23 @@ import { useEffect, useState } from 'react';
 
 const App = () => {
   const [cartCount, setCartCount] = useState(0);
-
-  // ⭐ fetch cartCount from backend
-  useEffect(() => {
-    const fetchCartCount = async () => {
+ 
+   const fetchCartCount = async () => {
       try {
         const res = await axios.get(`http://localhost:3000/cart/${sessionId}`);
-        const items = res.data.items || [];
-        const count = items.reduce((sum, item) => sum + item.quantity, 0);
-        setCartCount(count);
+      
+        setCartCount(res.data.cartCount);
       } catch (err) {
         console.log("Could not fetch cart count", err);
       }
     };
+  useEffect(() => {
+   
 
     fetchCartCount();
-  }, []);
+  }, [sessionId]);
 
-  // ⭐ AddToCart — backend only
+ 
   const addToCart = async (product) => {
     try {
       
@@ -44,8 +43,8 @@ const App = () => {
         quantity: 1
       });
 
-      
-      setCartCount(prev => prev + 1);
+      await fetchCartCount();
+     
 
     } catch (err) {
       console.log('Could not add to cart', err);
@@ -64,7 +63,7 @@ const App = () => {
 
         <Route
           path="/cart"
-          element={<Cart sessionId={sessionId} />}
+          element={<Cart sessionId={sessionId} handleCartCount={fetchCartCount} />}
         />
 
         <Route

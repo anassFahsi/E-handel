@@ -2,40 +2,44 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
 
-const Cart = ({ sessionId }) => {
+const Cart = ({ sessionId,handleCartCount}) => {
+  const[total,setTotal]=useState(0)
   const [items, setItems] = useState([]);
-
-  // ⭐ Hämta cart från backend
-  useEffect(() => {
+  
     const fetchCart = async () => {
       try {
         const res = await axios.get(`http://localhost:3000/cart/${sessionId}`);
         setItems(res.data.items || []);
-        console.log(res.data.items )
+        setTotal(res.data.total)
+      
       } catch (err) {
         console.error("Could not fetch cart", err);
       }
     };
 
+  useEffect(() => {
+  
+
     fetchCart();
   }, [sessionId]);
 
-  // ⭐ Ta bort item från backend
+  
   const removeItem = async (itemId) => {
+    if( !confirm('Are you sure you want to remove item?'))
+      return
+
     try {
-      const res=await axios.delete(`http://localhost:3000/cart/items/${itemId}`);
-      alert(res.data.message)
-      setItems(prev => prev.filter(item => item.id !== itemId));
+     await axios.delete(`http://localhost:3000/cart/items/${itemId}`);
+      alert('Item removed')
+     // setItems(prev => prev.filter(item => item.id !== itemId));
+      await fetchCart();
+      await handleCartCount();
+
     } catch (err) {
       console.error("Could not remove item", err);
     }
   };
 
-  // ⭐ Räkna total från backend-cart
-  const total = items.reduce(
-    (sum, item) => sum + item.price * item.quantity,
-    0
-  );
 
   return (
     <div>

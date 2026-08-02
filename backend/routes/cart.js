@@ -76,7 +76,7 @@ router.get("/cart/:sessionId", async (req, res) => {
     );
 
     if (cartRes.rows.length === 0) {
-      return res.json({ cart: null, items: [] });
+      return res.json({ cart: null, items: [], total:0});
     }
 
     const cartId = cartRes.rows[0].id;
@@ -89,10 +89,14 @@ router.get("/cart/:sessionId", async (req, res) => {
        WHERE ci.cart_id = $1`,
       [cartId]
     );
+    const cartCount=itemsRes.rows.reduce((sum,item)=>sum+item.quantity,0)
+    const total=itemsRes.rows.reduce((sum,item)=>sum+(item.quantity*item.price),0);
 
     res.json({
       cartId,
-      items: itemsRes.rows
+      items: itemsRes.rows,
+      cartCount,
+      total
     });
 
   } catch (err) {

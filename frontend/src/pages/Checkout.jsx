@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 
 const Checkout = ({ sessionId }) => {
   const navigate = useNavigate();
+  const [total,setTotal]=useState(0)
   const [items, setItems] = useState([]);
   const [form, setForm] = useState({
     name: "",
@@ -11,12 +12,13 @@ const Checkout = ({ sessionId }) => {
     address: ""
   });
 
-  // ⭐ 1. Hämta cart från backend
+  // Fetch cart from backend
   useEffect(() => {
     const fetchCart = async () => {
       try {
         const res = await axios.get(`http://localhost:3000/cart/${sessionId}`);
         setItems(res.data.items || []);
+        setTotal(res.data.total)
       } catch (err) {
         console.error("Could not fetch cart", err);
       }
@@ -25,19 +27,13 @@ const Checkout = ({ sessionId }) => {
     fetchCart();
   }, []);
 
-  // ⭐ 2. Räkna total från backend-cart
-  const total = items.reduce(
-    (sum, item) => sum + item.price * item.quantity,
-    0
-  );
-
-  // ⭐ 3. Hantera formulär
+  
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  // ⭐ 4. Skicka order till backend
+ 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
