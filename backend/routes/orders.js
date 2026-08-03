@@ -2,21 +2,33 @@ import express from 'express';
 import pool from '../db.js';
 
 
+
 const router=express.Router();
 
 router.post('/',async(req,res)=>{
     
-        const {customer, cart, total}=req.body;
+        const {customer, cart, total,shipping_method_id,shipping_price,sessionId}=req.body;
         try{
-            const orderResult=await pool.query(`INSERT INTO orders (customer_name, customer_email, customer_address, total)
-            VALUES ($1, $2, $3, $4)
-            RETURNING id`, [customer.name, customer.email, customer.address, total]);
-            const orderId=orderResult.rows[0].id;
+           const orderRes = await pool.query(`
+          INSERT INTO orders (customer_name, customer_email, customer_address, total, shipping_method_id, shipping_price)
+            VALUES ($1, $2, $3, $4, $5, $6)
+              RETURNING id`,
+            [
+            customer.name,
+            customer.email,
+            customer.address,
+            total,
+            shipping_method_id,
+            shipping_price
+          ]);
+
+            const orderId=orderRes.rows[0].id;
     
             for(const item of cart){
                 await pool.query(`INSERT INTO order_items (order_id,product_id, quantity, price_at_purchase) VALUES($1,$2,$3,$4)`,[orderId,item.product_id,item.quantity,item.price])
             }
-        res.json({success:true,orderId})
+        res.json({success:true,orderId});
+        await pool.query(`DELETE FROM carts WHERE session_id=$1`,[sessionId])
 
         }catch(error){
             console.error(error)

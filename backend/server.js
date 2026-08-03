@@ -3,12 +3,13 @@ import cors from 'cors';
 import pool from './db.js';
 import ordersRouter from './routes/orders.js';
 import  cartRouter from './routes/cart.js';
+import shippingRouter from './routes/shipping.js';
 const app = express();
 app.use(cors());
 app.use(express.json());
 app.use('/orders',ordersRouter);
 app.use('/',cartRouter)
-
+app.use('/',shippingRouter)
 app.get("/products", async(req, res) => {
   try{
     const result=await pool.query("SELECT * FROM products");
