@@ -48,6 +48,7 @@ export default function AddProduct({ onProductAdded }) {
           onChange={handleChange}
           required
         />
+      
         <button type="submit" disabled={loading}>
           {loading ? "Adding..." : "Add"}
         </button>

@@ -24,10 +24,12 @@ app.get("/products", async(req, res) => {
 });
 
 app.post('/products',async(req,res)=>{
-  const {name,description,image_url,price,stock}=req.body;
+  const {name,price}=req.body;
   try{
-    const result=await pool.query(`INSERT INTO products (name,description,image_url,price,stock) VALUES ($1,$2,$3,$4,$5) RETURNING *`,[name,description,image_url,price,stock]);
+    const result=await pool.query(`INSERT INTO products (name,price)VALUES ($1,$2) RETURNING *`,[name,price]);
     res.json(result.rows[0]);
+  
+    
   }
   catch(error){
     console.error(error);
@@ -88,6 +90,37 @@ app.delete("/products/:id", async (req, res) => {
     res.status(500).json({ error: "Could not delete product" });
   }
 });
+
+app.get('/:id/variants',async(req,res)=>{
+  try{
+     const result= await pool.query(`SELECT * FROM product_variants WHERE product_id=$1`,[req.params.id]);
+     res.json(result.rows);
+  }
+  catch(err){
+    console.error(err)
+    res.status(500).json({error:'Could not fetch variants'})
+  }
+ 
+});
+
+router.post("/:id/variants", async (req, res) => {
+  const { size, color, stock } = req.body;
+
+  try {
+    await pool.query(
+      `INSERT INTO product_variants (product_id, size, color, stock)
+       VALUES ($1, $2, $3, $4)`,
+      [req.params.id, size, color, stock]
+    );
+
+    res.json({ message: "Variant added" });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Could not add variant" });
+  }
+});
+
 
 
 
