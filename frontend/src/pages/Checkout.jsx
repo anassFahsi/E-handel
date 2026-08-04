@@ -1,57 +1,94 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import {useNavigate} from 'react-router-dom'
 
-const Checkout = ({ sessionId }) => {
-  const navigate = useNavigate();
-  const [total,setTotal]=useState(0)
-  const [items, setItems] = useState([]);
+export default function Checkout({ sessionId ,fetchCartCount}) {
   const [form, setForm] = useState({
     name: "",
     email: "",
-    address: ""
+    address: "",
   });
 
-  // Fetch cart from backend
+  const [items, setItems] = useState([]);
+  const [subtotal, setSubtotal] = useState(0);
+
+  const [shippingMethods, setShippingMethods] = useState([]);
+  const [selectedShipping, setSelectedShipping] = useState(null);
+
+  const [grandTotal, setGrandTotal] = useState(0);
+  const navigate=useNavigate();
+  
+
+  // Fetch cart
   useEffect(() => {
     const fetchCart = async () => {
       try {
         const res = await axios.get(`http://localhost:3000/cart/${sessionId}`);
         setItems(res.data.items || []);
-        setTotal(res.data.total)
+        setSubtotal(res.data.total || 0);
       } catch (err) {
         console.error("Could not fetch cart", err);
       }
     };
 
     fetchCart();
+  }, [sessionId]);
+
+  // Fetch shipping methods
+  useEffect(() => {
+    const fetchShipping = async () => {
+      try {
+        const res = await axios.get("http://localhost:3000/shipping");
+        setShippingMethods(res.data);
+        setSelectedShipping(res.data[0]); // default
+      } catch (err) {
+        console.error("Could not fetch shipping methods", err);
+      }
+    };
+
+    fetchShipping();
   }, []);
 
-  
+  // Update grand total when shipping or subtotal changes
+  useEffect(() => {
+    if (selectedShipping) {
+      setGrandTotal(subtotal + Number(selectedShipping.price));
+    }
+  }, [subtotal, selectedShipping]);
+
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+    setForm({
+      ...form,
+      [e.target.name]: e.target.value,
+    });
   };
 
- 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     const order = {
       customer: form,
       cart: items,
-      total
+      shipping_method_id: selectedShipping.id,
+      shipping_price: selectedShipping.price,
+      total: grandTotal,
+      sessionId:sessionId
     };
     console.log(order)
     try {
       const res = await axios.post("http://localhost:3000/orders", order);
-      const data = res.data;
-
-      if (data.success) {
-        navigate(`/thankyou/${data.orderId}`);
+      if(res.data.success){
+           alert("Order submitted!");
+           setItems([])
+           setSubtotal(0)
+           await fetchCartCount();
+           navigate(`/thankyou/${res.data.orderId}`)
       }
-    } catch (error) {
-      console.error(error);
+     
+
+      
+    } catch (err) {
+      console.error("Could not submit order", err);
       alert("Order failed");
     }
   };
@@ -60,43 +97,58 @@ const Checkout = ({ sessionId }) => {
     <div>
       <h1>Checkout</h1>
 
-      <h2>Total: {total} kr</h2>
+      <h2>Subtotal: {subtotal} kr</h2>
+
+      {selectedShipping && (
+        <h3>
+          Shipping: {selectedShipping.price} kr (
+          {selectedShipping.delivery_days}{" "}
+          {selectedShipping.delivery_days === 1 ? "day" : "days"})
+        </h3>
+      )}
+
+      <h2>Total: {grandTotal} kr</h2>
 
       <form onSubmit={handleSubmit}>
         <label>
           Name:
-          <input
-            type="text"
-            name="name"
-            value={form.name}
-            onChange={handleChange}
-          />
+          <input name="name" value={form.name} onChange={handleChange} />
         </label>
 
         <label>
           Email:
-          <input
-            type="email"
-            name="email"
-            value={form.email}
-            onChange={handleChange}
-          />
+          <input name="email" value={form.email} onChange={handleChange} />
         </label>
 
         <label>
           Address:
-          <input
-            type="text"
-            name="address"
-            value={form.address}
-            onChange={handleChange}
-          />
+          <input name="address" value={form.address} onChange={handleChange} />
         </label>
 
-        <button type="submit">Confirm order</button>
+        <label>
+          Shipping method:
+          <select
+            value={selectedShipping?.id}
+            onChange={(e) => {
+              const method = shippingMethods.find(
+                (m) => m.id === Number(e.target.value)
+              );
+              setSelectedShipping(method);
+            }}
+          >
+            {shippingMethods.map((method) => (
+              <option key={method.id} value={method.id}>
+                {method.name} - {method.price} kr (
+                {method.delivery_days}{" "}
+                {method.delivery_days === 1 ? "day" : "days"})
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <button type="submit">Confirm Order</button>
       </form>
     </div>
   );
-};
+}
 
-export default Checkout;

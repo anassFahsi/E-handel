@@ -68,7 +68,7 @@ const App = () => {
 
         <Route
           path="/checkout"
-          element={<Checkout sessionId={sessionId} />}
+          element={<Checkout sessionId={sessionId} fetchCartCount={fetchCartCount}/>}
         />
 
         <Route

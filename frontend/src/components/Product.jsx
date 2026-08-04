@@ -57,7 +57,7 @@ const  Product=({ products, fetchProducts }) =>{
             </>
           ) : (
             <>
-              <strong>{p.name}</strong> – {p.price} kr
+              <strong>{p.name}</strong> - {p.price} kr
               <button onClick={() => startEdit(p)}>Edit</button>
               <button onClick={() => handleDelete(p.id)}>Delete</button>
             </>

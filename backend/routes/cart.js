@@ -77,7 +77,7 @@ router.get("/cart/:sessionId", async (req, res) => {
     );
 
     if (cartRes.rows.length === 0) {
-      return res.json({ cart: null, items: [], total:0});
+      return res.json({ cart: null, items: [], total:0,cartCount:0});
     }
 
     const cartId = cartRes.rows[0].id;

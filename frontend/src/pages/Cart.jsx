@@ -31,7 +31,7 @@ const Cart = ({ sessionId,handleCartCount}) => {
     try {
      await axios.delete(`http://localhost:3000/cart/items/${itemId}`);
       alert('Item removed')
-     // setItems(prev => prev.filter(item => item.id !== itemId));
+     
       await fetchCart();
       await handleCartCount();
 
