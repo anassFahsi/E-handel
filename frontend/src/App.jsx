@@ -8,6 +8,7 @@ import ThankYou from './pages/thankyou';
 import AdminOrders from './pages/AdminOrders';
 import AdminOrderDetails from './pages/AdminOrderDetails';
 import sessionId from '../../backend/session';
+import ProductPage from './pages/ProductPage';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 
@@ -30,7 +31,7 @@ const App = () => {
   }, [sessionId]);
 
  
-  const addToCart = async (product) => {
+  const addToCart = async (item) => {
     try {
       
       const sessionRes = await axios.post('http://localhost:3000/cart', { sessionId });
@@ -39,7 +40,8 @@ const App = () => {
       
       await axios.post('http://localhost:3000/cart/items', {
         cartId,
-        productId: product.id,
+        productId: item.product.id,
+        variantId:item.variantId,
         quantity: 1
       });
 
@@ -58,7 +60,12 @@ const App = () => {
       <Routes>
         <Route
           path="/"
-          element={<Products addToCart={addToCart} />}
+          element={<Products />}
+        />
+
+      <Route 
+        path='/products/:id'
+        element={<ProductPage addToCart={addToCart}/>}
         />
 
         <Route

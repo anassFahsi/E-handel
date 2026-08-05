@@ -9,7 +9,9 @@ app.use(cors());
 app.use(express.json());
 app.use('/orders',ordersRouter);
 app.use('/',cartRouter)
-app.use('/',shippingRouter)
+app.use('/',shippingRouter);
+
+// Get all products
 app.get("/products", async(req, res) => {
   try{
     const result=await pool.query("SELECT * FROM products");
@@ -23,6 +25,27 @@ app.get("/products", async(req, res) => {
   
 });
 
+// Get one product
+app.get("/products/:id", async (req, res) => {
+  try {
+    const result = await pool.query(
+      "SELECT * FROM products WHERE id = $1",
+      [req.params.id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "Product not found" });
+    }
+
+    res.json(result.rows[0]);
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Could not fetch product" });
+  }
+});
+
+// Create products
 app.post('/products',async(req,res)=>{
   const {name,price}=req.body;
   try{
@@ -37,7 +60,7 @@ app.post('/products',async(req,res)=>{
   }
 
 })
-
+// Update product
 app.put("/products/:id", async (req, res) => {
   const { id } = req.params;
   const { name, description, image_url, price, stock } = req.body;
@@ -66,6 +89,7 @@ app.put("/products/:id", async (req, res) => {
   }
 });
 
+// Delete product
 app.delete("/products/:id", async (req, res) => {
   const { id } = req.params;
 
@@ -91,7 +115,8 @@ app.delete("/products/:id", async (req, res) => {
   }
 });
 
-app.get('/:id/variants',async(req,res)=>{
+// Get variants for products
+app.get('/products/:id/variants',async(req,res)=>{
   try{
      const result= await pool.query(`SELECT * FROM product_variants WHERE product_id=$1`,[req.params.id]);
      res.json(result.rows);
@@ -103,7 +128,8 @@ app.get('/:id/variants',async(req,res)=>{
  
 });
 
-router.post("/:id/variants", async (req, res) => {
+// Add variant
+app.post("/products/:id/variants", async (req, res) => {
   const { size, color, stock } = req.body;
 
   try {
@@ -120,6 +146,38 @@ router.post("/:id/variants", async (req, res) => {
     res.status(500).json({ error: "Could not add variant" });
   }
 });
+
+// Delete variant
+app.delete("/products/variants/:variantId", async (req, res) => {
+  try {
+    await pool.query(
+      "DELETE FROM product_variants WHERE id = $1",
+      [req.params.variantId]
+    );
+
+    res.json({ message: "Variant deleted" });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Could not delete variant" });
+  }
+});
+
+ // Update variant 
+app.put('/variants/:variantId',async(req,res)=>{
+  const {size,color,stock}=req.body;
+  try{
+    await pool.query(`UPDATE product_variants SET 
+      size=$1, color:$2, stock=$3
+      WHERE id=$4`,
+    [size,color,stock, req.params.variantId]);
+    res.json({message:'Variant updated'})
+  }
+  catch(error){
+    console.error(error);
+    res.status(500).json({error:'Could not update variant'})
+  }
+})
 
 
 
