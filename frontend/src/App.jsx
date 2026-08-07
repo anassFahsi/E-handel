@@ -11,6 +11,7 @@ import sessionId from '../../backend/session';
 import ProductPage from './pages/ProductPage';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
+import AdminProductDetailsPage from './pages/AdminProductDetailsPage';
 
 const App = () => {
   const [cartCount, setCartCount] = useState(0);
@@ -40,7 +41,7 @@ const App = () => {
       
       await axios.post('http://localhost:3000/cart/items', {
         cartId,
-        productId: item.product.id,
+        productId: item.productId,
         variantId:item.variantId,
         quantity: 1
       });
@@ -66,6 +67,11 @@ const App = () => {
       <Route 
         path='/products/:id'
         element={<ProductPage addToCart={addToCart}/>}
+        />
+
+        <Route
+        path='/admin/products/:id'
+        element={<AdminProductDetailsPage />}
         />
 
         <Route

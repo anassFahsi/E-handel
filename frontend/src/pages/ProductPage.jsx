@@ -12,6 +12,7 @@ const ProductPage = ({ addToCart }) => {
     const fetchProduct = async () => {
       const res = await axios.get(`http://localhost:3000/products/${id}`);
       setProduct(res.data);
+      console.log(res.data)
      
     };
 
@@ -44,6 +45,9 @@ const ProductPage = ({ addToCart }) => {
   return (
     <div>
       <h1>{product.name}</h1>
+      <img  src={product.image_url.startsWith('http')?product.image_url:'http://localhost:3000'+product.image_url}
+      width={200}/>
+      <p>{product.description}</p>
       <p>Pris: {Number(product.price)} kr</p>
       
       

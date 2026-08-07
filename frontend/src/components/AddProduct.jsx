@@ -2,31 +2,44 @@ import { useState } from "react";
 import axios from "axios";
 
 export default function AddProduct({ onProductAdded }) {
-  const [formData, setFormData] = useState({ name: "", price: "" });
+  const [formData, setFormData] = useState({ name: "", price: "",description:'',image_url:'',imageFile:null,category_id:''});
+  const[imageFile,setImageFile]=useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
     setLoading(true);
 
+    const data=new FormData();
+    data.append('name',formData.name)
+    data.append('price',formData.price)
+    data.append('description',formData.description)
+    data.append('category_id',formData.category_id)
+    data.append('image',imageFile)
+
     try {
-      await axios.post("http://localhost:3000/products", formData);
-      setFormData({ name: "", price: "" });
+      const res=await axios.post("http://localhost:3000/products", 
+        data,{
+        headers:{"Content-Type": "multipart/form-data"
+                    }
+                }
+      );
+      console.log(res.data)
+      setFormData({ name: "", price: "",description:'',image_url:'',category_id:''});
       if (onProductAdded) onProductAdded(); 
-    } catch (err) {
+    } 
+      catch (err) {
       console.error("Error adding product:", err);
       setError(err.message);
-    } finally {
-      setLoading(false);
     }
-  };
+     finally {
+      setLoading(false);
+      }
+    };
 
   return (
     <div>
@@ -37,7 +50,7 @@ export default function AddProduct({ onProductAdded }) {
           name="name"
           value={formData.name}
           placeholder="Produktnamn"
-          onChange={handleChange}
+          onChange={(e)=>setFormData({...formData,name:e.target.value})}
           required
         />
         <input
@@ -45,9 +58,33 @@ export default function AddProduct({ onProductAdded }) {
           name="price"
           value={formData.price}
           placeholder="Pris"
-          onChange={handleChange}
-          required
+          onChange={(e)=>setFormData({...formData,price:e.target.value})}
         />
+
+        <input 
+        type='text'
+        name='description'
+        value={formData.description}
+        placeholder='Description'
+        onChange={(e)=>setFormData({...formData,description:e.target.value})}>
+        </input>
+
+        <input 
+        type='text'
+        name='category_id'
+        value={formData.category_id}
+        placeholder='Category'
+        onChange={(e)=>setFormData({...formData,category_id:e.target.value})}>
+        </input>
+
+        <input 
+             type='file'
+             name='image'
+             accept='image/*'
+             onChange={(e) => setImageFile(e.target.files[0])
+                     }
+        >
+        </input>
       
         <button type="submit" disabled={loading}>
           {loading ? "Adding..." : "Add"}

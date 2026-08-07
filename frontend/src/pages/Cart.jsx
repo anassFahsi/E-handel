@@ -42,14 +42,16 @@ const Cart = ({ sessionId,handleCartCount}) => {
 
   const increaseQuantity=async(itemId)=>{
     try{
-      const res= await axios.put(`http://localhost:3000/cart/items/${itemId}/increase`)
-      alert(res.data.message)
+       await axios.put(`http://localhost:3000/cart/items/${itemId}/increase`)
+     
       await fetchCart();
       await handleCartCount();
     }
-    catch(error){
-      console.error('Could not increase quantity',error)
-    }
+   catch(error) {
+    const msg = error.response?.data?.message || "Could not increase quantity";
+    alert(msg);
+   }
+
   };
 
    const decreaseQuantity=async(itemId)=>{

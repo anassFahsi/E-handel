@@ -22,6 +22,9 @@ const Products = () => {
                <li key={p.id}>
                 <Link to={`/products/${p.id}`}>
                    <strong>{p.name}</strong> - {p.price} kr
+                   <img src={p.image_url.startsWith('http')?p.image_url:'http://localhost:3000'+p.image_url}
+                      alt={p.name}
+                      width='200'/>
                </Link>
               </li>
 

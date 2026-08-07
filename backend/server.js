@@ -1,15 +1,41 @@
 import express from 'express';
 import cors from 'cors';
 import pool from './db.js';
+import multer from 'multer';
+import path from 'path';
 import ordersRouter from './routes/orders.js';
 import  cartRouter from './routes/cart.js';
 import shippingRouter from './routes/shipping.js';
 const app = express();
+
+// Multer setup
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "uploads/");
+  },
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + "-" + file.originalname);
+  }
+});
+
+const upload = multer({ storage });
+
+
+app.use("/uploads", express.static("uploads"));
+
+
 app.use(cors());
 app.use(express.json());
 app.use('/orders',ordersRouter);
 app.use('/',cartRouter)
 app.use('/',shippingRouter);
+
+// Upload image route
+app.post("/upload", upload.single("image"), (req, res) => {
+  const filePath = `/uploads/${req.file.filename}`;
+  res.json({ url: filePath });
+});
+
 
 // Get all products
 app.get("/products", async(req, res) => {
@@ -46,20 +72,36 @@ app.get("/products/:id", async (req, res) => {
 });
 
 // Create products
-app.post('/products',async(req,res)=>{
-  const {name,price}=req.body;
-  try{
-    const result=await pool.query(`INSERT INTO products (name,price)VALUES ($1,$2) RETURNING *`,[name,price]);
-    res.json(result.rows[0]);
-  
-    
-  }
-  catch(error){
-    console.error(error);
-    res.status(500).json({error:'Could not create product'});
-  }
+app.post("/products", upload.single("image"), async (req, res) => {
+  try {
+    const { name, price, description, category_id } = req.body;
 
-})
+    // Multer ger oss filen här
+    const image_url = `/uploads/${req.file.filename}`;
+
+    // Hämta category_id från namn
+    const categoryRes = await pool.query(
+      "SELECT id FROM categories WHERE name = $1",
+      [category_id]
+    );
+
+    const catId = categoryRes.rows[0].id;
+
+    const result = await pool.query(
+      `INSERT INTO products (name, price, description, image_url, category_id)
+       VALUES ($1, $2, $3, $4, $5)
+       RETURNING *`,
+      [name, price, description, image_url, catId]
+    );
+
+    res.json(result.rows[0]);
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Could not create product" });
+  }
+});
+
 // Update product
 app.put("/products/:id", async (req, res) => {
   const { id } = req.params;

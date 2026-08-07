@@ -23,10 +23,15 @@ router.post('/',async(req,res)=>{
             const orderId=orderRes.rows[0].id;
     
             for(const item of cart){
-                await pool.query(`INSERT INTO order_items (order_id,product_id, quantity, price_at_purchase) VALUES($1,$2,$3,$4)`,[orderId,item.product_id,item.quantity,item.price])
+              if(item.quantity>item.variant_stock){
+                return res.json({error:'Not enough stock'})
+              }
+                await pool.query(`INSERT INTO order_items (order_id,product_id, variant_id,quantity, price_at_purchase) VALUES($1,$2,$3,$4,$5)`,[orderId,item.product_id,item.variant_id,item.quantity,item.price]);
+                await pool.query(`UPDATE product_variants SET stock=stock-$1 WHERE id=$2`,[item.quantity,item.variant_id])
             }
-        res.json({success:true,orderId});
-        await pool.query(`DELETE FROM carts WHERE session_id=$1`,[sessionId])
+             await pool.query(`DELETE FROM carts WHERE session_id=$1`,[sessionId])
+             res.json({success:true,orderId});
+       
 
         }catch(error){
             console.error(error)
@@ -92,8 +97,8 @@ router.get('/:id', async (req, res) => {
     }
 
     const itemsResult = await pool.query(`
-      SELECT oi.product_id, p.name, oi.quantity, oi.price_at_purchase ,(oi.quantity * oi.price_at_purchase) AS subtotal
-      FROM order_items oi inner join products p on p.id = oi.product_id
+      SELECT oi.product_id, p.name, oi.variant_id,oi.quantity, oi.price_at_purchase, pv.size, pv.color, pv.stock ,(oi.quantity * oi.price_at_purchase) AS subtotal
+      FROM order_items oi inner join products p on p.id = oi.product_id JOIN product_variants pv ON oi.variant_id=pv.id
       WHERE order_id = $1
     `, [id]);
      
