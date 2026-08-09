@@ -31,25 +31,38 @@ app.use('/',cartRouter)
 app.use('/',shippingRouter);
 
 // Upload image route
-app.post("/upload", upload.single("image"), (req, res) => {
-  const filePath = `/uploads/${req.file.filename}`;
-  res.json({ url: filePath });
-});
+//app.post("/upload", upload.single("image"), (req, res) => {
+//  const filePath = `/uploads/${req.file.filename}`;
+//  res.json({ url: filePath });
+//});
 
 
 // Get all products
-app.get("/products", async(req, res) => {
-  try{
-    const result=await pool.query("SELECT * FROM products");
-    res.json(result.rows)
-    
+app.get("/products", async (req, res) => {
+  const { search } = req.query;
+
+  try {
+    let query = "SELECT * FROM products ORDER BY id DESC";
+    let params = [];
+
+    if (search) {
+      query = `
+        SELECT * FROM products
+        WHERE name ILIKE $1
+           OR description ILIKE $1
+        ORDER BY id DESC
+      `;
+      params = [`%${search}%`];
+    }
+
+    const result = await pool.query(query, params);
+    res.json(result.rows);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Could not get products" });
   }
-  catch(error){
-    console.error(error)
-    res.status(500).json({error:'Could not get products'})
-  }
-  
 });
+
 
 // Get one product
 app.get("/products/:id", async (req, res) => {
@@ -84,6 +97,9 @@ app.post("/products", upload.single("image"), async (req, res) => {
       "SELECT id FROM categories WHERE name = $1",
       [category_id]
     );
+     if (categoryRes.rows.length === 0) {
+      return res.status(404).json({ error: "Category not found" });
+    }
 
     const catId = categoryRes.rows[0].id;
 
