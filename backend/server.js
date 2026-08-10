@@ -39,30 +39,42 @@ app.use('/',shippingRouter);
 
 // Get all products
 app.get("/products", async (req, res) => {
-  const { search } = req.query;
+  const { search, category } = req.query;
 
   try {
-    let query = "SELECT * FROM products ORDER BY id DESC";
+    let query = "SELECT * FROM products";
     let params = [];
+    let conditions = [];
 
     if (search) {
-      query = `
-        SELECT * FROM products
-        WHERE name ILIKE $1
-           OR description ILIKE $1
-        ORDER BY id DESC
-      `;
-      params = [`%${search}%`];
+      conditions.push("(name ILIKE $1 OR description ILIKE $1)");
+      params.push(`%${search}%`);
     }
+
+    if (category) {
+      conditions.push(`category_id = $${params.length + 1}`);
+      params.push(category);
+    }
+
+    if (conditions.length > 0) {
+      query += " WHERE " + conditions.join(" AND ");
+    }
+
+    query += " ORDER BY id DESC";
 
     const result = await pool.query(query, params);
     res.json(result.rows);
+
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Could not get products" });
   }
 });
 
+
+
+
+  
 
 // Get one product
 app.get("/products/:id", async (req, res) => {
@@ -117,6 +129,18 @@ app.post("/products", upload.single("image"), async (req, res) => {
     res.status(500).json({ error: "Could not create product" });
   }
 });
+
+// Get all categories
+app.get('/categories',async(req,res)=>{
+  try{
+    const result=await pool.query(`SELECT * FROM categories WHERE id>6`);
+    res.json(result.rows);
+  }
+  catch(error){
+    console.error(error);
+    res.status(500).json({error:'Could not fetch categories'})
+  }
+})
 
 // Update product
 app.put("/products/:id", async (req, res) => {
