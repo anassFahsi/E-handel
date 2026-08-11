@@ -2,7 +2,7 @@ import { useState } from "react";
 import axios from "axios";
 
 export default function AddProduct({ onProductAdded }) {
-  const [formData, setFormData] = useState({ name: "", price: "",description:'',image_url:'',imageFile:null,category_id:''});
+  const [formData, setFormData] = useState({ name: "", price: "",description:'',category_id:'Basics'});
   const[imageFile,setImageFile]=useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -10,6 +10,7 @@ export default function AddProduct({ onProductAdded }) {
 
 
   const handleSubmit = async (e) => {
+    console.log('skickat data')
     e.preventDefault();
     setError(null);
     setLoading(true);
@@ -69,13 +70,37 @@ export default function AddProduct({ onProductAdded }) {
         onChange={(e)=>setFormData({...formData,description:e.target.value})}>
         </input>
 
-        <input 
-        type='text'
-        name='category_id'
-        value={formData.category_id}
-        placeholder='Category'
-        onChange={(e)=>setFormData({...formData,category_id:e.target.value})}>
-        </input>
+        <select  
+            value={formData.category_id} 
+            name='category_id'
+            onChange={(e)=>setFormData({...formData,category_id:e.target.value})}
+            >
+              <option value='Basics' >
+                Basics
+              </option>
+
+              <option value='T-Shirts'>
+                T-Shirts
+              </option>
+             
+              <option  value='Casual'>
+                Casual
+              </option>
+
+              <option  value='Men'>
+                Men
+              </option>
+
+              <option value='Clothing'>
+                Clothing
+              </option>
+
+              <option value='Women'>
+                Women
+              </option>
+
+             
+        </select>
 
         <input 
              type='file'

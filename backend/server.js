@@ -39,38 +39,64 @@ app.use('/',shippingRouter);
 
 // Get all products
 app.get("/products", async (req, res) => {
-  const { search, category } = req.query;
+  const { search, category, sort, page = 1, limit = 5 } = req.query;
+
+  const offset = (Number(page) - 1) * Number(limit);
 
   try {
-    let query = "SELECT * FROM products";
-    let params = [];
     let conditions = [];
+    let params = [];
 
+    // Search
     if (search) {
-      conditions.push("(name ILIKE $1 OR description ILIKE $1)");
+      conditions.push(`(name ILIKE $${params.length + 1} OR description ILIKE $${params.length + 1})`);
       params.push(`%${search}%`);
     }
 
+    // Category
     if (category) {
       conditions.push(`category_id = $${params.length + 1}`);
       params.push(category);
     }
 
-    if (conditions.length > 0) {
-      query += " WHERE " + conditions.join(" AND ");
-    }
+    // Build WHERE
+    const whereSQL = conditions.length > 0
+      ? `WHERE ${conditions.join(" AND ")}`
+      : "";
 
-    query += " ORDER BY id DESC";
+    //  1. COUNT-query 
+    const countQuery = `SELECT COUNT(*) FROM products ${whereSQL}`;
+    const countRes = await pool.query(countQuery, params);
+    const totalProducts = Number(countRes.rows[0].count);
 
-    const result = await pool.query(query, params);
-    res.json(result.rows);
+    //  2. SORT + LIMIT-query
+    let sortSQL = "ORDER BY id DESC"; // default
+
+    if (sort === "price_asc") sortSQL = "ORDER BY price ASC";
+    if (sort === "price_desc") sortSQL = "ORDER BY price DESC";
+    if (sort === "oldest") sortSQL = "ORDER BY id ASC";
+    if (sort === "newest") sortSQL = "ORDER BY id DESC";
+
+    const productsQuery = `
+      SELECT * FROM products
+      ${whereSQL}
+      ${sortSQL}
+      OFFSET ${offset}
+      LIMIT ${limit}
+    `;
+
+    const productsRes = await pool.query(productsQuery, params);
+
+    res.json({
+      products: productsRes.rows,
+      productsCount: totalProducts
+    });
 
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Could not get products" });
   }
 });
-
 
 
 
