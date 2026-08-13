@@ -10,7 +10,10 @@ export default function ProductDetailsPage() {
   const [product, setProduct] = useState(null);
 
   const fetchProduct = async () => {
-    const res = await axios.get(`http://localhost:3000/products/${id}`);
+    const token=localStorage.getItem('token')
+    const res = await axios.get(`http://localhost:3000/products/${id}`,{
+      headers:{Authorization:`Bearer ${token}`}
+    });
     setProduct(res.data);
   };
 

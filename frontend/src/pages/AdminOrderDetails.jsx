@@ -12,9 +12,16 @@ const AdminOrderDetails=()=> {
   const [orderStatus,setOrderStatus]=useState(order.status);
 
   const fetchOrderDetails = async () => {
+    
     try {
       setLoading(true);
-      const res = await axios.get(`http://localhost:3000/orders/${id}`);
+      const token= localStorage.getItem('token');
+      const res = await axios.get(`http://localhost:3000/orders/${id}`,{
+        headers:{
+          Authorization:`Bearer ${token}`
+        }
+
+      });
       setOrder(res.data.order);
       setItems(res.data.items);
       setOrderStatus(res.data.order.status);
@@ -35,7 +42,12 @@ const AdminOrderDetails=()=> {
   if (!confirm("Are you sure you want to delete this order?")) return;
 
   try {
-    const res=await axios.delete(`http://localhost:3000/orders/${id}`);
+    const token=localStorage.getItem('token')
+    const res=await axios.delete(`http://localhost:3000/orders/${id}`,{
+      headers:{
+        Authorization:`Bearer ${token}`
+      }
+    });
     alert(res.data.message);
     window.location.href = "/admin/orders"; // redirect
   } catch (err) {
@@ -45,8 +57,8 @@ const AdminOrderDetails=()=> {
 };
 
 const updateStatus = async () => {
- 
-  await axios.put(`http://localhost:3000/orders/${order.id}/status`, {status:orderStatus
+  const token=localStorage.getItem('token')
+  await axios.put(`http://localhost:3000/orders/${order.id}/status`,{headers:{Authorization:`Bearer ${token}`}}, {status:orderStatus
   });
 
   alert("Order status updated");

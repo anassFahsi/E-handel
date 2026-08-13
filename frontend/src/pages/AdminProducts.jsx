@@ -7,7 +7,10 @@ const AdminProducts = () => {
     const[products,setProducts]=useState([])
   
      const fetchProducts = async () => {
-    const res = await axios.get("http://localhost:3000/admin/products");
+      const token=localStorage.getItem('token')
+    const res = await axios.get("http://localhost:3000/admin/products",{
+      headers:{Authorization:`Bearer ${token}`}
+    });
     console.log(res)
     setProducts(res.data);
   };

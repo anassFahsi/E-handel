@@ -2,7 +2,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Products from "./pages/Products";
 import AdminProducts from './pages/AdminProducts';
 import Cart from './pages/Cart';
-import Header from './pages/Header';
+import Header from './components/Header';
 import Checkout from './pages/Checkout';
 import ThankYou from './pages/thankyou';
 import AdminOrders from './pages/AdminOrders';
@@ -15,6 +15,8 @@ import AdminProductDetailsPage from './pages/AdminProductDetailsPage';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Profile from './pages/Profile';
+import AdminRoute from './components/AdminRoute';
+import ProtectedRoute from './components/ProtectedRoute';
 
 const App = () => {
   const [cartCount, setCartCount] = useState(0);
@@ -74,7 +76,7 @@ const App = () => {
 
         <Route
         path='/admin/products/:id'
-        element={<AdminProductDetailsPage />}
+        element={<AdminRoute><AdminProductDetailsPage /> </AdminRoute>}
         />
 
         <Route
@@ -94,17 +96,17 @@ const App = () => {
 
         <Route
           path="/admin/products"
-          element={<AdminProducts />}
+          element={<AdminRoute> <AdminProducts /> </AdminRoute>}
         />
 
         <Route
           path="/admin/orders"
-          element={<AdminOrders />}
+          element={<AdminRoute> <AdminOrders /> </AdminRoute>}
         />
 
         <Route
           path="/admin/orders/:id"
-          element={<AdminOrderDetails />}
+          element={<AdminRoute> <AdminOrderDetails /> </AdminRoute>}
         />
 
         <Route
@@ -119,7 +121,7 @@ const App = () => {
 
         <Route
           path='/users/profile'
-          element={<Profile />}
+          element={<ProtectedRoute> <Profile /> </ProtectedRoute>}
         />
       </Routes>
     </BrowserRouter>

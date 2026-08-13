@@ -6,7 +6,8 @@ export default function VariantList({ productId }) {
   const [editing, setEditing] = useState(null); 
 
   const fetchVariants = async () => {
-    const res = await axios.get(`http://localhost:3000/products/${productId}/variants`);
+    const token=localStorage.getItem('token')
+    const res = await axios.get(`http://localhost:3000/products/${productId}/variants`,{headers:{Authorization:`Bearer ${token}`}});
     setVariants(res.data);
   };
 
@@ -15,16 +16,18 @@ export default function VariantList({ productId }) {
   }, [productId]);
 
   const deleteVariant = async (variantId) => {
-    await axios.delete(`http://localhost:3000/products/variants/${variantId}`);
+    const token=localStorage.getItem('token')
+    await axios.delete(`http://localhost:3000/products/variants/${variantId}`,{headers:{Authorization:`Bearer ${token}`}});
     await fetchVariants();
   };
 
   const saveEdit = async () => {
+    const token=localStorage.getItem('token')
     await axios.put(`http://localhost:3000/variants/${editing.id}`, {
       size: editing.size,
       color: editing.color,
       stock: editing.stock
-    });
+    },{headers:{Authorization:`Bearer ${token}`}});
 
     setEditing(null);
     await fetchVariants();

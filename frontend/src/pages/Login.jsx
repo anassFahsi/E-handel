@@ -1,11 +1,14 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { AuthContext } from "../context/AuthContext";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const navigate=useNavigate();
+  const navigate = useNavigate();
+
+  const { login } = useContext(AuthContext);
 
   const handleLogin = async () => {
     try {
@@ -14,13 +17,14 @@ export default function Login() {
         password
       });
 
-      // Spara token
-      localStorage.setItem("token", res.data.token);
+      // Uppdatera global auth-state
+      login(res.data.token);
 
       // Redirect efter login
-      navigate("/users/profile") ; // eller /admin
+      navigate("/users/profile");
+
     } catch (err) {
-      console.error(err)
+      console.error(err);
       alert("Fel email eller lösenord");
     }
   };
@@ -47,3 +51,4 @@ export default function Login() {
     </div>
   );
 }
+

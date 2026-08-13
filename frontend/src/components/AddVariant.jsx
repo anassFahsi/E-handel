@@ -15,8 +15,8 @@ const AddVariant=({ productId, onVariantAdded })=> {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    await axios.post(`http://localhost:3000/products/${productId}/variants`, formData);
+    const token=localStorage.getItem('token')
+    await axios.post(`http://localhost:3000/products/${productId}/variants`, formData,{headers:{Authorization:`Bearer ${token}`}});
 
     setFormData({ size: "", color: "", stock: "" });
 

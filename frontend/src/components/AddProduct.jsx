@@ -23,9 +23,10 @@ export default function AddProduct({ onProductAdded }) {
     data.append('image',imageFile)
 
     try {
+      const token=localStorage.getItem('token')
       const res=await axios.post("http://localhost:3000/products", 
         data,{
-        headers:{"Content-Type": "multipart/form-data"
+        headers:{"Content-Type": "multipart/form-data",Authorization:`Bearer ${token}`
                     }
                 }
       );

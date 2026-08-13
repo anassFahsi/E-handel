@@ -120,7 +120,7 @@ app.get("/products/:id", async (req, res) => {
 });
 
 // Create products
-app.post("/products", upload.single("image"),  async (req, res) => {
+app.post("/products", auth,admin,upload.single("image"), async (req, res) => {
   try {
     const { name, price, description, category_id } = req.body;
 
@@ -166,7 +166,7 @@ app.get('/categories',async(req,res)=>{
 })
 
 // Update product
-app.put("/products/:id", async (req, res) => {
+app.put("/products/:id", auth, admin,async (req, res) => {
   const { id } = req.params;
   const { name, description, image_url, price, stock } = req.body;
 
@@ -195,7 +195,7 @@ app.put("/products/:id", async (req, res) => {
 });
 
 // Delete product
-app.delete("/products/:id",  async (req, res) => {
+app.delete("/products/:id", auth,admin,  async (req, res) => {
   const { id } = req.params;
 
   try {
@@ -221,7 +221,7 @@ app.delete("/products/:id",  async (req, res) => {
 });
 
 // Get variants for products
-app.get('/products/:id/variants',async(req,res)=>{
+app.get('/products/:id/variants',auth, admin,async(req,res)=>{
   try{
      const result= await pool.query(`SELECT * FROM product_variants WHERE product_id=$1`,[req.params.id]);
      res.json(result.rows);
@@ -234,7 +234,7 @@ app.get('/products/:id/variants',async(req,res)=>{
 });
 
 // Add variant
-app.post("/products/:id/variants", async (req, res) => {
+app.post("/products/:id/variants", auth,admin,async (req, res) => {
   const { size, color, stock } = req.body;
 
   try {
@@ -253,7 +253,7 @@ app.post("/products/:id/variants", async (req, res) => {
 });
 
 // Delete variant
-app.delete("/products/variants/:variantId", async (req, res) => {
+app.delete("/products/variants/:variantId", auth,admin,async (req, res) => {
   try {
     await pool.query(
       "DELETE FROM product_variants WHERE id = $1",
@@ -269,7 +269,7 @@ app.delete("/products/variants/:variantId", async (req, res) => {
 });
 
  // Update variant 
-app.put('/variants/:variantId', async(req,res)=>{
+app.put('/variants/:variantId', auth,admin,async(req,res)=>{
   const {size,color,stock}=req.body;
   try{
     await pool.query(`UPDATE product_variants SET 
@@ -285,7 +285,7 @@ app.put('/variants/:variantId', async(req,res)=>{
 })
 
 //Get products/admin
-app.get('/admin/products',async(req,res)=>{
+app.get('/admin/products',auth, admin, async(req,res)=>{
   try{
     const result= await pool.query(`SELECT * FROM products`);
     res.json(result.rows);

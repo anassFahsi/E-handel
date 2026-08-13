@@ -17,12 +17,20 @@ export default function Product({ products, fetchProducts }) {
   const [stockMap, setStockMap] = useState({});
 
   const fetchStock = async () => {
+    const token = localStorage.getItem("token");
     const map = {};
 
     for (const p of products) {
-      const res = await axios.get(`http://localhost:3000/products/${p.id}/variants`);
-      const variants = res.data;
+      const res = await axios.get(
+        `http://localhost:3000/products/${p.id}/variants`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
 
+      const variants = res.data;
       const totalStock = variants.reduce((sum, v) => sum + v.stock, 0);
       map[p.id] = totalStock;
     }
@@ -36,7 +44,14 @@ export default function Product({ products, fetchProducts }) {
 
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`http://localhost:3000/products/${id}`);
+      const token = localStorage.getItem("token");
+
+      await axios.delete(`http://localhost:3000/products/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+
       fetchProducts();
     } catch (err) {
       console.error("Error deleting product:", err);
@@ -59,40 +74,45 @@ export default function Product({ products, fetchProducts }) {
   const uploadImage = async () => {
     if (!editData.imageFile) return null;
 
+    const token = localStorage.getItem("token");
+
     const formData = new FormData();
     formData.append("image", editData.imageFile);
 
     const res = await axios.post("http://localhost:3000/upload", formData, {
-      headers: { "Content-Type": "multipart/form-data" }
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "multipart/form-data"
+      }
     });
 
-    return res.data.url; 
+    return res.data.url;
   };
 
- 
   const handleUpdate = async (id) => {
-   
-
     try {
-      console.log("editData:", editData);
+      const token = localStorage.getItem("token");
 
       let imageUrl = editData.image_url;
+
       if (editData.imageFile) {
-        console.log("Uploading image...");
         imageUrl = await uploadImage();
-        console.log("Image uploaded, URL:", imageUrl);
-      } else {
-        console.log("No new image selected");
       }
 
-      await axios.put(`http://localhost:3000/products/${id}`, {
-        name: editData.name,
-        price: editData.price,
-        description: editData.description,
-        image_url: imageUrl
-      });
-
-      console.log("PUT request completed");
+      await axios.put(
+        `http://localhost:3000/products/${id}`,
+        {
+          name: editData.name,
+          price: editData.price,
+          description: editData.description,
+          image_url: imageUrl
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
 
       setEditing(null);
       fetchProducts();
@@ -107,8 +127,6 @@ export default function Product({ products, fetchProducts }) {
       <ul>
         {products.map((p) => (
           <li key={p.id} style={{ marginBottom: "20px" }}>
-            
-            {/* EDIT MODE */}
             {editing === p.id ? (
               <div>
                 <h3>Edit Product</h3>
@@ -117,20 +135,26 @@ export default function Product({ products, fetchProducts }) {
                   type="text"
                   value={editData.name}
                   placeholder="Name"
-                  onChange={(e) => setEditData({ ...editData, name: e.target.value })}
+                  onChange={(e) =>
+                    setEditData({ ...editData, name: e.target.value })
+                  }
                 />
 
                 <input
                   type="number"
                   value={editData.price}
                   placeholder="Price"
-                  onChange={(e) => setEditData({ ...editData, price: e.target.value })}
+                  onChange={(e) =>
+                    setEditData({ ...editData, price: e.target.value })
+                  }
                 />
 
                 <textarea
                   value={editData.description}
                   placeholder="Description"
-                  onChange={(e) => setEditData({ ...editData, description: e.target.value })}
+                  onChange={(e) =>
+                    setEditData({ ...editData, description: e.target.value })
+                  }
                 />
 
                 <input
@@ -143,17 +167,16 @@ export default function Product({ products, fetchProducts }) {
                   }}
                 />
 
-             
                 {editData.image_url && (
-                 <img
-    src={
-      editData.image_url.startsWith("https")
-        ? editData.image_url
-        : `http://localhost:3000${editData.image_url}`
-    }
-    alt="Current"
-    width="100"
-  />
+                  <img
+                    src={
+                      editData.image_url.startsWith("https")
+                        ? editData.image_url
+                        : `http://localhost:3000${editData.image_url}`
+                    }
+                    alt="Current"
+                    width="100"
+                  />
                 )}
 
                 <button onClick={() => handleUpdate(p.id)}>Save</button>
@@ -161,45 +184,42 @@ export default function Product({ products, fetchProducts }) {
               </div>
             ) : (
               <>
-                
-                {p.image_url && ( 
+                {p.image_url && (
                   <img
                     src={
-                    p.image_url.startsWith("https")
-                    ? p.image_url
-                    : `http://localhost:3000${p.image_url}`
+                      p.image_url.startsWith("https")
+                        ? p.image_url
+                        : `http://localhost:3000${p.image_url}`
                     }
                     alt="Current"
                     width="100"
                   />
-
                 )}
 
-                
                 <Link to={`/admin/products/${p.id}`}>
                   <strong>{p.name}</strong> — {p.price} kr
                 </Link>
 
-                
                 {stockMap[p.id] !== undefined && (
                   <span style={{ marginLeft: "10px" }}>
                     Lager totalt: {stockMap[p.id]}
                   </span>
                 )}
 
-              
                 {stockMap[p.id] === 0 && (
                   <span style={{ marginLeft: "10px", color: "red" }}>
                     (Slut i lager)
                   </span>
                 )}
 
-                {/* Edit/Delete */}
                 <button onClick={() => startEdit(p)} style={{ marginLeft: "10px" }}>
                   ✏️
                 </button>
 
-                <button onClick={() => handleDelete(p.id)} style={{ marginLeft: "5px" }}>
+                <button
+                  onClick={() => handleDelete(p.id)}
+                  style={{ marginLeft: "5px" }}
+                >
                   🗑️
                 </button>
               </>
@@ -212,4 +232,5 @@ export default function Product({ products, fetchProducts }) {
     </div>
   );
 }
+
 
