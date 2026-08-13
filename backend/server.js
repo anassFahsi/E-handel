@@ -6,6 +6,9 @@ import path from 'path';
 import ordersRouter from './routes/orders.js';
 import  cartRouter from './routes/cart.js';
 import shippingRouter from './routes/shipping.js';
+import usersRouter from './routes/users.js';
+import { auth } from './middleware/auth.js';
+import { admin } from './middleware/admin.js';
 const app = express();
 
 // Multer setup
@@ -20,21 +23,15 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-
 app.use("/uploads", express.static("uploads"));
-
 
 app.use(cors());
 app.use(express.json());
 app.use('/orders',ordersRouter);
 app.use('/',cartRouter)
 app.use('/',shippingRouter);
+app.use('/users',usersRouter)
 
-// Upload image route
-//app.post("/upload", upload.single("image"), (req, res) => {
-//  const filePath = `/uploads/${req.file.filename}`;
-//  res.json({ url: filePath });
-//});
 
 
 // Get all products
@@ -123,7 +120,7 @@ app.get("/products/:id", async (req, res) => {
 });
 
 // Create products
-app.post("/products", upload.single("image"), async (req, res) => {
+app.post("/products", upload.single("image"),  async (req, res) => {
   try {
     const { name, price, description, category_id } = req.body;
 
@@ -198,7 +195,7 @@ app.put("/products/:id", async (req, res) => {
 });
 
 // Delete product
-app.delete("/products/:id", async (req, res) => {
+app.delete("/products/:id",  async (req, res) => {
   const { id } = req.params;
 
   try {
@@ -272,7 +269,7 @@ app.delete("/products/variants/:variantId", async (req, res) => {
 });
 
  // Update variant 
-app.put('/variants/:variantId',async(req,res)=>{
+app.put('/variants/:variantId', async(req,res)=>{
   const {size,color,stock}=req.body;
   try{
     await pool.query(`UPDATE product_variants SET 
@@ -287,6 +284,17 @@ app.put('/variants/:variantId',async(req,res)=>{
   }
 })
 
+//Get products/admin
+app.get('/admin/products',async(req,res)=>{
+  try{
+    const result= await pool.query(`SELECT * FROM products`);
+    res.json(result.rows);
+  }
+  catch(error){
+    console.error(error)
+    res.status(500).json({error:'Could not fetch products'})
+  }
+})
 
 
 

@@ -14,23 +14,4 @@ router.get('/shipping',async(req,res)=>{
 })
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 export default router

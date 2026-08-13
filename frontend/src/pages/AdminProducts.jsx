@@ -7,7 +7,7 @@ const AdminProducts = () => {
     const[products,setProducts]=useState([])
   
      const fetchProducts = async () => {
-    const res = await axios.get("http://localhost:3000/products");
+    const res = await axios.get("http://localhost:3000/admin/products");
     console.log(res)
     setProducts(res.data);
   };

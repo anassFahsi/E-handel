@@ -1,5 +1,7 @@
 import express from 'express';
 import pool from '../db.js';
+import { auth } from '../middleware/auth.js';
+import { admin } from '../middleware/admin.js';
 
 const router=express.Router();
 
@@ -39,7 +41,7 @@ router.post('/',async(req,res)=>{
         }
 });
 
-router.get('/', async (req, res) => {
+router.get('/', auth, admin, async (req, res) => {
   const { search, page=1, limit=5 } = req.query;
 
   const offset = (page - 1) * limit;
@@ -82,7 +84,7 @@ router.get('/', async (req, res) => {
 });
 
 
-router.get('/:id', async (req, res) => {
+router.get('/:id', auth, admin, async (req, res) => {
   const { id } = req.params;
 
   try {
@@ -113,7 +115,7 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-router.delete('/:id',async(req,res)=>{
+router.delete('/:id', auth, admin, async(req,res)=>{
   const {id}=req.params;
   try{
     const result=await pool.query(`
@@ -131,7 +133,7 @@ router.delete('/:id',async(req,res)=>{
  
 })
 
-router.put('/:id/status', async (req, res) => {
+router.put('/:id/status', auth,admin, async (req, res) => {
   const { status } = req.body;
   console.log(req.body.status)
   const orderId = req.params.id;

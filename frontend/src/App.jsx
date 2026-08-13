@@ -12,6 +12,9 @@ import ProductPage from './pages/ProductPage';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 import AdminProductDetailsPage from './pages/AdminProductDetailsPage';
+import Login from './pages/Login';
+import Register from './pages/Register';
+import Profile from './pages/Profile';
 
 const App = () => {
   const [cartCount, setCartCount] = useState(0);
@@ -102,6 +105,21 @@ const App = () => {
         <Route
           path="/admin/orders/:id"
           element={<AdminOrderDetails />}
+        />
+
+        <Route
+          path='/users/login'
+          element={<Login />}
+        />
+
+        <Route
+          path='/users/register'
+          element={<Register />}
+        />
+
+        <Route
+          path='/users/profile'
+          element={<Profile />}
         />
       </Routes>
     </BrowserRouter>
