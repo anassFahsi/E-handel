@@ -221,7 +221,7 @@ app.delete("/products/:id", auth,admin,  async (req, res) => {
 });
 
 // Get variants for products
-app.get('/products/:id/variants',auth, admin,async(req,res)=>{
+app.get('/products/:id/variants',async(req,res)=>{
   try{
      const result= await pool.query(`SELECT * FROM product_variants WHERE product_id=$1`,[req.params.id]);
      res.json(result.rows);

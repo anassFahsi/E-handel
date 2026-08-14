@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import Products from "./pages/Products";
 import AdminProducts from './pages/AdminProducts';
 import Cart from './pages/Cart';
@@ -60,7 +60,7 @@ const App = () => {
   };
 
   return (
-    <BrowserRouter>
+    <>
       <Header cartCount={cartCount} />
 
       <Routes>
@@ -68,6 +68,12 @@ const App = () => {
           path="/"
           element={<Products />}
         />
+
+        <Route
+          path="/products"
+          element={<Products />}
+        />
+
 
       <Route 
         path='/products/:id'
@@ -124,7 +130,7 @@ const App = () => {
           element={<ProtectedRoute> <Profile /> </ProtectedRoute>}
         />
       </Routes>
-    </BrowserRouter>
+    </>
   );
 };
 

@@ -7,8 +7,8 @@ export default function ProductVariants({ productId, onVariantSelected }) {
 
   useEffect(() => {
     const fetchVariants = async () => {
-      const token=localStorage.getItem('token')
-      const res = await axios.get(`http://localhost:3000/products/${productId}/variants`,{headers:{Authorization:`Baerer ${token}`}});
+      //const token=localStorage.getItem('token')
+      const res = await axios.get(`http://localhost:3000/products/${productId}/variants`);
       setVariants(res.data);
     };
 
