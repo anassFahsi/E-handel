@@ -9,7 +9,8 @@ router.post('/',async(req,res)=>{
     
         const {customer, cart, total,shipping_method_id,shipping_price,sessionId}=req.body;
         try{
-           const orderRes = await pool.query(`
+          await pool.query('BEGIN')
+          const orderRes = await pool.query(`
           INSERT INTO orders (customer_name, customer_email, customer_address, total, shipping_method_id, shipping_price)
             VALUES ($1, $2, $3, $4, $5, $6)
               RETURNING id`,
@@ -26,17 +27,20 @@ router.post('/',async(req,res)=>{
     
             for(const item of cart){
               if(item.quantity>item.variant_stock){
+                await pool.query('ROLLBACK')
                 return res.json({error:'Not enough stock'})
               }
                 await pool.query(`INSERT INTO order_items (order_id,product_id, variant_id,quantity, price_at_purchase) VALUES($1,$2,$3,$4,$5)`,[orderId,item.product_id,item.variant_id,item.quantity,item.price]);
                 await pool.query(`UPDATE product_variants SET stock=stock-$1 WHERE id=$2`,[item.quantity,item.variant_id])
             }
              await pool.query(`DELETE FROM carts WHERE session_id=$1`,[sessionId])
+             await pool.query('COMMIT')
              res.json({success:true,orderId});
        
 
         }catch(error){
             console.error(error)
+            await pool.query('ROLLBACK')
             res.status(500).json({error:'Order creation failed'})
         }
 });
@@ -138,13 +142,12 @@ router.put('/:id/status', auth, admin, async (req, res) => {
   const orderId = req.params.id;
 
   try {
-    // Uppdatera orderstatus
+    await pool.query('BEGIN')
     await pool.query(
       `UPDATE orders SET status = $1 WHERE id = $2`,
       [status, orderId]
     );
 
-    // ⭐ Om ordern återbetalas → återställ lager
     if (status === 'Refunded') {
 
       // 1. Hämta alla order_items + variant info
@@ -156,7 +159,6 @@ router.put('/:id/status', auth, admin, async (req, res) => {
 
       const items = variantsRes.rows;
 
-      // 2. Öka lagret för varje variant
       for (const item of items) {
         await pool.query(
           `UPDATE product_variants SET stock = stock + $1 WHERE id = $2`,
@@ -164,11 +166,12 @@ router.put('/:id/status', auth, admin, async (req, res) => {
         );
       }
     }
-
+    await pool.query('COMMIT')
     res.json({ message: "Orderstatus uppdaterad" });
 
   } catch (err) {
     console.error(err);
+    await pool.query('ROLLBACK')
     res.status(500).json({ error: "Kunde inte uppdatera orderstatus" });
   }
 });
