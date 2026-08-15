@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-import {useNavigate} from 'react-router-dom'
+import { useNavigate } from "react-router-dom";
 
-export default function Checkout({ sessionId ,fetchCartCount}) {
+export default function Checkout({ sessionId, fetchCartCount }) {
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -16,8 +16,7 @@ export default function Checkout({ sessionId ,fetchCartCount}) {
   const [selectedShipping, setSelectedShipping] = useState(null);
 
   const [grandTotal, setGrandTotal] = useState(0);
-  const navigate=useNavigate();
-  
+  const navigate = useNavigate();
 
   // Fetch cart
   useEffect(() => {
@@ -72,61 +71,59 @@ export default function Checkout({ sessionId ,fetchCartCount}) {
       shipping_method_id: selectedShipping.id,
       shipping_price: selectedShipping.price,
       total: grandTotal,
-      sessionId:sessionId
+      sessionId: sessionId,
     };
-    console.log(order)
+
     try {
       const res = await axios.post("http://localhost:3000/orders", order);
-      if(res.data.success){
-           alert("Order submitted!");
-           setItems([])
-           setSubtotal(0)
-           await fetchCartCount();
-           navigate(`/thankyou/${res.data.orderId}`)
+      if (res.data.success) {
+        alert("Order skickad!"); 
+        setItems([]);
+        setSubtotal(0);
+        await fetchCartCount();
+        navigate(`/thankyou/${res.data.orderId}`);
       }
-     
-
-      
     } catch (err) {
       console.error("Could not submit order", err);
-      alert("Order failed");
+      alert("Kunde inte skicka order"); 
     }
   };
 
   return (
     <div>
-      <h1>Checkout</h1>
+      <h1>Kassa</h1> 
 
-      <h2>Subtotal: {subtotal} kr</h2>
+      <h2>Delsumma: {subtotal} kr</h2> 
 
       {selectedShipping && (
         <h3>
-          Shipping: {selectedShipping.price} kr (
+          Frakt: {selectedShipping.price} kr ( 
           {selectedShipping.delivery_days}{" "}
-          {selectedShipping.delivery_days === 1 ? "day" : "days"})
+          {selectedShipping.delivery_days === 1 ? "dag" : "dagar"} 
+          )
         </h3>
       )}
 
-      <h2>Total: {grandTotal} kr</h2>
+      <h2>Totalt: {grandTotal} kr</h2> 
 
       <form onSubmit={handleSubmit}>
         <label>
-          Name:
+          Namn: {/* ⭐ ÄNDRAT */}
           <input name="name" value={form.name} onChange={handleChange} />
         </label>
 
         <label>
-          Email:
+          E-post: 
           <input name="email" value={form.email} onChange={handleChange} />
         </label>
 
         <label>
-          Address:
+          Adress: 
           <input name="address" value={form.address} onChange={handleChange} />
         </label>
 
         <label>
-          Shipping method:
+          Fraktalternativ: 
           <select
             value={selectedShipping?.id}
             onChange={(e) => {
@@ -138,17 +135,19 @@ export default function Checkout({ sessionId ,fetchCartCount}) {
           >
             {shippingMethods.map((method) => (
               <option key={method.id} value={method.id}>
-                {method.name} - {method.price} kr (
+                {method.name} - {method.price} kr ( 
                 {method.delivery_days}{" "}
-                {method.delivery_days === 1 ? "day" : "days"})
+                {method.delivery_days === 1 ? "dag" : "dagar"} 
+                )
               </option>
             ))}
           </select>
         </label>
 
-        <button type="submit">Confirm Order</button>
+        <button type="submit">Bekräfta order</button> 
       </form>
     </div>
   );
 }
+
 

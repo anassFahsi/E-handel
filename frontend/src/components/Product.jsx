@@ -129,12 +129,12 @@ export default function Product({ products, fetchProducts }) {
           <li key={p.id} style={{ marginBottom: "20px" }}>
             {editing === p.id ? (
               <div>
-                <h3>Edit Product</h3>
+                <h3>Redigera produkt</h3> 
 
                 <input
                   type="text"
                   value={editData.name}
-                  placeholder="Name"
+                  placeholder="Namn" 
                   onChange={(e) =>
                     setEditData({ ...editData, name: e.target.value })
                   }
@@ -143,7 +143,7 @@ export default function Product({ products, fetchProducts }) {
                 <input
                   type="number"
                   value={editData.price}
-                  placeholder="Price"
+                  placeholder="Pris" 
                   onChange={(e) =>
                     setEditData({ ...editData, price: e.target.value })
                   }
@@ -151,7 +151,7 @@ export default function Product({ products, fetchProducts }) {
 
                 <textarea
                   value={editData.description}
-                  placeholder="Description"
+                  placeholder="Beskrivning" 
                   onChange={(e) =>
                     setEditData({ ...editData, description: e.target.value })
                   }
@@ -174,13 +174,13 @@ export default function Product({ products, fetchProducts }) {
                         ? editData.image_url
                         : `http://localhost:3000${editData.image_url}`
                     }
-                    alt="Current"
+                    alt="Nuvarande bild"
                     width="100"
                   />
                 )}
 
-                <button onClick={() => handleUpdate(p.id)}>Save</button>
-                <button onClick={() => setEditing(null)}>Cancel</button>
+                <button onClick={() => handleUpdate(p.id)}>Spara</button> 
+                <button onClick={() => setEditing(null)}>Avbryt</button> 
               </div>
             ) : (
               <>
@@ -191,7 +191,7 @@ export default function Product({ products, fetchProducts }) {
                         ? p.image_url
                         : `http://localhost:3000${p.image_url}`
                     }
-                    alt="Current"
+                    alt="Produktbild" 
                     width="100"
                   />
                 )}
@@ -228,9 +228,10 @@ export default function Product({ products, fetchProducts }) {
         ))}
       </ul>
 
-      {error && <p style={{ color: "red" }}>Error: {error}</p>}
+      {error && <p style={{ color: "red" }}>Fel: {error}</p>} 
     </div>
   );
 }
+
 
 

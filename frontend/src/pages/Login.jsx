@@ -25,7 +25,7 @@ export default function Login() {
 
     } catch (err) {
       console.error(err);
-      alert("Fel email eller lösenord");
+      alert("Fel e-post eller lösenord"); 
     }
   };
 
@@ -35,7 +35,7 @@ export default function Login() {
 
       <input
         type="email"
-        placeholder="Email"
+        placeholder="E-post" 
         value={email}
         onChange={(e) => setEmail(e.target.value)}
       />
@@ -51,4 +51,5 @@ export default function Login() {
     </div>
   );
 }
+
 

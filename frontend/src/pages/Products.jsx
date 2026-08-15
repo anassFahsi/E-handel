@@ -11,7 +11,7 @@ const Products = () => {
   const [category, setCategory] = useState(params.get("category") || "");
   const [sort, setSort] = useState(params.get("sort") || "newest");
   const [page, setPage] = useState(Number(params.get("page")) || 1);
-  const [limit, setLimit] = useState(Number(params.get("limit")) || 5);
+  const [limit, setLimit] = useState(Number(params.get("limit")) || 10);
 
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -49,10 +49,9 @@ const Products = () => {
     }
   };
 
-  const setPosition=() => {
+  const setPosition = () => {
     localStorage.setItem("scrollPosition", window.scrollY);
-    
-  }
+  };
 
   useEffect(() => {
     fetchCategories();
@@ -62,14 +61,11 @@ const Products = () => {
     fetchProducts();
   }, [search, category, sort, page, limit]);
 
-
-
- 
   const renderFilters = () => (
     <>
       <input
         type="text"
-        placeholder="Search products..."
+        placeholder="Sök produkter..."
         value={search}
         onChange={(e) => {
           setSearch(e.target.value);
@@ -94,7 +90,6 @@ const Products = () => {
         ))}
       </select>
 
-      
       <select
         value={sort}
         onChange={(e) => {
@@ -109,7 +104,6 @@ const Products = () => {
         <option value="price_desc">Pris: Högt → Lågt</option>
       </select>
 
-    
       <select
         value={limit}
         onChange={(e) => {
@@ -119,7 +113,6 @@ const Products = () => {
           updateURL(1, category, search, sort, newLimit);
         }}
       >
-        <option value="5">5 per sida</option>
         <option value="10">10 per sida</option>
         <option value="15">15 per sida</option>
         <option value="20">20 per sida</option>
@@ -129,7 +122,7 @@ const Products = () => {
 
   return (
     <div>
-      <h1>Products</h1>
+      <h1>Produkter</h1>
 
       {renderFilters()}
 
@@ -142,9 +135,9 @@ const Products = () => {
               setSearch("");
               setCategory("");
               setSort("newest");
-              setLimit(5);
+              setLimit(10);
               setPage(1);
-              updateURL(1, "", "", "newest", 5);
+              updateURL(1, "", "", "newest", 10);
             }}
           >
             Rensa filter
@@ -152,27 +145,23 @@ const Products = () => {
         </>
       )}
 
-    
       {totalProducts > 0 && (
         <>
           <ul>
             {products.map((p) => (
               <li key={p.id}>
-                  <Link
-                    to={`/products/${p.id}`}
-                  >
+                <Link to={`/products/${p.id}`}>
                   <strong>{p.name}</strong> - {p.price} kr
                   <img
                     src={
                       p.image_url.startsWith("http")
-                            ? p.image_url
-                         : "http://localhost:3000" + p.image_url
-                          }
-                        alt={p.name}
-                             width="200"
-                           />
+                        ? p.image_url
+                        : "http://localhost:3000" + p.image_url
+                    }
+                    alt={p.name}
+                    width="200"
+                  />
                 </Link>
-
               </li>
             ))}
           </ul>
@@ -186,7 +175,7 @@ const Products = () => {
                 updateURL(page - 1);
               }}
             >
-              Previous
+              Föregående 
             </button>
 
             {Array.from({ length: totalPages }, (_, i) => i + 1).map((num) => (
@@ -209,14 +198,14 @@ const Products = () => {
                 updateURL(page + 1);
               }}
             >
-              Next
+              Nästa 
             </button>
           </div>
 
-          <p>Page: {page} of {totalPages}</p>
+          <p>Sida: {page} av {totalPages}</p> 
           <p>
-            Showing {(page - 1) * limit + 1} - {Math.min(page * limit, totalProducts)} of{" "}
-            {totalProducts} products
+            Visar {(page - 1) * limit + 1} - {Math.min(page * limit, totalProducts)} av{" "}
+            {totalProducts} produkter 
           </p>
         </>
       )}
@@ -225,5 +214,7 @@ const Products = () => {
 };
 
 export default Products;
+
+
 
 

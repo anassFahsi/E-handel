@@ -7,8 +7,6 @@ const ProductPage = ({ addToCart }) => {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  
-
   const [product, setProduct] = useState(null);
   const [selectedVariant, setSelectedVariant] = useState(null);
 
@@ -21,18 +19,16 @@ const ProductPage = ({ addToCart }) => {
     fetchProduct();
   }, [id]);
 
-  if (!product) return <p>Loading...</p>;
+  if (!product) return <p>Laddar...</p>; 
 
   return (
     <div>
-      <button
-        onClick={() =>
-          navigate(-1)}
-      >
+      <button onClick={() => navigate(-1)}>
         ← Tillbaka till produkter
       </button>
 
       <h1>{product.name}</h1>
+
       <img
         src={
           product.image_url.startsWith("http")
@@ -41,8 +37,9 @@ const ProductPage = ({ addToCart }) => {
         }
         width={200}
       />
+
       <p>{product.description}</p>
-      <p>Pris: {Number(product.price)} kr</p>
+      <p>Pris: {Number(product.price)} kr</p> 
 
       <ProductVariants
         productId={product.id}
@@ -51,8 +48,8 @@ const ProductPage = ({ addToCart }) => {
 
       <button
         onClick={() => {
-          if (!selectedVariant) return alert("Välj en variant först!");
-          if (selectedVariant.stock <= 0) return alert("Slut i lager!");
+          if (!selectedVariant) return alert("Välj en variant först!"); 
+          if (selectedVariant.stock <= 0) return alert("Slut i lager!"); 
 
           addToCart({
             productId: product.id,
@@ -60,11 +57,12 @@ const ProductPage = ({ addToCart }) => {
           });
         }}
       >
-        Add to cart
+        Lägg i kundvagn 
       </button>
     </div>
   );
 };
 
 export default ProductPage;
+
 

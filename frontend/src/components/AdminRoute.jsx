@@ -35,7 +35,7 @@ export default function AdminRoute({ children }) {
     checkAdmin();
   }, [token]);
 
-  if (loading) return <p>Loading...</p>;
+  if (loading) return <p>Laddar...</p>; 
 
   if (!token) return <Navigate to="/users/login" replace />;
 
@@ -43,3 +43,4 @@ export default function AdminRoute({ children }) {
 
   return children;
 }
+

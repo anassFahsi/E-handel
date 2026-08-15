@@ -7,8 +7,9 @@ export default function ProductVariants({ productId, onVariantSelected }) {
 
   useEffect(() => {
     const fetchVariants = async () => {
-      //const token=localStorage.getItem('token')
-      const res = await axios.get(`http://localhost:3000/products/${productId}/variants`);
+      const res = await axios.get(
+        `http://localhost:3000/products/${productId}/variants`
+      );
       setVariants(res.data);
     };
 
@@ -24,13 +25,15 @@ export default function ProductVariants({ productId, onVariantSelected }) {
     <div>
       <h3>Välj variant</h3>
 
-      {variants.length === 0 && <p>Inga varianter tillgängliga.</p>}
+      {variants.length === 0 && (
+        <p>Inga varianter tillgängliga.</p> 
+      )}
 
       <ul>
-        {variants.map(v => (
+        {variants.map((v) => (
           <li key={v.id}>
             <button onClick={() => handleSelect(v)}>
-              {v.size} / {v.color} — Lager: {v.stock}
+              {v.size} / {v.color} — Lager: {v.stock} 
             </button>
           </li>
         ))}
@@ -38,9 +41,10 @@ export default function ProductVariants({ productId, onVariantSelected }) {
 
       {selectedVariant && (
         <p>
-          Vald variant: {selectedVariant.size} / {selectedVariant.color}
+          Vald variant: {selectedVariant.size} / {selectedVariant.color} 
         </p>
       )}
     </div>
   );
 }
+

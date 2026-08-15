@@ -273,7 +273,7 @@ app.put('/variants/:variantId', auth,admin,async(req,res)=>{
   const {size,color,stock}=req.body;
   try{
     await pool.query(`UPDATE product_variants SET 
-      size=$1, color:$2, stock=$3
+      size=$1, color=$2, stock=$3
       WHERE id=$4`,
     [size,color,stock, req.params.variantId]);
     res.json({message:'Variant updated'})

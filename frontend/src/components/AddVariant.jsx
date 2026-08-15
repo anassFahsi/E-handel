@@ -1,7 +1,7 @@
 import { useState } from "react";
 import axios from "axios";
 
-const AddVariant=({ productId, onVariantAdded })=> {
+const AddVariant = ({ productId, onVariantAdded }) => {
   const [formData, setFormData] = useState({
     size: "",
     color: "",
@@ -15,8 +15,13 @@ const AddVariant=({ productId, onVariantAdded })=> {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const token=localStorage.getItem('token')
-    await axios.post(`http://localhost:3000/products/${productId}/variants`, formData,{headers:{Authorization:`Bearer ${token}`}});
+    const token = localStorage.getItem("token");
+
+    await axios.post(
+      `http://localhost:3000/products/${productId}/variants`,
+      formData,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
 
     setFormData({ size: "", color: "", stock: "" });
 
@@ -29,7 +34,7 @@ const AddVariant=({ productId, onVariantAdded })=> {
         type="text"
         name="size"
         value={formData.size}
-        placeholder="Size"
+        placeholder="Storlek" 
         onChange={handleChange}
         required
       />
@@ -38,7 +43,7 @@ const AddVariant=({ productId, onVariantAdded })=> {
         type="text"
         name="color"
         value={formData.color}
-        placeholder="Color"
+        placeholder="Färg"
         onChange={handleChange}
         required
       />
@@ -47,15 +52,14 @@ const AddVariant=({ productId, onVariantAdded })=> {
         type="number"
         name="stock"
         value={formData.stock}
-        placeholder="Stock"
+        placeholder="Lagerantal" 
         onChange={handleChange}
         required
       />
 
-      <button type="submit">Add Variant</button>
+      <button type="submit">Lägg till variant</button> 
     </form>
   );
-}
+};
 
-
-export default AddVariant
+export default AddVariant;

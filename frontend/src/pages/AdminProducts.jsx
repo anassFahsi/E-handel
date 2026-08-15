@@ -1,17 +1,17 @@
-import { useState,useEffect } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import AddProduct from "../components/AddProduct";
 import Product from "../components/Product";
 
 const AdminProducts = () => {
-    const[products,setProducts]=useState([])
-  
-     const fetchProducts = async () => {
-      const token=localStorage.getItem('token')
-    const res = await axios.get("http://localhost:3000/admin/products",{
-      headers:{Authorization:`Bearer ${token}`}
+  const [products, setProducts] = useState([]);
+
+  const fetchProducts = async () => {
+    const token = localStorage.getItem("token");
+    const res = await axios.get("http://localhost:3000/admin/products", {
+      headers: { Authorization: `Bearer ${token}` }
     });
-    console.log(res)
+    console.log(res);
     setProducts(res.data);
   };
 
@@ -21,13 +21,14 @@ const AdminProducts = () => {
 
   return (
     <div>
-      <h1>Admin - Products</h1>
+      <h1>Admin - Produkter</h1>
 
       <AddProduct onProductAdded={fetchProducts} />
 
       <Product products={products} fetchProducts={fetchProducts} />
     </div>
   );
-}
+};
 
-export default AdminProducts
+export default AdminProducts;
+

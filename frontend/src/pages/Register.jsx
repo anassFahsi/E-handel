@@ -2,11 +2,11 @@ import { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
-const Register=() =>{
+const Register = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [username, setUsername] = useState("");
-  const navigate=useNavigate();
+  const navigate = useNavigate();
 
   const handleRegister = async () => {
     try {
@@ -16,10 +16,10 @@ const Register=() =>{
         username
       });
 
-      alert("Registrering lyckades");
+      alert("Registrering lyckades"); 
       navigate("/users/login");
     } catch (err) {
-      console.error(err)
+      console.error(err);
       alert("Registrering misslyckades");
     }
   };
@@ -30,7 +30,7 @@ const Register=() =>{
 
       <input
         type="email"
-        placeholder="Email"
+        placeholder="E-post" 
         value={email}
         onChange={(e) => setEmail(e.target.value)}
       />
@@ -52,7 +52,6 @@ const Register=() =>{
       <button onClick={handleRegister}>Registrera</button>
     </div>
   );
-}
+};
 
-
-export default Register
+export default Register;

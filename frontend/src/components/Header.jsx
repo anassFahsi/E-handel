@@ -8,32 +8,32 @@ const Header = ({ cartCount }) => {
   return (
     <header>
       <nav>
-        <Link to="/">Products</Link>
+        <Link to="/">Produkter</Link> 
         {" | "}
-        <Link to="/cart">Cart ({cartCount})</Link>
+        <Link to="/cart">Kundvagn ({cartCount})</Link> 
         {" | "}
 
         {token ? (
           <>
-            <Link to="/users/profile">Profile</Link>
+            <Link to="/users/profile">Profil</Link> 
 
             {isAdmin && (
               <>
                 {" | "}
-                <Link to="/admin/products">Admin Products</Link>
+                <Link to="/admin/products">Admin - Produkter</Link> 
                 {" | "}
-                <Link to="/admin/orders">Admin Orders</Link>
+                <Link to="/admin/orders">Admin - Ordrar</Link>
               </>
             )}
 
             {" | "}
-            <button onClick={logout}>Logout</button>
+            <button onClick={logout}>Logga ut</button> 
           </>
         ) : (
           <>
-            <Link to="/users/login">Login</Link>
+            <Link to="/users/login">Logga in</Link> 
             {" | "}
-            <Link to="/users/register">Register</Link>
+            <Link to="/users/register">Registrera</Link> 
           </>
         )}
       </nav>
@@ -42,4 +42,5 @@ const Header = ({ cartCount }) => {
 };
 
 export default Header;
+
 

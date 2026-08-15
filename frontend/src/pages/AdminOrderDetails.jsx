@@ -12,7 +12,6 @@ const AdminOrderDetails=()=> {
   const [orderStatus,setOrderStatus]=useState(order.status);
 
   const fetchOrderDetails = async () => {
-    
     try {
       setLoading(true);
       const token= localStorage.getItem('token');
@@ -20,15 +19,15 @@ const AdminOrderDetails=()=> {
         headers:{
           Authorization:`Bearer ${token}`
         }
-
       });
+
       setOrder(res.data.order);
       setItems(res.data.items);
       setOrderStatus(res.data.order.status);
       
     } catch (err) {
       console.error("Error fetching order details:", err);
-      setError("Could not load order details");
+      setError("Kunde inte ladda orderdetaljer"); 
     } finally {
       setLoading(false);
     }
@@ -39,58 +38,65 @@ const AdminOrderDetails=()=> {
   }, [id]);
 
   const handleDelete = async () => {
-  if (!confirm("Are you sure you want to delete this order?")) return;
+    if (!confirm("Är du säker på att du vill ta bort denna order?")) return; 
 
-  try {
-    const token=localStorage.getItem('token')
-    const res=await axios.delete(`http://localhost:3000/orders/${id}`,{
-      headers:{
-        Authorization:`Bearer ${token}`
+    try {
+      const token=localStorage.getItem('token')
+      const res=await axios.delete(`http://localhost:3000/orders/${id}`,{
+        headers:{
+          Authorization:`Bearer ${token}`
+        }
+      });
+
+      alert(res.data.message);
+      window.location.href = "/admin/orders";
+    } catch (err) {
+      console.error(err);
+      alert("Kunde inte ta bort order"); 
+    }
+  };
+
+  const updateStatus = async () => {
+    const token = localStorage.getItem("token");
+
+    await axios.put(
+      `http://localhost:3000/orders/${order.id}/status`,
+      { status: orderStatus }, 
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
       }
-    });
-    alert(res.data.message);
-    window.location.href = "/admin/orders"; // redirect
-  } catch (err) {
-    console.error(err);
-    alert("Could not delete order");
-  }
-};
+    );
 
-const updateStatus = async () => {
-  const token=localStorage.getItem('token')
-  await axios.put(`http://localhost:3000/orders/${order.id}/status`,{headers:{Authorization:`Bearer ${token}`}}, {status:orderStatus
-  });
+    alert("Orderstatus uppdaterad"); 
+  };
 
-  alert("Order status updated");
-};
-
-
-
-  if (loading) return <p>Loading order details...</p>;
+  if (loading) return <p>Laddar orderdetaljer...</p>; 
   if (error) return <p>{error}</p>;
-  if (!order) return <p>No order found.</p>;
+  if (!order) return <p>Ingen order hittades.</p>; 
 
   return (
     <div>
       <h1>Order #{order.id}</h1>
 
-      <h2>Customer</h2>
-      <p><strong>Name:</strong> {order.customer_name}</p>
+      <h2>Kund</h2> 
+      <p><strong>Namn:</strong> {order.customer_name}</p> 
       <p><strong>Email:</strong> {order.customer_email}</p>
-      <p><strong>Address:</strong> {order.customer_address}</p>
+      <p><strong>Adress:</strong> {order.customer_address}</p> 
       <p><strong>Status:</strong> {order.status}</p>
 
-      <h2>Order Items</h2>
+      <h2>Orderrader</h2> 
       {items.length === 0 ? (
-        <p>No items found.</p>
+        <p>Inga produkter hittades.</p> 
       ) : (
         <table>
           <thead>
             <tr>
-              <th>Product </th>
-              <th>Quantity</th>
-              <th>Price at purchase</th>
-              <th>Subtotal</th>
+              <th>Produkt</th> 
+              <th>Antal</th> 
+              <th>Pris vid köp</th> 
+              <th>Delsumma</th> 
             </tr>
           </thead>
           <tbody>
@@ -106,29 +112,34 @@ const updateStatus = async () => {
         </table>
       )}
 
-      <h2>Total</h2>
+      <h2>Totalt</h2> 
       <p>{order.total} kr</p>
 
-      <p><strong>Created:</strong> {new Date(order.created_at).toLocaleString()}</p>
-      <div><p><strong>Status:</strong>{orderStatus}</p>
-      <select 
-           value={orderStatus} 
-           onChange={(e)=>setOrderStatus(e.target.value)}>
-        <option value={'Ordered'}>Ordered</option>
-        <option value={'Processing'}>Processing</option>
-        <option value={'Delivered'}>Delivered</option>
-        <option value={'Refunded'}>refunded</option>
-      </select>
-      <button onClick={updateStatus}>Update status</button>
-      
+      <p><strong>Skapad:</strong> {new Date(order.created_at).toLocaleString()}</p> 
+
+      <div>
+        <p><strong>Status:</strong> {orderStatus}</p>
+
+        <select 
+          value={orderStatus} 
+          onChange={(e)=>setOrderStatus(e.target.value)}
+        >
+          <option value={'Ordered'}>Beställd</option> 
+          <option value={'Processing'}>Behandlas</option> 
+          <option value={'Delivered'}>Levererad</option> 
+          <option value={'Refunded'}>Återbetald</option> 
+        </select>
+
+        <button onClick={updateStatus}>Uppdatera status</button> 
       </div>
 
       <Link to="/admin/orders">
-        <button>Back to orders</button>
+        <button>Tillbaka till ordrar</button> 
       </Link>
-      <button onClick={handleDelete}>Delete order</button>
+
+      <button onClick={handleDelete}>Ta bort order</button> 
     </div>
   );
 }
 
-export default AdminOrderDetails
+export default AdminOrderDetails;

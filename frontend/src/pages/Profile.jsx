@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 
 export default function Profile() {
   const [user, setUser] = useState(null);
-  const navigate=useNavigate();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -35,7 +35,7 @@ export default function Profile() {
     fetchProfile();
   }, []);
 
-  if (!user) return <p>Laddar...</p>;
+  if (!user) return <p>Laddar...</p>; 
 
   return (
     <div>
@@ -45,3 +45,4 @@ export default function Profile() {
     </div>
   );
 }
+

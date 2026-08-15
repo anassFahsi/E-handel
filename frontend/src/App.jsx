@@ -12,6 +12,7 @@ import ProductPage from './pages/ProductPage';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 import AdminProductDetailsPage from './pages/AdminProductDetailsPage';
+import Footer from './components/Footer';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Profile from './pages/Profile';
@@ -130,6 +131,7 @@ const App = () => {
           element={<ProtectedRoute> <Profile /> </ProtectedRoute>}
         />
       </Routes>
+      <Footer />
     </>
   );
 };

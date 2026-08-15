@@ -133,23 +133,46 @@ router.delete('/:id', auth, admin, async(req,res)=>{
  
 })
 
-router.put('/:id/status', auth,admin, async (req, res) => {
+router.put('/:id/status', auth, admin, async (req, res) => {
   const { status } = req.body;
-  console.log(req.body.status)
   const orderId = req.params.id;
 
   try {
+    // Uppdatera orderstatus
     await pool.query(
       `UPDATE orders SET status = $1 WHERE id = $2`,
       [status, orderId]
     );
 
-    res.json({ message: "Order status updated" });
+    // ⭐ Om ordern återbetalas → återställ lager
+    if (status === 'Refunded') {
+
+      // 1. Hämta alla order_items + variant info
+      const variantsRes = await pool.query(`
+        SELECT oi.variant_id, oi.quantity
+        FROM order_items oi
+        WHERE oi.order_id = $1
+      `, [orderId]);
+
+      const items = variantsRes.rows;
+
+      // 2. Öka lagret för varje variant
+      for (const item of items) {
+        await pool.query(
+          `UPDATE product_variants SET stock = stock + $1 WHERE id = $2`,
+          [item.quantity, item.variant_id]
+        );
+      }
+    }
+
+    res.json({ message: "Orderstatus uppdaterad" });
+
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: "Could not update order status" });
+    res.status(500).json({ error: "Kunde inte uppdatera orderstatus" });
   }
 });
+
 
 
 export default router

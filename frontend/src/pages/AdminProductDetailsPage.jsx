@@ -1,18 +1,20 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 import VariantList from "../components/VariantList";
 import AddVariant from "../components/AddVariant";
 
 export default function ProductDetailsPage() {
+  const navigate = useNavigate();
   const { id } = useParams();
   const [product, setProduct] = useState(null);
 
   const fetchProduct = async () => {
-    const token=localStorage.getItem('token')
-    const res = await axios.get(`http://localhost:3000/products/${id}`,{
-      headers:{Authorization:`Bearer ${token}`}
+    const token = localStorage.getItem('token');
+    const res = await axios.get(`http://localhost:3000/products/${id}`, {
+      headers: { Authorization: `Bearer ${token}` }
     });
     setProduct(res.data);
   };
@@ -21,7 +23,7 @@ export default function ProductDetailsPage() {
     fetchProduct();
   }, [id]);
 
-  if (!product) return <p>Laddar produkt...</p>;
+  if (!product) return <p>Laddar produkt...</p>; 
 
   return (
     <div style={{ padding: "20px" }}>
@@ -29,12 +31,16 @@ export default function ProductDetailsPage() {
 
       <div>
         <h3>{product.name}</h3>
-        <p>Pris: {product.price} kr</p>
+        <p>Pris: {product.price} kr</p> 
         <p>{product.description}</p>
 
         {product.image_url && (
           <img
-            src={product.image_url.startsWith('http')?product.image_url:`http://localhost:3000${product.image_url}`}
+            src={
+              product.image_url.startsWith('http')
+                ? product.image_url
+                : `http://localhost:3000${product.image_url}`
+            }
             alt={product.name}
             width="200"
             height="200"
@@ -48,8 +54,12 @@ export default function ProductDetailsPage() {
 
       <hr />
 
-      <h3>Lägg till variant</h3>
+      <h3>Lägg till variant</h3> 
       <AddVariant productId={product.id} onVariantAdded={fetchProduct} />
+
+      <button onClick={() => navigate(-1)}>
+        Tillbaka till produkter 
+      </button>
     </div>
   );
 }
