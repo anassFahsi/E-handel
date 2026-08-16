@@ -7,6 +7,7 @@ import ordersRouter from './routes/orders.js';
 import  cartRouter from './routes/cart.js';
 import shippingRouter from './routes/shipping.js';
 import usersRouter from './routes/users.js';
+import reviewsRouter from './routes/reviews.js';
 import { auth } from './middleware/auth.js';
 import { admin } from './middleware/admin.js';
 const app = express();
@@ -28,10 +29,10 @@ app.use("/uploads", express.static("uploads"));
 app.use(cors());
 app.use(express.json());
 app.use('/orders',ordersRouter);
-app.use('/',cartRouter)
+app.use('/',cartRouter);
 app.use('/',shippingRouter);
-app.use('/users',usersRouter)
-
+app.use('/users',usersRouter);
+app.use('/reviews',reviewsRouter);
 
 
 // Get all products

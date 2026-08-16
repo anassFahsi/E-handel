@@ -9,14 +9,14 @@ const router=express.Router();
 
 // Register
 router.post('/register', async(req,res)=>{
-    const {email,password,username}=req.body;
+    const {email,password,name}=req.body;
     try{
         const hashed= await bcrypt.hash(password,10);
 
         await pool.query(
-        `INSERT INTO users (email, password_hash, username, role)
+        `INSERT INTO users (email, password_hash, name, role)
           VALUES ($1, $2, $3, 'user')`,
-          [email, hashed, username || null]
+          [email, hashed, name|| null]
        );
 
         res.json({ message: "User registered" });
@@ -44,7 +44,7 @@ router.post('/login',async(req,res)=>{
      if (!match) return res.status(400).json({ error: "Wrong password" });
 
      const token=jwt.sign(
-        {id:user.id, role:user.role},
+        {id:user.id, email:user.email, role:user.role},
         process.env.JWT_SECRET,
         {expiresIn:"1d"}
      );
@@ -61,7 +61,7 @@ router.post('/login',async(req,res)=>{
 router.get('/profile', auth, async (req, res) => {
   try {
     const userRes = await pool.query(
-      "SELECT id, email, username, role FROM users WHERE id = $1",
+      "SELECT id, email, name, role FROM users WHERE id = $1",
       [req.user.id]
     );
 

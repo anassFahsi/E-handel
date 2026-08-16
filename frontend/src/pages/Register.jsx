@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 const Register = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [username, setUsername] = useState("");
+  const [name, setName] = useState("");
   const navigate = useNavigate();
 
   const handleRegister = async () => {
@@ -13,7 +13,7 @@ const Register = () => {
       await axios.post("http://localhost:3000/users/register", {
         email,
         password,
-        username
+        name
       });
 
       alert("Registrering lyckades"); 
@@ -45,8 +45,8 @@ const Register = () => {
       <input
         type="text"
         placeholder="Användarnamn (valfritt)"
-        value={username}
-        onChange={(e) => setUsername(e.target.value)}
+        value={name}
+        onChange={(e) => setName(e.target.value)}
       />
 
       <button onClick={handleRegister}>Registrera</button>

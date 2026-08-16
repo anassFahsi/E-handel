@@ -51,6 +51,7 @@ const App = () => {
         variantId:item.variantId,
         quantity: 1
       });
+      alert("Produkten lades i kundvagnen!");
 
       await fetchCartCount();
      
