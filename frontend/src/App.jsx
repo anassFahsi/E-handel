@@ -18,6 +18,8 @@ import Register from './pages/Register';
 import Profile from './pages/Profile';
 import AdminRoute from './components/AdminRoute';
 import ProtectedRoute from './components/ProtectedRoute';
+import UserOrders from './pages/UserOrders';
+import ChangePassword from './pages/ChangePassword';
 
 const App = () => {
   const [cartCount, setCartCount] = useState(0);
@@ -51,7 +53,6 @@ const App = () => {
         variantId:item.variantId,
         quantity: 1
       });
-      alert("Produkten lades i kundvagnen!");
 
       await fetchCartCount();
      
@@ -131,7 +132,19 @@ const App = () => {
           path='/users/profile'
           element={<ProtectedRoute> <Profile /> </ProtectedRoute>}
         />
+
+        <Route
+          path='/users/orders'
+          element={<UserOrders />}
+         />
+
+        <Route
+          path='/users/change-password'
+          element={<ChangePassword />}
+        />
       </Routes>
+
+      
       <Footer />
     </>
   );

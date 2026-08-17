@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { Link,useNavigate } from "react-router-dom";
 
 export default function Profile() {
   const [user, setUser] = useState(null);
@@ -23,7 +23,7 @@ export default function Profile() {
         });
 
         setUser(res.data.user);
-
+      
       } catch (err) {
         if (err.response && err.response.status === 401) {
           localStorage.removeItem("token");
@@ -37,12 +37,23 @@ export default function Profile() {
 
   if (!user) return <p>Laddar...</p>; 
 
-  return (
-    <div>
-      <h2>Min profil</h2>
-      <p>ID: {user.id}</p>
-      <p>Roll: {user.role}</p>
-    </div>
-  );
+ return (
+  <div>
+    <h2>Min profil</h2>
+
+    <p><strong>E-post:</strong> {user.email}</p>
+    <p><strong>Användarnamn:</strong> {user.name || "Inget användarnamn"}</p>
+
+      <p><strong>Medlem sedan:</strong> {new Date(user.created_at).toLocaleDateString()}</p>
+    
+
+    <hr />
+
+    <Link to={`/users/orders`}>Mina ordrar</Link>
+    <br />
+    <Link to="/users/change-password">Byt lösenord</Link>
+  </div>
+);
+
 }
 

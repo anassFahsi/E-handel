@@ -108,7 +108,7 @@ export default function Checkout({ sessionId, fetchCartCount }) {
 
       <form onSubmit={handleSubmit}>
         <label>
-          Namn: {/* ⭐ ÄNDRAT */}
+          Namn: 
           <input name="name" value={form.name} onChange={handleChange} />
         </label>
 

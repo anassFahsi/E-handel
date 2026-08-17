@@ -1,5 +1,3 @@
-
-
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
@@ -83,7 +81,7 @@ const Cart = ({ sessionId, handleCartCount }) => {
         <button disabled={total === 0}>Gå till kassan</button>
       </Link>
 
-      <button onClick={() => navigate(-1)}>Tillbaka till produkter</button> 
+      <button onClick={() => navigate('/products')}>Tillbaka till produkter</button> 
     </div>
   );
 };

@@ -10,7 +10,26 @@ const Header = ({ cartCount }) => {
       <nav>
         <Link to="/">Produkter</Link> 
         {" | "}
-        <Link to="/cart">Kundvagn ({cartCount})</Link> 
+        <Link to='/cart' style={{ position: "relative", fontSize: "22px" }}>
+  🛒
+  {cartCount > 0 && (
+    <span
+      style={{
+        position: "absolute",
+        top: "-8px",
+        right: "-12px",
+        background: "red",
+        color: "white",
+        borderRadius: "50%",
+        padding: "2px 6px",
+        fontSize: "12px"
+      }}
+    >
+      {cartCount}
+    </span>
+  )}
+</Link>
+
         {" | "}
 
         {token ? (

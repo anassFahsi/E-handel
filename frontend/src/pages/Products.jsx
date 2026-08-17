@@ -6,7 +6,7 @@ const Products = () => {
   const navigate = useNavigate();
   const [params] = useSearchParams();
 
-  // URL-driven state
+  
   const [search, setSearch] = useState(params.get("search") || "");
   const [category, setCategory] = useState(params.get("category") || "");
   const [sort, setSort] = useState(params.get("sort") || "newest");
@@ -49,9 +49,7 @@ const Products = () => {
     }
   };
 
-  const setPosition = () => {
-    localStorage.setItem("scrollPosition", window.scrollY);
-  };
+
 
   useEffect(() => {
     fetchCategories();
