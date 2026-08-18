@@ -18,7 +18,7 @@ const AddVariant = ({ productId, onVariantAdded }) => {
     const token = localStorage.getItem("token");
 
     await axios.post(
-      `http://localhost:3000/products/${productId}/variants`,
+      `http://localhost:3000/admin/products/${productId}/variants`,
       formData,
       { headers: { Authorization: `Bearer ${token}` } }
     );

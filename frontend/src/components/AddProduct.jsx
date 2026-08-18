@@ -28,7 +28,7 @@ export default function AddProduct({ onProductAdded }) {
     try {
       const token = localStorage.getItem("token");
       const res = await axios.post(
-        "http://localhost:3000/products",
+        "http://localhost:3000/admin/products",
         data,
         {
           headers: {
@@ -38,7 +38,7 @@ export default function AddProduct({ onProductAdded }) {
         }
       );
 
-      console.log(res.data);
+      alert('Produkten lades till')
       setFormData({
         name: "",
         price: "",

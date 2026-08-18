@@ -16,7 +16,7 @@ const AdminOrders = () => {
       setLoading(true);
       const token = localStorage.getItem('token');
 
-      const res = await axios.get("http://localhost:3000/orders", {
+      const res = await axios.get("http://localhost:3000/admin/orders", {
         params: { search, page, limit },
         headers: { Authorization: `Bearer ${token}` }
       });

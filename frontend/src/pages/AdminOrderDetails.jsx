@@ -15,7 +15,7 @@ const AdminOrderDetails=()=> {
     try {
       setLoading(true);
       const token= localStorage.getItem('token');
-      const res = await axios.get(`http://localhost:3000/orders/${id}`,{
+      const res = await axios.get(`http://localhost:3000/admin/orders/${id}`,{
         headers:{
           Authorization:`Bearer ${token}`
         }
@@ -42,7 +42,7 @@ const AdminOrderDetails=()=> {
 
     try {
       const token=localStorage.getItem('token')
-      const res=await axios.delete(`http://localhost:3000/orders/${id}`,{
+      const res=await axios.delete(`http://localhost:3000/admin/orders/${id}`,{
         headers:{
           Authorization:`Bearer ${token}`
         }
@@ -60,7 +60,7 @@ const AdminOrderDetails=()=> {
     const token = localStorage.getItem("token");
 
     await axios.put(
-      `http://localhost:3000/orders/${order.id}/status`,
+      `http://localhost:3000/admin/orders/${order.id}/status`,
       { status: orderStatus }, 
       {
         headers: {
@@ -70,6 +70,7 @@ const AdminOrderDetails=()=> {
     );
 
     alert("Orderstatus uppdaterad"); 
+    fetchOrderDetails();
   };
 
   if (loading) return <p>Laddar orderdetaljer...</p>; 

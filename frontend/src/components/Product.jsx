@@ -13,7 +13,7 @@ export default function Product({ products, fetchProducts }) {
   });
   const [error, setError] = useState(null);
 
-  // Hämta total stock för varje produkt
+  
   const [stockMap, setStockMap] = useState({});
 
   const fetchStock = async () => {
@@ -22,7 +22,7 @@ export default function Product({ products, fetchProducts }) {
 
     for (const p of products) {
       const res = await axios.get(
-        `http://localhost:3000/products/${p.id}/variants`,
+        `http://localhost:3000/admin/products/${p.id}/variants`,
         {
           headers: {
             Authorization: `Bearer ${token}`
@@ -43,15 +43,18 @@ export default function Product({ products, fetchProducts }) {
   }, [products]);
 
   const handleDelete = async (id) => {
+    if (!confirm("Är du säker att du vill ta bort produkten?")) return;
+
     try {
       const token = localStorage.getItem("token");
 
-      await axios.delete(`http://localhost:3000/products/${id}`, {
+      await axios.delete(`http://localhost:3000/admin/products/${id}`, {
         headers: {
           Authorization: `Bearer ${token}`
         }
       });
 
+      alert("Produkten tagits bort");
       fetchProducts();
     } catch (err) {
       console.error("Error deleting product:", err);
@@ -70,50 +73,33 @@ export default function Product({ products, fetchProducts }) {
     });
   };
 
-  // UPLOAD IMAGE TO BACKEND (Multer)
-  const uploadImage = async () => {
-    if (!editData.imageFile) return null;
-
-    const token = localStorage.getItem("token");
-
-    const formData = new FormData();
-    formData.append("image", editData.imageFile);
-
-    const res = await axios.post("http://localhost:3000/upload", formData, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "multipart/form-data"
-      }
-    });
-
-    return res.data.url;
-  };
-
+  
   const handleUpdate = async (id) => {
     try {
       const token = localStorage.getItem("token");
 
-      let imageUrl = editData.image_url;
+      const formData = new FormData();
+      formData.append("name", editData.name);
+      formData.append("price", editData.price);
+      formData.append("description", editData.description);
+      formData.append("image_url", editData.image_url);
 
       if (editData.imageFile) {
-        imageUrl = await uploadImage();
+        formData.append("image", editData.imageFile);
       }
 
       await axios.put(
-        `http://localhost:3000/products/${id}`,
-        {
-          name: editData.name,
-          price: editData.price,
-          description: editData.description,
-          image_url: imageUrl
-        },
+        `http://localhost:3000/admin/products/${id}`,
+        formData,
         {
           headers: {
-            Authorization: `Bearer ${token}`
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data"
           }
         }
       );
 
+      alert("Produkten uppdaterades");
       setEditing(null);
       fetchProducts();
     } catch (err) {
@@ -129,12 +115,12 @@ export default function Product({ products, fetchProducts }) {
           <li key={p.id} style={{ marginBottom: "20px" }}>
             {editing === p.id ? (
               <div>
-                <h3>Redigera produkt</h3> 
+                <h3>Redigera produkt</h3>
 
                 <input
                   type="text"
                   value={editData.name}
-                  placeholder="Namn" 
+                  placeholder="Namn"
                   onChange={(e) =>
                     setEditData({ ...editData, name: e.target.value })
                   }
@@ -143,7 +129,7 @@ export default function Product({ products, fetchProducts }) {
                 <input
                   type="number"
                   value={editData.price}
-                  placeholder="Pris" 
+                  placeholder="Pris"
                   onChange={(e) =>
                     setEditData({ ...editData, price: e.target.value })
                   }
@@ -151,7 +137,7 @@ export default function Product({ products, fetchProducts }) {
 
                 <textarea
                   value={editData.description}
-                  placeholder="Beskrivning" 
+                  placeholder="Beskrivning"
                   onChange={(e) =>
                     setEditData({ ...editData, description: e.target.value })
                   }
@@ -179,8 +165,8 @@ export default function Product({ products, fetchProducts }) {
                   />
                 )}
 
-                <button onClick={() => handleUpdate(p.id)}>Spara</button> 
-                <button onClick={() => setEditing(null)}>Avbryt</button> 
+                <button onClick={() => handleUpdate(p.id)}>Spara</button>
+                <button onClick={() => setEditing(null)}>Avbryt</button>
               </div>
             ) : (
               <>
@@ -191,7 +177,7 @@ export default function Product({ products, fetchProducts }) {
                         ? p.image_url
                         : `http://localhost:3000${p.image_url}`
                     }
-                    alt="Produktbild" 
+                    alt="Produktbild"
                     width="100"
                   />
                 )}
@@ -212,7 +198,10 @@ export default function Product({ products, fetchProducts }) {
                   </span>
                 )}
 
-                <button onClick={() => startEdit(p)} style={{ marginLeft: "10px" }}>
+                <button
+                  onClick={() => startEdit(p)}
+                  style={{ marginLeft: "10px" }}
+                >
                   ✏️
                 </button>
 
@@ -228,10 +217,11 @@ export default function Product({ products, fetchProducts }) {
         ))}
       </ul>
 
-      {error && <p style={{ color: "red" }}>Fel: {error}</p>} 
+      {error && <p style={{ color: "red" }}>Fel: {error}</p>}
     </div>
   );
 }
+
 
 
 

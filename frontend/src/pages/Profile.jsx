@@ -1,10 +1,16 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState,useContext } from "react";
 import axios from "axios";
-import { Link,useNavigate } from "react-router-dom";
+import {Navigate, Link,useNavigate } from "react-router-dom";
+import { AuthContext } from "../context/AuthContext";
 
 export default function Profile() {
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
+  const { isAdmin } = useContext(AuthContext);
+
+  if (isAdmin) {
+    return <Navigate to="/admin/profile" />;
+  }
 
   useEffect(() => {
     const fetchProfile = async () => {

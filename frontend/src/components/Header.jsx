@@ -34,7 +34,10 @@ const Header = ({ cartCount }) => {
 
         {token ? (
           <>
-            <Link to="/users/profile">Profil</Link> 
+            <Link to={isAdmin ? "/admin/profile" : "/users/profile"}>
+                Profil
+            </Link>
+
 
             {isAdmin && (
               <>
@@ -42,6 +45,8 @@ const Header = ({ cartCount }) => {
                 <Link to="/admin/products">Admin - Produkter</Link> 
                 {" | "}
                 <Link to="/admin/orders">Admin - Ordrar</Link>
+                {" | "}
+                <Link to="/admin/dashboard">Admin - Dashboard</Link>
               </>
             )}
 

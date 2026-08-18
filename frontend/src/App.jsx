@@ -20,6 +20,9 @@ import AdminRoute from './components/AdminRoute';
 import ProtectedRoute from './components/ProtectedRoute';
 import UserOrders from './pages/UserOrders';
 import ChangePassword from './pages/ChangePassword';
+import AdminProfile from './pages/AdminProfile';
+import AdminDashboard from './pages/AdminDashBoard';
+
 
 const App = () => {
   const [cartCount, setCartCount] = useState(0);
@@ -132,6 +135,10 @@ const App = () => {
           path='/users/profile'
           element={<ProtectedRoute> <Profile /> </ProtectedRoute>}
         />
+        <Route 
+          path="/admin/profile" 
+          element={<AdminProfile />} />
+
 
         <Route
           path='/users/orders'
@@ -142,6 +149,12 @@ const App = () => {
           path='/users/change-password'
           element={<ChangePassword />}
         />
+
+        <Route
+         path="/admin/dashboard" 
+         element={<AdminDashboard />}
+        />
+
       </Routes>
 
       
