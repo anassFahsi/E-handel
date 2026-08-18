@@ -8,7 +8,39 @@ const Register = () => {
   const [name, setName] = useState("");
   const navigate = useNavigate();
 
+  const validateEmail = (email) => {
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return regex.test(email);
+  };
+
+  const validatePassword = (password) => {
+    if (password.length < 8) {
+      return "Lösenordet måste vara minst 8 tecken långt";
+    }
+    if (!/[A-Z]/.test(password)) {
+      return "Lösenordet måste innehålla minst en stor bokstav (A-Z)";
+    }
+    if (!/[0-9]/.test(password)) {
+      return "Lösenordet måste innehålla minst en siffra (0-9)";
+    }
+    if (!/[!@#$%^&*(),.?\":{}|<>]/.test(password)) {
+      return "Lösenordet måste innehålla minst ett specialtecken (!@#$%^&*)";
+    }
+    return null;
+  };
+
   const handleRegister = async () => {
+    if (!validateEmail(email)) {
+      alert("Ogiltig e-postadress");
+      return;
+    }
+
+    const passwordError = validatePassword(password);
+    if (passwordError) {
+      alert(passwordError);
+      return;
+    }
+
     try {
       await axios.post("http://localhost:3000/users/register", {
         email,
@@ -16,8 +48,9 @@ const Register = () => {
         name
       });
 
-      alert("Registrering lyckades"); 
+      alert("Registrering lyckades");
       navigate("/users/login");
+
     } catch (err) {
       console.error(err);
       alert("Registrering misslyckades");
@@ -30,7 +63,7 @@ const Register = () => {
 
       <input
         type="email"
-        placeholder="E-post" 
+        placeholder="E-post"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
       />
@@ -55,3 +88,4 @@ const Register = () => {
 };
 
 export default Register;
+

@@ -48,7 +48,7 @@ export default function Checkout({ sessionId, fetchCartCount }) {
     fetchShipping();
   }, []);
 
-  // Update grand total when shipping or subtotal changes
+  
   useEffect(() => {
     if (selectedShipping) {
       setGrandTotal(subtotal + Number(selectedShipping.price));
@@ -62,8 +62,44 @@ export default function Checkout({ sessionId, fetchCartCount }) {
     });
   };
 
+
+  const validateEmail = (email) => {
+  const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return regex.test(email);
+};
+
+const validateCheckout = (form, items, selectedShipping) => {
+  if (!form.name.trim()) {
+    return "Namn är obligatoriskt";
+  }
+
+  if (!validateEmail(form.email)) {
+    return "Ogiltig e-postadress";
+  }
+
+  if (!form.address.trim()) {
+    return "Adress är obligatorisk";
+  }
+
+  if (items.length === 0) {
+    return "Kundvagnen är tom";
+  }
+
+  if (!selectedShipping) {
+    return "Välj ett fraktalternativ";
+  }
+
+  return null; // allt OK
+};
+
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const error=validateCheckout(form,items,selectedShipping);
+    if(error){
+      alert(error);
+      return ;
+    }
 
     const order = {
       customer: form,
@@ -109,17 +145,17 @@ export default function Checkout({ sessionId, fetchCartCount }) {
       <form onSubmit={handleSubmit}>
         <label>
           Namn: 
-          <input name="name" value={form.name} onChange={handleChange} />
+          <input name="name" value={form.name} onChange={handleChange} required />
         </label>
 
         <label>
           E-post: 
-          <input name="email" value={form.email} onChange={handleChange} />
+          <input name="email" value={form.email} onChange={handleChange} required/>
         </label>
 
         <label>
           Adress: 
-          <input name="address" value={form.address} onChange={handleChange} />
+          <input name="address" value={form.address} onChange={handleChange} required />
         </label>
 
         <label>

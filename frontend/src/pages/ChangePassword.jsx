@@ -6,8 +6,34 @@ export default function ChangePassword() {
   const [newPassword, setNewPassword] = useState("");
   const [message, setMessage] = useState("");
 
+  const validatePassword = (password) => {
+    if (password.length < 8) {
+      return "Lösenordet måste vara minst 8 tecken långt";
+    }
+
+    if (!/[A-Z]/.test(password)) {
+      return "Lösenordet måste innehålla minst en stor bokstav (A-Z)";
+    }
+
+    if (!/[0-9]/.test(password)) {
+      return "Lösenordet måste innehålla minst en siffra (0-9)";
+    }
+
+    if (!/[!@#$%^&*(),.?\":{}|<>]/.test(password)) {
+      return "Lösenordet måste innehålla minst ett specialtecken (!@#$%^&*)";
+    }
+
+    return null;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    const validationError = validatePassword(newPassword);
+    if (validationError) {
+      setMessage(validationError);
+      return;
+    }
 
     try {
       const token = localStorage.getItem("token");
