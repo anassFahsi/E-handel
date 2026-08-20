@@ -1,0 +1,65 @@
+.profile-page {
+  max-width: 600px;
+  margin: 40px auto;
+  background: #fff;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+}
+
+
+.profile-page .page-title {
+  text-align: center;
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 25px;
+}
+
+
+.profile-field {
+  font-size: 16px;
+  margin-bottom: 15px;
+  padding: 12px;
+  background: #fafafa;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+}
+
+
+.divider {
+  margin: 25px 0;
+  border: none;
+  border-top: 1px solid #ddd;
+}
+
+/* Länkar */
+.profile-link {
+  display: inline-block;
+  margin-bottom: 12px;
+  font-size: 16px;
+  color: #007bff;
+  font-weight: 600;
+  text-decoration: none;
+  transition: 0.2s;
+}
+
+.profile-link:hover {
+  color: #005fcc;
+  text-decoration: underline;
+}
+
+
+@media (max-width: 600px) {
+  .profile-page {
+    padding: 20px;
+    margin: 20px;
+  }
+
+  .profile-field {
+    font-size: 15px;
+  }
+
+  .profile-link {
+    font-size: 15px;
+  }
+}

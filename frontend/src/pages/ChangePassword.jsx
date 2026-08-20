@@ -55,38 +55,39 @@ export default function ChangePassword() {
   };
 
   return (
-    <div>
-      <h2>Byt lösenord</h2>
+    <div className="change-password-page">
+  <h2 className="page-title">Byt lösenord</h2>
 
-      <form onSubmit={handleSubmit}>
-        <label>
-          Nuvarande lösenord:
-          <input
-            type="password"
-            value={oldPassword}
-            onChange={(e) => setOldPassword(e.target.value)}
-            required
-          />
-        </label>
+  <form className="form" onSubmit={handleSubmit}>
+    <label className="form-label">
+      Nuvarande lösenord:
+      <input
+        className="form-input"
+        type="password"
+        value={oldPassword}
+        onChange={(e) => setOldPassword(e.target.value)}
+        required
+      />
+    </label>
 
-        <br />
+    <label className="form-label">
+      Nytt lösenord:
+      <input
+        className="form-input"
+        type="password"
+        value={newPassword}
+        onChange={(e) => setNewPassword(e.target.value)}
+        required
+      />
+    </label>
 
-        <label>
-          Nytt lösenord:
-          <input
-            type="password"
-            value={newPassword}
-            onChange={(e) => setNewPassword(e.target.value)}
-            required
-          />
-        </label>
+    <button className="btn btn-primary" type="submit">
+      Uppdatera lösenord
+    </button>
+  </form>
 
-        <br />
+  {message && <p className="form-message">{message}</p>}
+</div>
 
-        <button type="submit">Uppdatera lösenord</button>
-      </form>
-
-      {message && <p>{message}</p>}
-    </div>
   );
 }

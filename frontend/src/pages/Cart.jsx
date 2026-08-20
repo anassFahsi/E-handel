@@ -59,30 +59,40 @@ const Cart = ({ sessionId, handleCartCount }) => {
   };
 
   return (
-    <div>
-      <h1>Kundvagn</h1>
+    <div className="cart-page">
+  <h1 className="page-title">Kundvagn</h1>
 
-      {items.length === 0 && <p>Din kundvagn är tom.</p>} 
+  {items.length === 0 && <p className="empty-cart">Din kundvagn är tom.</p>}
 
-      <ul>
-        {items.map(item => (
-          <li key={item.id}>
-            {item.quantity} x {item.name} - {item.price} kr
-            <button onClick={() => decreaseQuantity(item.id)}>-</button>
-            <button onClick={() => increaseQuantity(item.id)}>+</button>
-            <button onClick={() => removeItem(item.id)}>Ta bort</button> 
-          </li>
-        ))}
-      </ul>
+  <ul className="cart-items">
+    {items.map(item => (
+      <li key={item.id} className="cart-item">
+        <span className="cart-item-text">
+          {item.quantity} x {item.name} - {item.price} kr
+        </span>
 
-      <h2>Totalt: {total} kr</h2> 
+        <div className="cart-item-actions">
+          <button className="btn btn-secondary" onClick={() => decreaseQuantity(item.id)}>-</button>
+          <button className="btn btn-secondary" onClick={() => increaseQuantity(item.id)}>+</button>
+          <button className="btn btn-danger" onClick={() => removeItem(item.id)}>Ta bort</button>
+        </div>
+      </li>
+    ))}
+  </ul>
 
-      <Link to="/checkout">
-        <button disabled={total === 0}>Gå till kassan</button>
-      </Link>
+  <h2 className="cart-total">Totalt: {total} kr</h2>
 
-      <button onClick={() => navigate('/products')}>Tillbaka till produkter</button> 
-    </div>
+  <Link to="/checkout">
+    <button className="btn btn-primary" disabled={total === 0}>
+      Gå till kassan
+    </button>
+  </Link>
+
+  <button className="btn btn-secondary" onClick={() => navigate('/products')}>
+    Tillbaka till produkter
+  </button>
+</div>
+
   );
 };
 

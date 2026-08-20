@@ -17,10 +17,10 @@ export default function Login() {
         password
       });
 
-      // Uppdatera global auth-state
+      
       login(res.data.token);
 
-      // Redirect efter login
+     
       navigate("/users/profile");
 
     } catch (err) {
@@ -30,25 +30,32 @@ export default function Login() {
   };
 
   return (
-    <div>
-      <h2>Logga in</h2>
+    <div className="login-page">
+  <h2 className="page-title">Logga in</h2>
 
-      <input
-        type="email"
-        placeholder="E-post" 
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-      />
+  <div className="login-form">
+    <input
+      className="form-input"
+      type="email"
+      placeholder="E-post"
+      value={email}
+      onChange={(e) => setEmail(e.target.value)}
+    />
 
-      <input
-        type="password"
-        placeholder="Lösenord"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-      />
+    <input
+      className="form-input"
+      type="password"
+      placeholder="Lösenord"
+      value={password}
+      onChange={(e) => setPassword(e.target.value)}
+    />
 
-      <button onClick={handleLogin}>Logga in</button>
-    </div>
+    <button className="btn btn-primary" onClick={handleLogin}>
+      Logga in
+    </button>
+  </div>
+</div>
+
   );
 }
 

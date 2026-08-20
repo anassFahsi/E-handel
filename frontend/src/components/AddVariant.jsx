@@ -29,36 +29,42 @@ const AddVariant = ({ productId, onVariantAdded }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <input
-        type="text"
-        name="size"
-        value={formData.size}
-        placeholder="Storlek" 
-        onChange={handleChange}
-        required
-      />
+    <form className="variant-form" onSubmit={handleSubmit}>
+  <input
+    className="form-input"
+    type="text"
+    name="size"
+    value={formData.size}
+    placeholder="Storlek"
+    onChange={handleChange}
+    required
+  />
 
-      <input
-        type="text"
-        name="color"
-        value={formData.color}
-        placeholder="Färg"
-        onChange={handleChange}
-        required
-      />
+  <input
+    className="form-input"
+    type="text"
+    name="color"
+    value={formData.color}
+    placeholder="Färg"
+    onChange={handleChange}
+    required
+  />
 
-      <input
-        type="number"
-        name="stock"
-        value={formData.stock}
-        placeholder="Lagerantal" 
-        onChange={handleChange}
-        required
-      />
+  <input
+    className="form-input"
+    type="number"
+    name="stock"
+    value={formData.stock}
+    placeholder="Lagerantal"
+    onChange={handleChange}
+    required
+  />
 
-      <button type="submit">Lägg till variant</button> 
-    </form>
+  <button className="btn btn-primary" type="submit">
+    Lägg till variant
+  </button>
+</form>
+
   );
 };
 

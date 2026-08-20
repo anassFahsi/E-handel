@@ -22,29 +22,33 @@ export default function ProductVariants({ productId, onVariantSelected }) {
   };
 
   return (
-    <div>
-      <h3>Välj variant</h3>
+    <div className="product-variants">
+  <h3 className="section-title">Välj variant</h3>
 
-      {variants.length === 0 && (
-        <p>Inga varianter tillgängliga.</p> 
-      )}
+  {variants.length === 0 && (
+    <p className="no-variants-text">Inga varianter tillgängliga.</p>
+  )}
 
-      <ul>
-        {variants.map((v) => (
-          <li key={v.id}>
-            <button onClick={() => handleSelect(v)}>
-              {v.size} / {v.color} — Lager: {v.stock} 
-            </button>
-          </li>
-        ))}
-      </ul>
+  <ul className="variant-list">
+    {variants.map((v) => (
+      <li key={v.id} className="variant-item">
+        <button
+          className="btn btn-variant"
+          onClick={() => handleSelect(v)}
+        >
+          {v.size} / {v.color} — Lager: {v.stock}
+        </button>
+      </li>
+    ))}
+  </ul>
 
-      {selectedVariant && (
-        <p>
-          Vald variant: {selectedVariant.size} / {selectedVariant.color} 
-        </p>
-      )}
-    </div>
+  {selectedVariant && (
+    <p className="selected-variant">
+      Vald variant: {selectedVariant.size} / {selectedVariant.color}
+    </p>
+  )}
+</div>
+
   );
 }
 

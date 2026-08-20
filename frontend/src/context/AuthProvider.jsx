@@ -1,17 +1,19 @@
 import axios from "axios";
-import { useState , useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "./AuthContext";
 
 export const AuthProvider = ({ children }) => {
-const navigate=useNavigate();
+  const navigate = useNavigate();
   const [isAdmin, setIsAdmin] = useState(false);
   const [token, setToken] = useState(localStorage.getItem("token"));
+  const [loading, setLoading] = useState(true); // 👈 Ny state
 
   useEffect(() => {
     const checkAdmin = async () => {
       if (!token) {
         setIsAdmin(false);
+        setLoading(false); // 👈 Sluta ladda
         return;
       }
 
@@ -21,8 +23,17 @@ const navigate=useNavigate();
         });
 
         setIsAdmin(res.data.user.role === "admin");
+        const admin=res.data.user.role === "admin";
+        if (admin) {
+          console.log('is:true')
+            navigate("/admin/profile");
+        } else {
+            navigate("/users/profile");
+        }
       } catch {
         setIsAdmin(false);
+      } finally {
+        setLoading(false); // 👈 Sluta ladda oavsett resultat
       }
     };
 
@@ -32,16 +43,17 @@ const navigate=useNavigate();
   const login = (newToken) => {
     localStorage.setItem("token", newToken);
     setToken(newToken);
-    
   };
 
   const logout = () => {
     localStorage.removeItem("token");
     setToken(null);
     setIsAdmin(false);
-  
-    navigate('/users/login',{replace:true})
+    navigate("/users/login", { replace: true });
   };
+
+  // 👇 Vänta tills rollen är känd innan appen renderas
+  if (loading) return null;
 
   return (
     <AuthContext.Provider value={{ isAdmin, token, login, logout }}>
@@ -49,3 +61,4 @@ const navigate=useNavigate();
     </AuthContext.Provider>
   );
 };
+

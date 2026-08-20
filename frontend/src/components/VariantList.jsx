@@ -1,5 +1,3 @@
-
-
 import { useEffect, useState } from "react";
 import axios from "axios";
 
@@ -32,7 +30,7 @@ export default function VariantList({ productId }) {
   const saveEdit = async () => {
     const token = localStorage.getItem("token");
     await axios.put(
-      `http://localhost:3000/variants/${editing.id}`,
+      `http://localhost:3000/admin/variants/${editing.id}`,
       {
         size: editing.size,
         color: editing.color,
@@ -40,7 +38,7 @@ export default function VariantList({ productId }) {
       },
       { headers: { Authorization: `Bearer ${token}` } }
     );
-
+    alert('Variant uppdaterades')
     setEditing(null);
     await fetchVariants();
   };
@@ -48,97 +46,99 @@ export default function VariantList({ productId }) {
   const totalStock = variants.reduce((sum, v) => sum + v.stock, 0);
 
   return (
-    <div>
-      <h3>Varianter</h3>
+    <div className="admin-variant-list">
+  <h3 className="section-title">Varianter</h3>
 
-      <p>
-        <strong>Total lager:</strong> {totalStock} 
-      </p>
+  <p className="variant-total">
+    <strong>Total lager:</strong> {totalStock}
+  </p>
 
-      {variants.length === 0 && <p>Inga varianter ännu.</p>}
+  {variants.length === 0 && (
+    <p className="no-variants-text">Inga varianter ännu.</p>
+  )}
 
-      <ul>
-        {variants.map((v) => (
-          <li key={v.id}>
-            {v.size} / {v.color} — Lager: {v.stock}
+  <ul className="variant-ul">
+  {variants.map((v) => (
+    <li key={v.id} className="admin-variant-item">
+      
+      <span className="admin-variant-info">
+        {v.size} / {v.color}
+      </span>
 
-            {v.stock === 0 && (
-              <span style={{ marginLeft: "10px", color: "red" }}>
-                (Slut i lager)
-              </span>
-            )}
+      <span className={`admin-variant-stock ${v.stock > 0 ? "in" : "out"}`}>
+        {v.stock > 0 ? `I lager (${v.stock})` : "Slut i lager"}
+      </span>
 
-            <button
-              onClick={() => setEditing(v)}
-              style={{ marginLeft: "10px" }}
-            >
-              ✏️
-            </button>
-
-            <button
-              onClick={() => deleteVariant(v.id)}
-              style={{ marginLeft: "5px" }}
-            >
-              🗑️
-            </button>
-          </li>
-        ))}
-      </ul>
-
-      {/* EDIT MODAL */}
-      {editing && (
-        <div
-          style={{
-            position: "fixed",
-            top: "20%",
-            left: "30%",
-            width: "40%",
-            padding: "20px",
-            background: "white",
-            border: "1px solid black"
-          }}
+      <div className="admin-variant-actions">
+        <button
+          className="btn btn-icon"
+          onClick={() => setEditing(v)}
         >
-          <h3>Redigera variant</h3> 
+          ✏️
+        </button>
 
-          <label>Storlek</label> 
-          <input
-            value={editing.size}
-            onChange={(e) =>
-              setEditing({ ...editing, size: e.target.value })
-            }
-          />
+        <button
+          className="btn btn-danger"
+          onClick={() => deleteVariant(v.id)}
+        >
+          🗑️
+        </button>
+      </div>
 
-          <label>Färg</label> 
-          <input
-            value={editing.color}
-            onChange={(e) =>
-              setEditing({ ...editing, color: e.target.value })
-            }
-          />
+    </li>
+  ))}
+</ul>
 
-          <label>Lager</label>
-          <input
-            type="number"
-            value={editing.stock}
-            onChange={(e) =>
-              setEditing({
-                ...editing,
-                stock: Number(e.target.value)
-              })
-            }
-          />
 
-          <div style={{ marginTop: "10px" }}>
-            <button onClick={saveEdit}>Spara</button> 
-            <button
-              onClick={() => setEditing(null)}
-              style={{ marginLeft: "10px" }}
-            >
-              Avbryt 
-            </button>
-          </div>
+  {/* EDIT MODAL */}
+  {editing && (
+    <div className="modal-overlay">
+      <div className="modal">
+        <h3 className="modal-title">Redigera variant</h3>
+
+        <label className="form-label">Storlek</label>
+        <input
+          className="form-input"
+          value={editing.size}
+          onChange={(e) =>
+            setEditing({ ...editing, size: e.target.value })
+          }
+        />
+
+        <label className="form-label">Färg</label>
+        <input
+          className="form-input"
+          value={editing.color}
+          onChange={(e) =>
+            setEditing({ ...editing, color: e.target.value })
+          }
+        />
+
+        <label className="form-label">Lager</label>
+        <input
+          className="form-input"
+          type="number"
+          value={editing.stock}
+          onChange={(e) =>
+            setEditing({ ...editing, stock: Number(e.target.value) })
+          }
+        />
+
+        <div className="modal-actions">
+          <button className="btn btn-primary" onClick={saveEdit}>
+            Spara
+          </button>
+
+          <button
+            className="btn btn-secondary"
+            onClick={() => setEditing(null)}
+          >
+            Avbryt
+          </button>
         </div>
-      )}
+      </div>
     </div>
-  );
+  )}
+</div>
+  )
 }

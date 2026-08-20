@@ -1,9 +1,7 @@
-
-
 import { useEffect, useState } from "react";
 import axios from "axios";
 import AddProduct from "./AddProduct";
-import Product from "./Product";
+import Product from "./AdminProduct";
 
 export default function Products() {
   const [products, setProducts] = useState([]);
@@ -30,16 +28,17 @@ export default function Products() {
   if (error) return <p>Kunde inte hämta produkter: {error}</p>;
 
   return (
-    <div>
-      <h1>Produkter</h1> 
+    <div className="admin-products-page">
+  <h1 className="page-title">Produkter</h1>
 
-      {products.length === 0 ? (
-        <p>Inga produkter hittades.</p>
-      ) : (
-        <Product products={products} fetchProducts={fetchProducts} />
-      )}
+  {products.length === 0 ? (
+    <p className="no-products-text">Inga produkter hittades.</p>
+  ) : (
+    <Product products={products} fetchProducts={fetchProducts} />
+  )}
 
-      <AddProduct onProductAdded={fetchProducts} />
-    </div>
+  <AddProduct onProductAdded={fetchProducts} />
+</div>
+
   );
 }

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import AddProduct from "../components/AddProduct";
-import Product from "../components/Product";
+import AdminProduct from "../components/AdminProduct";
 
 const AdminProducts = () => {
   const [products, setProducts] = useState([]);
@@ -20,13 +20,14 @@ const AdminProducts = () => {
   }, []);
 
   return (
-    <div>
-      <h1>Admin - Produkter</h1>
+    <div className="admin-products-page">
+  <h1 className="page-title">Admin - Produkter</h1>
 
-      <AddProduct onProductAdded={fetchProducts} />
+  <AddProduct onProductAdded={fetchProducts} />
 
-      <Product products={products} fetchProducts={fetchProducts} />
-    </div>
+  <AdminProduct products={products} fetchProducts={fetchProducts} />
+</div>
+
   );
 };
 

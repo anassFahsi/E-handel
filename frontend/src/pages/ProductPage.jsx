@@ -13,15 +13,12 @@ const ProductPage = ({ addToCart }) => {
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState("");
   const [canReview, setCanReview] = useState(false);
- 
-
 
   useEffect(() => {
     const fetchProduct = async () => {
       const res = await axios.get(`http://localhost:3000/products/${id}`);
       setProduct(res.data);
     };
-
     fetchProduct();
   }, [id]);
 
@@ -29,61 +26,43 @@ const ProductPage = ({ addToCart }) => {
     const fetchReviews = async () => {
       const res = await axios.get(`http://localhost:3000/reviews/${id}`);
       setReviews(res.data);
-    
     };
-
     fetchReviews();
   }, [id]);
 
- useEffect(() => {
-  const token = localStorage.getItem("token");
-  if (!token) return;
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
 
-  const check = async () => {
-    try {
-      const res = await axios.get(
-        `http://localhost:3000/reviews/can-review/${id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        }
-      );
-      setCanReview(res.data.canReview);
-      console.log(res.data.canReview)
-    } catch (err) {
-      console.error(err);
-    }
-  };
+    const check = async () => {
+      try {
+        const res = await axios.get(
+          `http://localhost:3000/reviews/can-review/${id}`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        setCanReview(res.data.canReview);
+      } catch (err) {
+        console.error(err);
+      }
+    };
 
-  check();
-}, [id]);
+    check();
+  }, [id]);
 
-
-  
   const handleSubmitReview = async (e) => {
     e.preventDefault();
-    const token =localStorage.getItem('token');
-   
+    const token = localStorage.getItem("token");
 
     try {
       await axios.post(
-  "http://localhost:3000/reviews",
-  {
-    product_id: id,
-    rating,
-    comment,
-  },{
-    headers:{Authorization:`Bearer ${token}`}
-  }
-);
+        "http://localhost:3000/reviews",
+        { product_id: id, rating, comment },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
 
-
-    
       const res = await axios.get(`http://localhost:3000/reviews/${id}`);
       setReviews(res.data);
 
-     
       setRating(5);
       setComment("");
     } catch (err) {
@@ -95,24 +74,23 @@ const ProductPage = ({ addToCart }) => {
   if (!product) return <p>Laddar...</p>;
 
   return (
-    <div>
-      <button onClick={() => navigate(-1)}>
-        ← Tillbaka till produkter
-      </button>
+    <div className="product-page">
+      
 
-      <h1>{product.name}</h1>
+      <h1 className="product-title">{product.name}</h1>
 
       <img
+        className="product-image"
         src={
           product.image_url.startsWith("http")
             ? product.image_url
             : "http://localhost:3000" + product.image_url
         }
-        width={200}
+        alt={product.name}
       />
 
-      <p>{product.description}</p>
-      <p>Pris: {Number(product.price)} kr</p>
+      <p className="product-description">{product.description}</p>
+      <p className="product-price">Pris: {Number(product.price)} kr</p>
 
       <ProductVariants
         productId={product.id}
@@ -120,6 +98,7 @@ const ProductPage = ({ addToCart }) => {
       />
 
       <button
+        className="btn btn-primary add-to-cart-btn"
         onClick={() => {
           if (!selectedVariant) return alert("Välj en variant först!");
           if (selectedVariant.stock <= 0) return alert("Slut i lager!");
@@ -128,76 +107,83 @@ const ProductPage = ({ addToCart }) => {
             productId: product.id,
             variantId: selectedVariant.id,
           });
-          
         }}
       >
         Lägg i kundvagn
       </button>
+      <button className="btn btn-secondary" onClick={() => navigate(-1)}>
+        ← Tillbaka till produkter
+      </button>
 
-      <div className="reviews" style={{ marginTop: "30px" }}>
-        <h3>Recensioner</h3>
+      
+      <div className="reviews-section">
+        <h3 className="reviews-title">Recensioner</h3>
 
         {reviews.length === 0 && <p>Inga recensioner ännu.</p>}
 
         {reviews.map((r) => (
-          <div key={r.id} className="review" style={{ marginBottom: "15px" }}>
-            <strong>{r.user_name}</strong>
-             {Array.from({ length: 5 }).map((_, i) => (
-              <span
-                key={i}
-                style={{
-               color: i < r.rating ? "gold" : "#ccc",
-               fontSize: "20px",
-               marginRight: "3px"
-              }}
-             >
-               ★
-           </span>
-          ))}
-            <p>{r.comment}</p>
-            <small>{new Date(r.created_at).toLocaleDateString()}</small>
+          <div key={r.id} className="review-item">
+            <strong className="review-author">{r.user_name}</strong>
+
+            <div className="review-stars">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <span
+                  key={i}
+                  className={`star ${i < r.rating ? "star-filled" : "star-empty"}`}
+                >
+                  ★
+                </span>
+              ))}
+            </div>
+
+            <p className="review-comment">{r.comment}</p>
+            <small className="review-date">
+              {new Date(r.created_at).toLocaleDateString()}
+            </small>
           </div>
         ))}
       </div>
- 
-      {localStorage.getItem('token') && canReview &&
-      <div style={{ marginTop: "30px" }}>
-        <h3>Skriv en recension</h3>
 
-        <form onSubmit={handleSubmitReview}>
-          <label>Betyg</label>
-          <div style={{ marginBottom: "10px" }}>
-           {Array.from({ length: 5 }).map((_, i) => (
-           <span
-              key={i}
-              onClick={() => setRating(i + 1)}
-              style={{
-              cursor: "pointer",
-              fontSize: "24px",
-              color: i < rating ? "gold" : "#ccc",
-              marginRight: "5px"
-              }}
-           >
-             ★
-          </span>
-         ))}
+    
+      {localStorage.getItem("token") && canReview && (
+        <div className="review-form-section">
+          <h3 className="review-form-title">Skriv en recension</h3>
+
+          <form className="review-form" onSubmit={handleSubmitReview}>
+            <label className="form-label">Betyg</label>
+
+            <div className="review-stars-select">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <span
+                  key={i}
+                  onClick={() => setRating(i + 1)}
+                  className={`star-select ${i < rating ? "star-filled" : "star-empty"}`}
+                >
+                  ★
+                </span>
+              ))}
+            </div>
+
+            <label className="form-label">Kommentar</label>
+            <textarea
+              className="form-textarea"
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
+              rows="4"
+            />
+
+            <button className="btn btn-primary" type="submit">
+              Skicka recension
+            </button>
+          </form>
+          
         </div>
-
-          <label>Kommentar</label>
-          <textarea
-            value={comment}
-            onChange={(e) => setComment(e.target.value)}
-            rows="4"
-          />
-
-          <button type="submit" style={{ marginTop: "10px" }}>
-            Skicka recension 
-          </button>
-        </form>
-      </div>}
+      )}
+     
     </div>
   );
 };
 
 export default ProductPage;
+
 

@@ -58,32 +58,38 @@ const Register = () => {
   };
 
   return (
-    <div>
-      <h2>Registrera dig</h2>
+    <div className="register-page">
+  <h2 className="page-title">Registrera dig</h2>
 
-      <input
-        type="email"
-        placeholder="E-post"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-      />
+  <input
+    className="form-input"
+    type="email"
+    placeholder="E-post"
+    value={email}
+    onChange={(e) => setEmail(e.target.value)}
+  />
 
-      <input
-        type="password"
-        placeholder="Lösenord"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-      />
+  <input
+    className="form-input"
+    type="password"
+    placeholder="Lösenord"
+    value={password}
+    onChange={(e) => setPassword(e.target.value)}
+  />
 
-      <input
-        type="text"
-        placeholder="Användarnamn (valfritt)"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-      />
+  <input
+    className="form-input"
+    type="text"
+    placeholder="Användarnamn (valfritt)"
+    value={name}
+    onChange={(e) => setName(e.target.value)}
+  />
 
-      <button onClick={handleRegister}>Registrera</button>
-    </div>
+  <button className="btn btn-primary" onClick={handleRegister}>
+    Registrera
+  </button>
+</div>
+
   );
 };
 

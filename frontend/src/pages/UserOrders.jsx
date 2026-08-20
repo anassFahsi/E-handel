@@ -1,6 +1,7 @@
 import axios from "axios";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import '../styles/userOrders.css';
 
 const UserOrders = () => {
   const navigate = useNavigate();
@@ -15,7 +16,7 @@ const UserOrders = () => {
 
       try {
         const res = await axios.get(
-          "http://localhost:3000/users/orders",
+          "http://localhost:3000/orders",
           { headers: { Authorization: `Bearer ${token}` } }
         );
 
@@ -35,46 +36,53 @@ const UserOrders = () => {
   if (error) return <p>{error}</p>;
 
   return (
-    <div>
-      <h1>Mina ordrar</h1>
+    <div className="user-orders-page">
+       <h1 className="page-title">Mina ordrar</h1>
 
-      {orders.length === 0 && <p>Du har inga ordrar ännu.</p>}
+       {orders.length === 0 && (
+       <p className="no-orders-text">Du har inga ordrar ännu.</p>
+       )}
 
-      <ul>
-        {orders.map(order => (
-          <li key={order.id} style={{ marginBottom: "20px" }}>
-            <strong>Order #{order.id}</strong><br />
-            Datum: {new Date(order.created_at).toLocaleDateString()}<br />
-            Status: {order.status}<br />
-            Total: {order.total} kr
+      <ul className="orders-list">
+       {orders.map(order => (
+         <li key={order.id} className="order-card">
+           <strong className="order-title">Order #{order.id}</strong>
+           <p className="order-date">
+             Datum: {new Date(order.created_at).toLocaleDateString()}
+           </p>
+           <p className="order-status">Status: {order.status}</p>
+           <p className="order-total">Total: {order.total} kr</p>
 
-            <h4>Produkter:</h4>
-            <ul>
-              {order.items.map(item => (
-                <li key={item.id}>
+           <h4 className="order-products-title">Produkter:</h4>
+
+           <ul className="order-items-list">
+             {order.items.map(item => (
+              <li key={item.id} className="order-item">
+                <span className="order-item-text">
                   {item.quantity} x {item.product_name}
                   {item.variant_size && item.variant_color &&
-                    ` (${item.variant_size}, ${item.variant_color})`
+                   ` (${item.variant_size}, ${item.variant_color})`
                   }
-                  – {item.price_at_purchase} kr
-                  <br />
+                  - {item.price_at_purchase} kr
+                </span>
 
-                  <img
-                    src={
-                      item.image_url.startsWith("http")
-                        ? item.image_url
-                        : "http://localhost:3000" + item.image_url
-                    }
-                    alt={item.product_name}
-                    width="120"
-                  />
-                </li>
-              ))}
-            </ul>
-          </li>
-        ))}
-      </ul>
-    </div>
+                <img
+                className="order-item-image"
+                src={
+                  item.image_url.startsWith("http")
+                    ? item.image_url
+                    : "http://localhost:3000" + item.image_url
+                }
+                alt={item.product_name}
+              />
+            </li>
+          ))}
+        </ul>
+      </li>
+    ))}
+  </ul>
+</div>
+
   );
 };
 

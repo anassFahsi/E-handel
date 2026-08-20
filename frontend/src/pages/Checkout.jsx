@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import '../styles/checkout.css'
 
 export default function Checkout({ sessionId, fetchCartCount }) {
   const [form, setForm] = useState({
@@ -18,7 +19,7 @@ export default function Checkout({ sessionId, fetchCartCount }) {
   const [grandTotal, setGrandTotal] = useState(0);
   const navigate = useNavigate();
 
-  // Fetch cart
+
   useEffect(() => {
     const fetchCart = async () => {
       try {
@@ -89,7 +90,7 @@ const validateCheckout = (form, items, selectedShipping) => {
     return "Välj ett fraktalternativ";
   }
 
-  return null; // allt OK
+  return null; 
 };
 
 
@@ -113,7 +114,6 @@ const validateCheckout = (form, items, selectedShipping) => {
     try {
       const res = await axios.post("http://localhost:3000/orders", order);
       if (res.data.success) {
-        alert("Order skickad!"); 
         setItems([]);
         setSubtotal(0);
         await fetchCartCount();
@@ -126,63 +126,74 @@ const validateCheckout = (form, items, selectedShipping) => {
   };
 
   return (
-    <div>
-      <h1>Kassa</h1> 
+    <div className="checkout-page">
 
-      <h2>Delsumma: {subtotal} kr</h2> 
+  {/* Steg-indikator */}
+  <div className="checkout-steps">
+    <span className="checkout-step">1. Kundvagn</span>
+    <span className="checkout-step active">2. Kassa</span>
+    <span className="checkout-step">3. Bekräftelse</span>
+  </div>
+
+  <div className="checkout-grid">
+
+   
+    <div className="checkout-summary">
+      <h2 className="summary-title">Orderöversikt</h2>
+
+      <div className="summary-item">
+        <span>Delsumma:</span>
+        <span>{subtotal} kr</span>
+      </div>
 
       {selectedShipping && (
-        <h3>
-          Frakt: {selectedShipping.price} kr ( 
-          {selectedShipping.delivery_days}{" "}
-          {selectedShipping.delivery_days === 1 ? "dag" : "dagar"} 
-          )
-        </h3>
+        <div className="summary-item">
+          <span>Frakt:</span>
+          <span>{selectedShipping.price} kr ({selectedShipping.delivery_days} dagar)</span>
+        </div>
       )}
 
-      <h2>Totalt: {grandTotal} kr</h2> 
-
-      <form onSubmit={handleSubmit}>
-        <label>
-          Namn: 
-          <input name="name" value={form.name} onChange={handleChange} required />
-        </label>
-
-        <label>
-          E-post: 
-          <input name="email" value={form.email} onChange={handleChange} required/>
-        </label>
-
-        <label>
-          Adress: 
-          <input name="address" value={form.address} onChange={handleChange} required />
-        </label>
-
-        <label>
-          Fraktalternativ: 
-          <select
-            value={selectedShipping?.id}
-            onChange={(e) => {
-              const method = shippingMethods.find(
-                (m) => m.id === Number(e.target.value)
-              );
-              setSelectedShipping(method);
-            }}
-          >
-            {shippingMethods.map((method) => (
-              <option key={method.id} value={method.id}>
-                {method.name} - {method.price} kr ( 
-                {method.delivery_days}{" "}
-                {method.delivery_days === 1 ? "dag" : "dagar"} 
-                )
-              </option>
-            ))}
-          </select>
-        </label>
-
-        <button type="submit">Bekräfta order</button> 
-      </form>
+      <div className="summary-total">
+        Totalt: {grandTotal} kr
+      </div>
     </div>
+
+    {/* Höger: Formulär */}
+    <form className="checkout-form" onSubmit={handleSubmit}>
+      <label className="form-label">Namn</label>
+      <input className="form-input" name="name" value={form.name} onChange={handleChange} />
+
+      <label className="form-label">E-post</label>
+      <input className="form-input" name="email" value={form.email} onChange={handleChange} />
+
+      <label className="form-label">Adress</label>
+      <input className="form-input" name="address" value={form.address} onChange={handleChange} />
+
+      <label className="form-label">Fraktalternativ</label>
+      <select
+        className="form-select"
+        value={selectedShipping?.id}
+        onChange={(e) => {
+          const method = shippingMethods.find(m => m.id === Number(e.target.value));
+          setSelectedShipping(method);
+        }}
+      >
+        {shippingMethods.map(method => (
+          <option key={method.id} value={method.id}>
+            {method.name} - {method.price} kr ({method.delivery_days} dagar)
+          </option>
+        ))}
+      </select>
+
+      <button className="checkout-button" type="submit">
+        Bekräfta order
+      </button>
+    </form>
+
+  </div>
+</div>
+
+
   );
 }
 

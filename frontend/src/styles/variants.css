@@ -1,0 +1,96 @@
+.variants-page {
+  max-width: 900px;
+  margin: auto;
+  padding: 20px;
+}
+
+.variant-list {
+  margin-top: 20px;
+}
+
+.variant-card {
+  background: #fff;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.variant-info {
+  flex: 1;
+}
+
+.variant-name {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.variant-price {
+  color: #007bff;
+  font-size: 16px;
+  margin-top: 5px;
+}
+
+.variant-stock {
+  font-weight: bold;
+  margin-top: 5px;
+}
+
+.variant-stock.out {
+  color: red;
+}
+
+.variant-stock.in {
+  color: green;
+}
+
+.variant-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.variant-actions .btn {
+  padding: 6px 12px;
+  font-size: 14px;
+}
+
+
+.variant-form {
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  margin-top: 25px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
+
+.variant-form-title {
+  font-size: 20px;
+  margin-bottom: 15px;
+  font-weight: bold;
+}
+
+.variant-form .form-input,
+.variant-form .form-select {
+  margin-bottom: 15px;
+}
+
+.variant-form button {
+  margin-top: 10px;
+}
+
+
+.selected-variant-box {
+  background: #f7f7f7;
+  padding: 15px;
+  border-radius: 6px;
+  margin-top: 20px;
+}
+
+.selected-variant-title {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}

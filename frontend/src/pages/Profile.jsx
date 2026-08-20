@@ -2,6 +2,7 @@ import { useEffect, useState,useContext } from "react";
 import axios from "axios";
 import {Navigate, Link,useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
+import  '../styles/profile.css';
 
 export default function Profile() {
   const [user, setUser] = useState(null);
@@ -44,21 +45,28 @@ export default function Profile() {
   if (!user) return <p>Laddar...</p>; 
 
  return (
-  <div>
-    <h2>Min profil</h2>
+  <div className="profile-page">
+  <h2 className="page-title">Min profil</h2>
 
-    <p><strong>E-post:</strong> {user.email}</p>
-    <p><strong>Användarnamn:</strong> {user.name || "Inget användarnamn"}</p>
+  <p className="profile-field">
+    <strong>E-post:</strong> {user.email}
+  </p>
 
-      <p><strong>Medlem sedan:</strong> {new Date(user.created_at).toLocaleDateString()}</p>
-    
+  <p className="profile-field">
+    <strong>Användarnamn:</strong> {user.name || "Inget användarnamn"}
+  </p>
 
-    <hr />
+  <p className="profile-field">
+    <strong>Medlem sedan:</strong> {new Date(user.created_at).toLocaleDateString()}
+  </p>
 
-    <Link to={`/users/orders`}>Mina ordrar</Link>
-    <br />
-    <Link to="/users/change-password">Byt lösenord</Link>
-  </div>
+  <hr className="divider" />
+
+  <Link className="profile-link" to="/orders">Mina ordrar</Link>
+  <br />
+  <Link className="profile-link" to="/users/change-password">Byt lösenord</Link>
+</div>
+
 );
 
 }

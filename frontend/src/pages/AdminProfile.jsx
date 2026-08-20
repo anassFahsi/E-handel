@@ -10,20 +10,22 @@ export default function AdminProfile() {
   }
 
   return (
-    <div style={{ padding: "20px" }}>
-      <h1>Adminprofil</h1>
+    <div className="admin-profile-page">
+  <h1 className="page-title">Adminprofil</h1>
 
-      <p>Du är inloggad som administratör.</p>
+  <p className="admin-info">Du är inloggad som administratör.</p>
 
-      <hr />
+  <hr className="divider" />
 
-      <h3>Adminpanel</h3>
-      <ul>
-        <li><Link to="/admin/products">Hantera produkter</Link></li>
-        <li><Link to="/admin/orders">Hantera ordrar</Link></li>
-      </ul>
+  <h3 className="section-title">Adminpanel</h3>
 
-      <button onClick={logout}>Logga ut</button>
-    </div>
+  <ul className="admin-links">
+    <li><Link className="nav-link" to="/admin/products">Hantera produkter</Link></li>
+    <li><Link className="nav-link" to="/admin/orders">Hantera ordrar</Link></li>
+  </ul>
+
+  <button className="btn btn-danger" onClick={logout}>Logga ut</button>
+</div>
+
   );
 }

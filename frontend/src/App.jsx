@@ -1,5 +1,5 @@
 import { Routes, Route } from 'react-router-dom';
-import Products from "./pages/Products";
+import ProductsPage from "./pages/ProductsPage";
 import AdminProducts from './pages/AdminProducts';
 import Cart from './pages/Cart';
 import Header from './components/Header';
@@ -72,12 +72,12 @@ const App = () => {
       <Routes>
         <Route
           path="/"
-          element={<Products />}
+          element={<ProductsPage/>}
         />
 
         <Route
           path="/products"
-          element={<Products />}
+          element={<ProductsPage />}
         />
 
 
@@ -137,11 +137,11 @@ const App = () => {
         />
         <Route 
           path="/admin/profile" 
-          element={<AdminProfile />} />
+          element={<AdminRoute> <AdminProfile /> </AdminRoute>} />
 
 
         <Route
-          path='/users/orders'
+          path='/orders'
           element={<UserOrders />}
          />
 
@@ -152,7 +152,7 @@ const App = () => {
 
         <Route
          path="/admin/dashboard" 
-         element={<AdminDashboard />}
+         element={<AdminRoute> <AdminDashboard /> </AdminRoute>}
         />
 
       </Routes>

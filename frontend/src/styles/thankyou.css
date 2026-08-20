@@ -1,0 +1,47 @@
+.thankyou-page {
+  max-width: 900px;
+  margin: 40px auto;
+  padding: 20px;
+}
+
+
+.thankyou-box {
+  background: #fff;
+  padding: 40px;
+  border-radius: 12px;
+  text-align: center;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+}
+
+.thankyou-icon {
+  font-size: 60px;
+  margin-bottom: 20px;
+}
+
+
+.thankyou-title {
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.thankyou-order-id {
+  font-size: 20px;
+  margin-bottom: 25px;
+}
+
+.thankyou-button {
+  font-size: 18px;
+  padding: 12px 20px;
+}
+
+
+@media (max-width: 700px) {
+  .thankyou-box {
+    padding: 25px;
+  }
+
+  .thankyou-icon {
+    font-size: 50px;
+  }
+}

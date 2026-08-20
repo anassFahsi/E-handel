@@ -27,7 +27,7 @@ export default function AddProduct({ onProductAdded }) {
 
     try {
       const token = localStorage.getItem("token");
-      const res = await axios.post(
+      await axios.post(
         "http://localhost:3000/admin/products",
         data,
         {
@@ -57,66 +57,72 @@ export default function AddProduct({ onProductAdded }) {
   };
 
   return (
-    <div>
-      <h2>Lägg till produkt</h2>
+    <div className="add-product">
+  <h2 className="section-title">Lägg till produkt</h2>
 
-      <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          name="name"
-          value={formData.name}
-          placeholder="Produktnamn" 
-          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-          required
-        />
+  <form className="form" onSubmit={handleSubmit}>
+    <input
+      className="form-input"
+      type="text"
+      name="name"
+      value={formData.name}
+      placeholder="Produktnamn"
+      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+      required
+    />
 
-        <input
-          type="number"
-          name="price"
-          value={formData.price}
-          placeholder="Pris" 
-          onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-        />
+    <input
+      className="form-input"
+      type="number"
+      name="price"
+      value={formData.price}
+      placeholder="Pris"
+      onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+    />
 
-        <input
-          type="text"
-          name="description"
-          value={formData.description}
-          placeholder="Beskrivning" 
-          onChange={(e) =>
-            setFormData({ ...formData, description: e.target.value })
-          }
-        />
+    <input
+      className="form-input"
+      type="text"
+      name="description"
+      value={formData.description}
+      placeholder="Beskrivning"
+      onChange={(e) =>
+        setFormData({ ...formData, description: e.target.value })
+      }
+    />
 
-        <select
-          value={formData.category_id}
-          name="category_id"
-          onChange={(e) =>
-            setFormData({ ...formData, category_id: e.target.value })
-          }
-        >
-          <option value="Basics">Basics</option>
-          <option value="T-Shirts">T-Shirts</option>
-          <option value="Casual">Casual</option>
-          <option value="Men">Herr</option> 
-          <option value="Clothing">Kläder</option> 
-          <option value="Women">Dam</option> 
-        </select>
+    <select
+      className="form-select"
+      value={formData.category_id}
+      name="category_id"
+      onChange={(e) =>
+        setFormData({ ...formData, category_id: e.target.value })
+      }
+    >
+      <option value="Basics">Basics</option>
+      <option value="T-Shirts">T-Shirts</option>
+      <option value="Casual">Casual</option>
+      <option value="Men">Herr</option>
+      <option value="Clothing">Kläder</option>
+      <option value="Women">Dam</option>
+    </select>
 
-        <input
-          type="file"
-          name="image"
-          accept="image/*"
-          onChange={(e) => setImageFile(e.target.files[0])}
-        />
+    <input
+      className="form-file"
+      type="file"
+      name="image"
+      accept="image/*"
+      onChange={(e) => setImageFile(e.target.files[0])}
+    />
 
-        <button type="submit" disabled={loading}>
-          {loading ? "Lägger till..." : "Lägg till"} 
-        </button>
-      </form>
+    <button className="btn btn-primary" type="submit" disabled={loading}>
+      {loading ? "Lägger till..." : "Lägg till"}
+    </button>
+  </form>
 
-      {error && <p style={{ color: "red" }}>Fel: {error}</p>}
-    </div>
+  {error && <p className="error-text">Fel: {error}</p>}
+</div>
+
   );
 }
 

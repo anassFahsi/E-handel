@@ -106,6 +106,33 @@ app.get("/products/:id", async (req, res) => {
   }
 });
 
+// Get all categories
+app.get('/categories',async(req,res)=>{
+  try{
+    const result=await pool.query(`SELECT * FROM categories WHERE id>6`);
+    res.json(result.rows);
+  }
+  catch(error){
+    console.error(error);
+    res.status(500).json({error:'Could not fetch categories'})
+  }
+})
+
+
+
+// Get variants for products
+app.get('/products/:id/variants',async(req,res)=>{
+  try{
+     const result= await pool.query(`SELECT * FROM product_variants WHERE product_id=$1`,[req.params.id]);
+     res.json(result.rows);
+  }
+  catch(err){
+    console.error(err)
+    res.status(500).json({error:'Could not fetch variants'})
+  }
+ 
+});
+
 
 app.listen(3000, () => console.log('Server körs på port 3000'));
 
