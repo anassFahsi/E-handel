@@ -26,41 +26,44 @@ export default function ProductDetailsPage() {
   if (!product) return <p>Laddar produkt...</p>; 
 
   return (
-    <div style={{ padding: "20px" }}>
-      <h2>Produktdetaljer</h2>
+    <div className="product-details-page">
 
-      <div>
-        <h3>{product.name}</h3>
-        <p>Pris: {product.price} kr</p> 
-        <p>{product.description}</p>
+      <h2 className="page-title">Produktdetaljer</h2>
+
+      <div className="product-details-card">
+        <h3 className="section-title">{product.name}</h3>
+
+        <p><strong>Pris:</strong> {product.price} kr</p>
+        <p><strong>Beskrivning:</strong> {product.description}</p>
 
         {product.image_url && (
           <img
+            className="product-details-image"
             src={
               product.image_url.startsWith('http')
                 ? product.image_url
                 : `http://localhost:3000${product.image_url}`
             }
             alt={product.name}
-            width="200"
-            height="200"
           />
         )}
       </div>
 
-      <hr />
+      <hr className="divider" />
 
+      <h3 className="section-title">Varianter</h3>
       <VariantList productId={product.id} />
 
-      <hr />
+      <hr className="divider" />
 
-      <h3>Lägg till variant</h3> 
+      <h3 className="section-title">Lägg till variant</h3>
       <AddVariant productId={product.id} onVariantAdded={fetchProduct} />
 
-      <button onClick={() => navigate(-1)}>
-        Tillbaka till produkter 
+      <button className="btn btn-secondary" onClick={() => navigate(-1)}>
+        Tillbaka till produkter
       </button>
     </div>
   );
 }
+
 

@@ -9,10 +9,19 @@ const ProductPage = ({ addToCart }) => {
 
   const [product, setProduct] = useState(null);
   const [selectedVariant, setSelectedVariant] = useState(null);
+
   const [reviews, setReviews] = useState([]);
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState("");
   const [canReview, setCanReview] = useState(false);
+
+ 
+  const [cartSuccess, setCartSuccess] = useState(false);
+  const [cartError, setCartError] = useState(null);
+
+  const [reviewSuccess, setReviewSuccess] = useState(false);
+  const [reviewError, setReviewError] = useState(null);
+
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -22,6 +31,7 @@ const ProductPage = ({ addToCart }) => {
     fetchProduct();
   }, [id]);
 
+  
   useEffect(() => {
     const fetchReviews = async () => {
       const res = await axios.get(`http://localhost:3000/reviews/${id}`);
@@ -30,6 +40,7 @@ const ProductPage = ({ addToCart }) => {
     fetchReviews();
   }, [id]);
 
+ 
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) return;
@@ -49,6 +60,7 @@ const ProductPage = ({ addToCart }) => {
     check();
   }, [id]);
 
+  // SUBMIT REVIEW
   const handleSubmitReview = async (e) => {
     e.preventDefault();
     const token = localStorage.getItem("token");
@@ -65,9 +77,14 @@ const ProductPage = ({ addToCart }) => {
 
       setRating(5);
       setComment("");
+
+      setReviewSuccess(true);
+      setTimeout(() => setReviewSuccess(false), 2500);
+
     } catch (err) {
       console.error(err);
-      alert("Kunde inte skicka recension");
+      setReviewError("Kunde inte skicka recension");
+      setTimeout(() => setReviewError(null), 2500);
     }
   };
 
@@ -75,7 +92,33 @@ const ProductPage = ({ addToCart }) => {
 
   return (
     <div className="product-page">
-      
+
+    
+      {cartSuccess && (
+        <div className="success-popup">
+          Produkten lades i kundvagnen!
+        </div>
+      )}
+
+   
+      {cartError && (
+        <div className="error-popup">
+          {cartError}
+        </div>
+      )}
+
+   
+      {reviewSuccess && (
+        <div className="success-popup">
+          Recension skickad!
+        </div>
+      )}
+
+      {reviewError && (
+        <div className="error-popup">
+          {reviewError}
+        </div>
+      )}
 
       <h1 className="product-title">{product.name}</h1>
 
@@ -100,22 +143,35 @@ const ProductPage = ({ addToCart }) => {
       <button
         className="btn btn-primary add-to-cart-btn"
         onClick={() => {
-          if (!selectedVariant) return alert("Välj en variant först!");
-          if (selectedVariant.stock <= 0) return alert("Slut i lager!");
+          if (!selectedVariant) {
+            setCartError("Välj en variant först!");
+            setTimeout(() => setCartError(null), 2500);
+            return;
+          }
+
+          if (selectedVariant.stock <= 0) {
+            setCartError("Slut i lager!");
+            setTimeout(() => setCartError(null), 2500);
+            return;
+          }
 
           addToCart({
             productId: product.id,
             variantId: selectedVariant.id,
           });
+
+          setCartSuccess(true);
+          setTimeout(() => setCartSuccess(false), 2500);
         }}
       >
         Lägg i kundvagn
       </button>
+
       <button className="btn btn-secondary" onClick={() => navigate(-1)}>
         ← Tillbaka till produkter
       </button>
 
-      
+    
       <div className="reviews-section">
         <h3 className="reviews-title">Recensioner</h3>
 
@@ -144,7 +200,7 @@ const ProductPage = ({ addToCart }) => {
         ))}
       </div>
 
-    
+     
       {localStorage.getItem("token") && canReview && (
         <div className="review-form-section">
           <h3 className="review-form-title">Skriv en recension</h3>
@@ -176,14 +232,14 @@ const ProductPage = ({ addToCart }) => {
               Skicka recension
             </button>
           </form>
-          
         </div>
       )}
-     
+
     </div>
   );
 };
 
 export default ProductPage;
+
 
 

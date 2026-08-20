@@ -47,7 +47,7 @@ export default function VariantList({ productId }) {
 
   return (
     <div className="admin-variant-list">
-  <h3 className="section-title">Varianter</h3>
+  
 
   <p className="variant-total">
     <strong>Total lager:</strong> {totalStock}

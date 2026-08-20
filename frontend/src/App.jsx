@@ -27,6 +27,7 @@ import AdminDashboard from './pages/AdminDashBoard';
 const App = () => {
   const [cartCount, setCartCount] = useState(0);
  
+ 
    const fetchCartCount = async () => {
       try {
         const res = await axios.get(`http://localhost:3000/cart/${sessionId}`);
@@ -56,7 +57,7 @@ const App = () => {
         variantId:item.variantId,
         quantity: 1
       });
-
+   
       await fetchCartCount();
      
 
@@ -83,7 +84,7 @@ const App = () => {
 
       <Route 
         path='/products/:id'
-        element={<ProductPage addToCart={addToCart}/>}
+        element={<ProductPage addToCart={addToCart} />}
         />
 
         <Route

@@ -10,6 +10,10 @@ export default function Login() {
 
   const { login } = useContext(AuthContext);
 
+ 
+ 
+  const [loginError, setLoginError] = useState(null);
+
   const handleLogin = async () => {
     try {
       const res = await axios.post("http://localhost:3000/users/login", {
@@ -17,46 +21,52 @@ export default function Login() {
         password
       });
 
-      
       login(res.data.token);
 
-     
       navigate("/users/profile");
+      
 
     } catch (err) {
       console.error(err);
-      alert("Fel e-post eller lösenord"); 
+      setLoginError("Fel e-post eller lösenord");
+      setTimeout(() => setLoginError(null), 2500);
     }
   };
 
   return (
     <div className="login-page">
-  <h2 className="page-title">Logga in</h2>
 
-  <div className="login-form">
-    <input
-      className="form-input"
-      type="email"
-      placeholder="E-post"
-      value={email}
-      onChange={(e) => setEmail(e.target.value)}
-    />
 
-    <input
-      className="form-input"
-      type="password"
-      placeholder="Lösenord"
-      value={password}
-      onChange={(e) => setPassword(e.target.value)}
-    />
+      {loginError && (
+        <div className="error-popup">{loginError}</div>
+      )}
 
-    <button className="btn btn-primary" onClick={handleLogin}>
-      Logga in
-    </button>
-  </div>
-</div>
+      <h2 className="page-title">Logga in</h2>
 
+      <div className="login-form">
+        <input
+          className="form-input"
+          type="email"
+          placeholder="E-post"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+
+        <input
+          className="form-input"
+          type="password"
+          placeholder="Lösenord"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+
+        <button className="btn btn-primary" onClick={handleLogin}>
+          Logga in
+        </button>
+      </div>
+    </div>
   );
 }
+
 
 

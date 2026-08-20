@@ -15,14 +15,14 @@ export default function AdminDashboard() {
     try {
       const token = localStorage.getItem("token");
 
-      // Hämta statistik
+     
       const statsRes = await axios.get("http://localhost:3000/admin/stats", {
         headers: { Authorization: `Bearer ${token}` }
       });
 
       setStats(statsRes.data);
 
-      // Hämta senaste ordrar
+     
       const ordersRes = await axios.get("http://localhost:3000/admin/orders/latest", {
         headers: { Authorization: `Bearer ${token}` }
       });

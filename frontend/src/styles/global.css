@@ -25,6 +25,7 @@ body {
   font-size: 22px;
   margin: 20px 0 10px;
   font-weight: bold;
+  text-align: center;
 }
 
 .divider {
@@ -66,7 +67,7 @@ body {
 }
 
 .btn-secondary {
-  background-color: #555;
+  background-color: #333;
   color: white;
 }
 
@@ -142,3 +143,142 @@ ul {
 li {
   margin-bottom: 10px;
 }
+
+/* SUCCESS POPUP */
+.success-popup {
+  background: #4caf50;
+  color: white;
+  padding: 12px 18px;
+  border-radius: 6px;
+  margin-bottom: 15px;
+  font-size: 16px;
+  animation: fadeIn 0.4s ease, fadeOut 0.4s ease 2.1s forwards;
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; transform: translateY(0); }
+  to { opacity: 0; transform: translateY(-5px); }
+}
+
+
+/* ERROR BORDER */
+.input-error {
+  border: 2px solid #e74c3c !important;
+}
+
+.error-text{
+  color: red;
+}
+
+/* IMAGE PREVIEW */
+.image-preview {
+  width: 160px;
+  height: auto;
+  margin-top: 10px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+}
+
+/* BUTTONS */
+.form-buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.btn-secondary {
+  background: #ccc;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.btn-secondary:hover {
+  background: #bbb;
+}
+
+
+.success-popup {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: #4caf50;
+  color: white;
+  padding: 14px 20px;
+  border-radius: 8px;
+  font-size: 16px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  z-index: 9999;
+
+  animation: fadeIn 0.3s ease, fadeOut 0.4s ease 2.1s forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; transform: translateY(0); }
+  to { opacity: 0; transform: translateY(-5px); }
+}
+
+.error-popup {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: #d9534f;
+  color: white;
+  padding: 14px 20px;
+  border-radius: 8px;
+  font-size: 16px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  z-index: 9999;
+  animation: fadeIn 0.3s ease, fadeOut 0.4s ease 2.1s forwards;
+}
+
+
+
+/* PAGE WRAPPER */
+.product-details-page {
+  max-width: 900px;
+  margin: 30px auto;
+  padding: 20px;
+}
+
+/* PRODUCT CARD */
+.product-details-card {
+  background: #fff;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  border: 1px solid #eee;
+  margin-bottom: 25px;
+}
+
+/* PRODUCT IMAGE */
+.product-details-image {
+  width: 250px;
+  height: auto;
+  margin-top: 15px;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+}
+
+.product-page {
+  text-align: center;
+}
+
+.product-page img.product-image {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.product-description,
+.product-price {
+  text-align: center;
+}
+
+

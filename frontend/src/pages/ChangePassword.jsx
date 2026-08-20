@@ -4,7 +4,10 @@ import axios from "axios";
 export default function ChangePassword() {
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
-  const [message, setMessage] = useState("");
+
+
+  const [successPopup, setSuccessPopup] = useState(null);
+  const [errorPopup, setErrorPopup] = useState(null);
 
   const validatePassword = (password) => {
     if (password.length < 8) {
@@ -31,7 +34,8 @@ export default function ChangePassword() {
 
     const validationError = validatePassword(newPassword);
     if (validationError) {
-      setMessage(validationError);
+      setErrorPopup(validationError);
+      setTimeout(() => setErrorPopup(null), 2500);
       return;
     }
 
@@ -44,50 +48,60 @@ export default function ChangePassword() {
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      setMessage(res.data.message);
+      setSuccessPopup(res.data.message || "Lösenord uppdaterat!");
+      setTimeout(() => setSuccessPopup(null), 2500);
+
       setOldPassword("");
       setNewPassword("");
 
     } catch (err) {
       const msg = err.response?.data?.error || "Fel uppstod";
-      setMessage(msg);
+      setErrorPopup(msg);
+      setTimeout(() => setErrorPopup(null), 2500);
     }
   };
 
   return (
     <div className="change-password-page">
-  <h2 className="page-title">Byt lösenord</h2>
 
-  <form className="form" onSubmit={handleSubmit}>
-    <label className="form-label">
-      Nuvarande lösenord:
-      <input
-        className="form-input"
-        type="password"
-        value={oldPassword}
-        onChange={(e) => setOldPassword(e.target.value)}
-        required
-      />
-    </label>
+     
+      {successPopup && (
+        <div className="success-popup">{successPopup}</div>
+      )}
 
-    <label className="form-label">
-      Nytt lösenord:
-      <input
-        className="form-input"
-        type="password"
-        value={newPassword}
-        onChange={(e) => setNewPassword(e.target.value)}
-        required
-      />
-    </label>
+      {errorPopup && (
+        <div className="error-popup">{errorPopup}</div>
+      )}
 
-    <button className="btn btn-primary" type="submit">
-      Uppdatera lösenord
-    </button>
-  </form>
+      <h2 className="page-title">Byt lösenord</h2>
 
-  {message && <p className="form-message">{message}</p>}
-</div>
+      <form className="form" onSubmit={handleSubmit}>
+        <label className="form-label">
+          Nuvarande lösenord:
+          <input
+            className="form-input"
+            type="password"
+            value={oldPassword}
+            onChange={(e) => setOldPassword(e.target.value)}
+            required
+          />
+        </label>
 
+        <label className="form-label">
+          Nytt lösenord:
+          <input
+            className="form-input"
+            type="password"
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
+            required
+          />
+        </label>
+
+        <button className="btn btn-primary" type="submit">
+          Uppdatera lösenord
+        </button>
+      </form>
+    </div>
   );
 }
