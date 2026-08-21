@@ -21,7 +21,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import UserOrders from './pages/UserOrders';
 import ChangePassword from './pages/ChangePassword';
 import AdminProfile from './pages/AdminProfile';
-import AdminDashboard from './pages/AdminDashBoard';
+import AdminDashboard from './pages/AdminDashboard';
 
 
 const App = () => {
