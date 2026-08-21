@@ -1,15 +1,15 @@
 import express from 'express';
 import cors from 'cors';
-import pool from './db.js';
+import pool from '../backend/db.js';
 import path from 'path';
 
 // Routers
-import ordersRouter from './routes/orders.js';
-import cartRouter from './routes/cart.js';
-import shippingRouter from './routes/shipping.js';
-import usersRouter from './routes/users.js';
-import reviewsRouter from './routes/reviews.js';
-import adminRouter from './routes/admin.js';   // <-- NY
+import ordersRouter from '../backend/routes/orders.js';
+import cartRouter from '../backend/routes/cart.js';
+import shippingRouter from '../backend/routes/shipping.js';
+import usersRouter from '../backend/routes/users.js';
+import reviewsRouter from '../backend/routes/reviews.js';
+import adminRouter from '../backend/routes/admin.js';   // <-- NY
 
 
 const app = express();
@@ -134,5 +134,6 @@ app.get('/products/:id/variants',async(req,res)=>{
 });
 
 
-app.listen(3000, () => console.log('Server körs på port 3000'));
+//app.listen(3000, () => console.log('Server körs på port 3000'));
 
+export default app;
