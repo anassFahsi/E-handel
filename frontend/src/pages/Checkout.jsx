@@ -100,6 +100,7 @@ export default function Checkout({ sessionId, fetchCartCount }) {
       total: grandTotal,
       sessionId: sessionId,
     };
+    console.log(order)
 
     try {
       const res = await axios.post("http://localhost:3000/orders", order);

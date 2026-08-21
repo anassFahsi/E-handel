@@ -7,46 +7,94 @@ const router = express.Router();
 /* -------------------------------------------
    USER: CREATE ORDER (checkout)
 ------------------------------------------- */
+
 router.post('/', async (req, res) => {
-  const { customer, cart, total, shipping_method_id, shipping_price, sessionId } = req.body;
+  const { customer, cart, shipping_method_id, sessionId } = req.body;
 
   try {
     await pool.query('BEGIN');
 
-    const orderRes = await pool.query(`
-      INSERT INTO orders (customer_name, customer_email, customer_address, total, shipping_method_id, shipping_price)
-      VALUES ($1, $2, $3, $4, $5, $6)
-      RETURNING id
-    `, [
-      customer.name,
-      customer.email,
-      customer.address,
-      total,
-      shipping_method_id,
-      shipping_price
-    ]);
+ 
+    const shippingRes = await pool.query(
+      `SELECT price FROM shipping_methods WHERE id = $1`,
+      [shipping_method_id]
+    );
+
+    if (shippingRes.rows.length === 0) {
+      await pool.query('ROLLBACK');
+      return res.status(400).json({ error: 'Invalid shipping method' });
+    }
+
+    const shippingPrice = shippingRes.rows[0].price;
+
+    let backendTotal = 0;
+
+  const orderRes = await pool.query(
+      `INSERT INTO orders 
+        (customer_name, customer_email, customer_address, total, shipping_method_id, shipping_price)
+       VALUES ($1, $2, $3, $4, $5, $6)
+       RETURNING id`,
+      [
+        customer.name,
+        customer.email,
+        customer.address,
+        0,                 
+        shipping_method_id,
+        shippingPrice
+      ]
+    );
 
     const orderId = orderRes.rows[0].id;
 
     for (const item of cart) {
+
       if (item.quantity > item.variant_stock) {
         await pool.query('ROLLBACK');
         return res.json({ error: 'Not enough stock' });
       }
 
-      await pool.query(`
-        INSERT INTO order_items (order_id, product_id, variant_id, quantity, price_at_purchase)
-        VALUES ($1, $2, $3, $4, $5)
-      `, [orderId, item.product_id, item.variant_id, item.quantity, item.price]);
+     
+      const priceRes = await pool.query(
+        `SELECT price FROM products WHERE id = $1`,
+        [item.product_id]
+      );
 
-      await pool.query(`
-        UPDATE product_variants SET stock = stock - $1 WHERE id = $2
-      `, [item.quantity, item.variant_id]);
+      if (priceRes.rows.length === 0) {
+        await pool.query('ROLLBACK');
+        return res.status(400).json({ error: 'Product not found' });
+      }
+
+      const itemPrice = priceRes.rows[0].price;
+
+      backendTotal += item.quantity * Number(itemPrice);
+
+      await pool.query(
+        `INSERT INTO order_items 
+          (order_id, product_id, variant_id, quantity, price_at_purchase)
+         VALUES ($1, $2, $3, $4, $5)`,
+        [orderId, item.product_id, item.variant_id, item.quantity, itemPrice]
+      );
+
+      await pool.query(
+        `UPDATE product_variants SET stock = stock - $1 WHERE id = $2`,
+        [item.quantity, item.variant_id]
+      );
     }
 
-    await pool.query(`DELETE FROM carts WHERE session_id = $1`, [sessionId]);
+    backendTotal += Number(shippingPrice);
+
+    await pool.query(
+      `UPDATE orders SET total = $1 WHERE id = $2`,
+      [backendTotal, orderId]
+    );
+
+    await pool.query(
+      `DELETE FROM carts WHERE session_id = $1`,
+      [sessionId]
+    );
 
     await pool.query('COMMIT');
+
     res.json({ success: true, orderId });
 
   } catch (error) {
@@ -55,6 +103,7 @@ router.post('/', async (req, res) => {
     res.status(500).json({ error: 'Order creation failed' });
   }
 });
+
 
 /* -------------------------------------------
    USER: GET OWN ORDERS
