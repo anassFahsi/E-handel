@@ -16,7 +16,7 @@
     ],
     "functions":{
         "api/server.js":{
-            "includesFiles":"backend/uploads/**"
+            "includeFiles":"backend/uploads/**"
         }
     }
 
