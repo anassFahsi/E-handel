@@ -8,7 +8,6 @@ const Register = () => {
   const [name, setName] = useState("");
   const navigate = useNavigate();
 
-  // POPUPS
   const [registerSuccess, setRegisterSuccess] = useState(null);
   const [registerError, setRegisterError] = useState(null);
 
@@ -48,7 +47,7 @@ const Register = () => {
     }
 
     try {
-      await axios.post("http://localhost:3000/users/register", {
+      await axios.post("/api/users/register", {
         email,
         password,
         name
@@ -71,7 +70,7 @@ const Register = () => {
   return (
     <div className="register-page">
 
-      {/* POPUPS */}
+    
       {registerSuccess && (
         <div className="success-popup">{registerSuccess}</div>
       )}

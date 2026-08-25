@@ -8,7 +8,7 @@ const AdminProducts = () => {
 
   const fetchProducts = async () => {
     const token = localStorage.getItem("token");
-    const res = await axios.get("http://localhost:3000/admin/products", {
+    const res = await axios.get("/api/admin/products", {
       headers: { Authorization: `Bearer ${token}` }
     });
     console.log(res);

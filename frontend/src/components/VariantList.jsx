@@ -8,7 +8,7 @@ export default function VariantList({ productId }) {
   const fetchVariants = async () => {
     const token = localStorage.getItem("token");
     const res = await axios.get(
-      `http://localhost:3000/admin/products/${productId}/variants`,
+      `/api/admin/products/${productId}/variants`,
       { headers: { Authorization: `Bearer ${token}` } }
     );
     setVariants(res.data);
@@ -21,7 +21,7 @@ export default function VariantList({ productId }) {
   const deleteVariant = async (variantId) => {
     const token = localStorage.getItem("token");
     await axios.delete(
-      `http://localhost:3000/products/variants/${variantId}`,
+      `/api/products/variants/${variantId}`,
       { headers: { Authorization: `Bearer ${token}` } }
     );
     await fetchVariants();
@@ -30,7 +30,7 @@ export default function VariantList({ productId }) {
   const saveEdit = async () => {
     const token = localStorage.getItem("token");
     await axios.put(
-      `http://localhost:3000/admin/variants/${editing.id}`,
+      `/api/admin/variants/${editing.id}`,
       {
         size: editing.size,
         color: editing.color,
@@ -90,7 +90,7 @@ export default function VariantList({ productId }) {
 </ul>
 
 
-  {/* EDIT MODAL */}
+  
   {editing && (
     <div className="modal-overlay">
       <div className="modal">

@@ -16,14 +16,14 @@ export default function AdminDashboard() {
       const token = localStorage.getItem("token");
 
      
-      const statsRes = await axios.get("http://localhost:3000/admin/stats", {
+      const statsRes = await axios.get("/api/admin/stats", {
         headers: { Authorization: `Bearer ${token}` }
       });
 
       setStats(statsRes.data);
 
      
-      const ordersRes = await axios.get("http://localhost:3000/admin/orders/latest", {
+      const ordersRes = await axios.get("/api/admin/orders/latest", {
         headers: { Authorization: `Bearer ${token}` }
       });
 

@@ -25,7 +25,7 @@ const ProductPage = ({ addToCart }) => {
 
   useEffect(() => {
     const fetchProduct = async () => {
-      const res = await axios.get(`http://localhost:3000/products/${id}`);
+      const res = await axios.get(`/api/products/${id}`);
       setProduct(res.data);
     };
     fetchProduct();
@@ -34,7 +34,7 @@ const ProductPage = ({ addToCart }) => {
   
   useEffect(() => {
     const fetchReviews = async () => {
-      const res = await axios.get(`http://localhost:3000/reviews/${id}`);
+      const res = await axios.get(`/api/reviews/${id}`);
       setReviews(res.data);
     };
     fetchReviews();
@@ -48,7 +48,7 @@ const ProductPage = ({ addToCart }) => {
     const check = async () => {
       try {
         const res = await axios.get(
-          `http://localhost:3000/reviews/can-review/${id}`,
+          `/api/reviews/can-review/${id}`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         setCanReview(res.data.canReview);
@@ -67,12 +67,12 @@ const ProductPage = ({ addToCart }) => {
 
     try {
       await axios.post(
-        "http://localhost:3000/reviews",
+        "/api/reviews",
         { product_id: id, rating, comment },
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      const res = await axios.get(`http://localhost:3000/reviews/${id}`);
+      const res = await axios.get(`/api/reviews/${id}`);
       setReviews(res.data);
 
       setRating(5);
@@ -124,11 +124,7 @@ const ProductPage = ({ addToCart }) => {
 
       <img
         className="product-image"
-        src={
-          product.image_url.startsWith("http")
-            ? product.image_url
-            : "http://localhost:3000" + product.image_url
-        }
+        src={product.image_url}
         alt={product.name}
       />
 

@@ -8,7 +8,7 @@ export default function ProductVariants({ productId, onVariantSelected }) {
   useEffect(() => {
     const fetchVariants = async () => {
       const res = await axios.get(
-        `http://localhost:3000/products/${productId}/variants`
+        `/api/products/${productId}/variants`
       );
       setVariants(res.data);
     };

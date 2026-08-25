@@ -30,7 +30,7 @@ const App = () => {
  
    const fetchCartCount = async () => {
       try {
-        const res = await axios.get(`http://localhost:3000/cart/${sessionId}`);
+        const res = await axios.get(`/api/cart/${sessionId}`);
       
         setCartCount(res.data.cartCount);
       } catch (err) {
@@ -47,11 +47,11 @@ const App = () => {
   const addToCart = async (item) => {
     try {
       
-      const sessionRes = await axios.post('http://localhost:3000/cart', { sessionId });
+      const sessionRes = await axios.post('/api/cart', { sessionId });
       const cartId = sessionRes.data.cartId;
 
       
-      await axios.post('http://localhost:3000/cart/items', {
+      await axios.post('/api/cart/items', {
         cartId,
         productId: item.productId,
         variantId:item.variantId,

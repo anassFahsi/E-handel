@@ -25,7 +25,7 @@ export default function Product({ products, fetchProducts }) {
 
     for (const p of products) {
       const res = await axios.get(
-        `http://localhost:3000/admin/products/${p.id}/variants`,
+        `/api/admin/products/${p.id}/variants`,
         {
           headers: { Authorization: `Bearer ${token}` }
         }
@@ -62,7 +62,7 @@ export default function Product({ products, fetchProducts }) {
     try {
       const token = localStorage.getItem("token");
 
-      await axios.delete(`http://localhost:3000/admin/products/${id}`, {
+      await axios.delete(`/api/admin/products/${id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
 
@@ -92,7 +92,7 @@ export default function Product({ products, fetchProducts }) {
     setImagePreview(
       product.image_url.startsWith("https")
         ? product.image_url
-        : `http://localhost:3000${product.image_url}`
+        : `/api${product.image_url}`
     );
   };
 
@@ -134,7 +134,7 @@ export default function Product({ products, fetchProducts }) {
       }
 
       await axios.put(
-        `http://localhost:3000/admin/products/${id}`,
+        `/api/admin/products/${id}`,
         formData,
         {
           headers: {
@@ -226,11 +226,7 @@ export default function Product({ products, fetchProducts }) {
                   {p.image_url && (
                     <img
                       className="admin-product-image"
-                      src={
-                        p.image_url.startsWith("https")
-                          ? p.image_url
-                          : `http://localhost:3000${p.image_url}`
-                      }
+                      src={p.image_url}
                       alt="Produktbild"
                     />
                   )}

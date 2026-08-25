@@ -11,7 +11,8 @@ const Header = ({ cartCount }) => {
   const closeMenu = () => setMenuOpen(false);
 
   return (
-    <header className="header">
+    <header className={`header ${menuOpen ? "menu-open" : ""}`}>
+
       <nav className="nav-left desktop-only">
         <Link className="nav-link" to="/">Produkter</Link>
 
@@ -27,10 +28,7 @@ const Header = ({ cartCount }) => {
       <div className="logo">👗 FashionHub</div>
 
       <nav className="nav-right desktop-only">
-        <Link className="nav-cart" to="/cart">
-          🛒
-          {cartCount > 0 && <span className="cart-count">{cartCount}</span>}
-        </Link>
+        
 
         {token ? (
           <>
@@ -51,13 +49,16 @@ const Header = ({ cartCount }) => {
         ☰
       </button>
 
+    
+
       <div className={`mobile-menu mobile-only ${menuOpen ? "open" : ""}`}>
         <button className="close-menu" onClick={closeMenu}>✕</button>
 
         <Link className="mobile-link" to="/" onClick={closeMenu}>Produkter</Link>
 
-        <Link className="mobile-link" to="/cart" onClick={closeMenu}>
-          🛒 Kundvagn ({cartCount})
+       <Link className="mobile-link-cart" to="/cart" onClick={closeMenu}>
+         🛒
+          {cartCount > 0 && <span className="cart-count">{cartCount}</span>}
         </Link>
 
         {token ? (
@@ -84,13 +85,26 @@ const Header = ({ cartCount }) => {
             <Link className="mobile-link" to="/users/register" onClick={closeMenu}>Registrera</Link>
           </>
         )}
+        
       </div>
+      <Link className="nav-cart" to="/cart">
+          🛒
+          {cartCount > 0 && <span className="cart-count">{cartCount}</span>}
+        </Link>
 
     </header>
   );
 };
 
 export default Header;
+
+
+
+
+
+
+
+
 
 
 

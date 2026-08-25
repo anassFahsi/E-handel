@@ -13,7 +13,7 @@ const Cart = ({ sessionId, handleCartCount }) => {
 
   const fetchCart = async () => {
     try {
-      const res = await axios.get(`http://localhost:3000/cart/${sessionId}`);
+      const res = await axios.get(`/api/cart/${sessionId}`);
       setItems(res.data.items || []);
       setTotal(res.data.total);
     } catch (err) {
@@ -31,7 +31,7 @@ const Cart = ({ sessionId, handleCartCount }) => {
     if (!confirm("Är du säker på att du vill ta bort produkten?")) return;
 
     try {
-      await axios.delete(`http://localhost:3000/cart/items/${itemId}`);
+      await axios.delete(`/api/cart/items/${itemId}`);
 
       setCartSuccess("Produkten har tagits bort");
       setTimeout(() => setCartSuccess(null), 2500);
@@ -47,7 +47,7 @@ const Cart = ({ sessionId, handleCartCount }) => {
 
   const increaseQuantity = async (itemId) => {
     try {
-      await axios.put(`http://localhost:3000/cart/items/${itemId}/increase`);
+      await axios.put(`/api/cart/items/${itemId}/increase`);
 
       setCartSuccess("Antalet ökades");
       setTimeout(() => setCartSuccess(null), 2500);
@@ -63,7 +63,7 @@ const Cart = ({ sessionId, handleCartCount }) => {
 
   const decreaseQuantity = async (itemId) => {
     try {
-       await axios.put(`http://localhost:3000/cart/items/${itemId}/decrease`);
+       await axios.put(`/api/cart/items/${itemId}/decrease`);
 
       setCartSuccess("Antalet minskades");
       setTimeout(() => setCartSuccess(null), 2500);

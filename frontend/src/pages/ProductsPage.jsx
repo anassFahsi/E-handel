@@ -32,7 +32,7 @@ const Products = () => {
   };
 
   const fetchProducts = async () => {
-    const res = await axios.get("http://localhost:3000/products", {
+    const res = await axios.get("/api/products", {
       params: { search, category, sort, limit, page },
     });
 
@@ -42,7 +42,7 @@ const Products = () => {
 
   const fetchCategories = async () => {
     try {
-      const res = await axios.get("http://localhost:3000/categories");
+      const res = await axios.get("/api/categories");
       setCategories(res.data);
     } catch (error) {
       console.error("Could not fetch categories", error);
@@ -59,64 +59,7 @@ const Products = () => {
     fetchProducts();
   }, [search, category, sort, page, limit]);
 
-  const renderFilters = () => (
-    <>
-      <input
-        type="text"
-        placeholder="Sök produkter..."
-        value={search}
-        onChange={(e) => {
-          setSearch(e.target.value);
-          setPage(1);
-          updateURL(1, category, e.target.value, sort, limit);
-        }}
-      />
-
-      <select
-        value={category}
-        onChange={(e) => {
-          setCategory(e.target.value);
-          setPage(1);
-          updateURL(1, e.target.value, search, sort, limit);
-        }}
-      >
-        <option value="">Alla kategorier</option>
-        {categories.map((c) => (
-          <option key={c.id} value={c.id}>
-            {c.name}
-          </option>
-        ))}
-      </select>
-
-      <select
-        value={sort}
-        onChange={(e) => {
-          setSort(e.target.value);
-          setPage(1);
-          updateURL(1, category, search, e.target.value, limit);
-        }}
-      >
-        <option value="newest">Nyast först</option>
-        <option value="oldest">Äldst först</option>
-        <option value="price_asc">Pris: Lågt → Högt</option>
-        <option value="price_desc">Pris: Högt → Lågt</option>
-      </select>
-
-      <select
-        value={limit}
-        onChange={(e) => {
-          const newLimit = Number(e.target.value);
-          setLimit(newLimit);
-          setPage(1);
-          updateURL(1, category, search, sort, newLimit);
-        }}
-      >
-        <option value="10">10 per sida</option>
-        <option value="15">15 per sida</option>
-        <option value="20">20 per sida</option>
-      </select>
-    </>
-  );
+ 
 
   return (
     <div className="products-page">
@@ -208,18 +151,16 @@ const Products = () => {
         {products.map((p) => (
           <li key={p.id} className="product-card">
             <Link to={`/products/${p.id}`} className="product-link">
+              <img
+            className="product-image"
+                src={p.image_url}
+                alt={p.name}
+              />
               <strong className="product-name">{p.name}</strong>
               <span className="product-price">{p.price} kr</span>
 
-              <img
-                className="product-image"
-                src={
-                  p.image_url.startsWith("http")
-                    ? p.image_url
-                    : "http://localhost:3000" + p.image_url
-                }
-                alt={p.name}
-              />
+              
+            
             </Link>
           </li>
         ))}

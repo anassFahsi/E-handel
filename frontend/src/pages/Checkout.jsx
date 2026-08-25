@@ -26,7 +26,7 @@ export default function Checkout({ sessionId, fetchCartCount }) {
   useEffect(() => {
     const fetchCart = async () => {
       try {
-        const res = await axios.get(`http://localhost:3000/cart/${sessionId}`);
+        const res = await axios.get(`/api/cart/${sessionId}`);
         setItems(res.data.items || []);
         setSubtotal(res.data.total || 0);
       } catch (err) {
@@ -42,7 +42,7 @@ export default function Checkout({ sessionId, fetchCartCount }) {
   useEffect(() => {
     const fetchShipping = async () => {
       try {
-        const res = await axios.get("http://localhost:3000/shipping");
+        const res = await axios.get("/api/shipping");
         setShippingMethods(res.data);
         setSelectedShipping(res.data[0]); 
       } catch (err) {
@@ -103,7 +103,7 @@ export default function Checkout({ sessionId, fetchCartCount }) {
     console.log(order)
 
     try {
-      const res = await axios.post("http://localhost:3000/orders", order);
+      const res = await axios.post("/api/orders", order);
 
       if (res.data.success) {
         setItems([]);

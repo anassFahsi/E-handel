@@ -7,18 +7,18 @@ export const AuthProvider = ({ children }) => {
   const navigate = useNavigate();
   const [isAdmin, setIsAdmin] = useState(false);
   const [token, setToken] = useState(localStorage.getItem("token"));
-  const [loading, setLoading] = useState(true); // 👈 Ny state
+  const [loading, setLoading] = useState(true); // 
 
   useEffect(() => {
     const checkAdmin = async () => {
       if (!token) {
         setIsAdmin(false);
-        setLoading(false); // 👈 Sluta ladda
+        setLoading(false); 
         return;
       }
 
       try {
-        const res = await axios.get("http://localhost:3000/users/profile", {
+        const res = await axios.get("/api/users/profile", {
           headers: { Authorization: `Bearer ${token}` }
         });
 
@@ -33,7 +33,7 @@ export const AuthProvider = ({ children }) => {
       } catch {
         setIsAdmin(false);
       } finally {
-        setLoading(false); // 👈 Sluta ladda oavsett resultat
+        setLoading(false); 
       }
     };
 
@@ -52,7 +52,7 @@ export const AuthProvider = ({ children }) => {
     navigate("/users/login", { replace: true });
   };
 
-  // 👇 Vänta tills rollen är känd innan appen renderas
+ 
   if (loading) return null;
 
   return (

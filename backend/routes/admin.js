@@ -1,19 +1,32 @@
 import express from "express";
 import pool from "../db.js";
+import cloudinary from "../config/cloudinary.js";
+import { CloudinaryStorage } from "multer-storage-cloudinary";
 import multer from "multer";
+
+
+
 import { auth } from "../middleware/auth.js";
 import { admin } from "../middleware/admin.js";
 
 const router = express.Router();
 
-
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, "uploads/"),
-  filename: (req, file, cb) => cb(null, Date.now() + "-" + file.originalname)
+/* -------------------------------------------
+   CLOUDINARY STORAGE (ersätter diskStorage)
+------------------------------------------- */
+const storage = new CloudinaryStorage({
+  cloudinary,
+  params: {
+    folder: "products", // valfri mapp i Cloudinary
+    allowed_formats: ["jpg", "png", "jpeg", "webp"]
+  }
 });
+
 const upload = multer({ storage });
 
-
+/* -------------------------------------------
+   ADMIN: DASHBOARD STATISTIK
+------------------------------------------- */
 router.get("/stats", auth, admin, async (req, res) => {
   try {
     const productsRes = await pool.query("SELECT COUNT(*) FROM products");
@@ -31,7 +44,9 @@ router.get("/stats", auth, admin, async (req, res) => {
   }
 });
 
-
+/* -------------------------------------------
+   ADMIN: SENASTE ORDRAR
+------------------------------------------- */
 router.get("/orders/latest", auth, admin, async (req, res) => {
   try {
     const result = await pool.query(`
@@ -48,7 +63,9 @@ router.get("/orders/latest", auth, admin, async (req, res) => {
   }
 });
 
-
+/* -------------------------------------------
+   ADMIN: ALLA PRODUKTER
+------------------------------------------- */
 router.get("/products", auth, admin, async (req, res) => {
   try {
     const result = await pool.query("SELECT * FROM products");
@@ -59,12 +76,18 @@ router.get("/products", auth, admin, async (req, res) => {
   }
 });
 
-
+/* -------------------------------------------
+   ADMIN: SKAPA PRODUKT (POST)
+------------------------------------------- */
 router.post("/products", auth, admin, upload.single("image"), async (req, res) => {
+  
   try {
     const { name, price, description, category_id } = req.body;
-    const image_url = `/uploads/${req.file.filename}`;
-
+   console.log('req.file:',req.file)
+    const image_url = req.file.path;
+    if(!image_url)
+      return res.status(400).json({error:'ingen bild laddades'})
+    
     const categoryRes = await pool.query(
       "SELECT id FROM categories WHERE name = $1",
       [category_id]
@@ -91,6 +114,13 @@ router.post("/products", auth, admin, upload.single("image"), async (req, res) =
   }
 });
 
+
+
+
+
+/* -------------------------------------------
+   ADMIN: HÄMTA PRODUKT
+------------------------------------------- */
 router.get("/products/:id", auth, admin, async (req, res) => {
   try {
     const result = await pool.query(
@@ -109,20 +139,41 @@ router.get("/products/:id", auth, admin, async (req, res) => {
   }
 });
 
-
-
+/* -------------------------------------------
+   ADMIN: UPPDATERA PRODUKT (PUT)
+------------------------------------------- */
 router.put("/products/:id", auth, admin, upload.single("image"), async (req, res) => {
   const { id } = req.params;
   const { name, description, price, stock } = req.body;
 
-
-  let finalImageUrl = req.body.image_url;
-
-  if (req.file) {
-    finalImageUrl = `/uploads/${req.file.filename}`;
-  }
-
   try {
+   
+    const existingRes = await pool.query(
+      "SELECT image_url FROM products WHERE id = $1",
+      [id]
+    );
+
+    if (existingRes.rows.length === 0) {
+      return res.status(404).json({ error: "Product not found" });
+    }
+
+    const oldImageUrl = existingRes.rows[0].image_url;
+
+    let finalImageUrl = req.body.image_url;
+
+    if (req.file) {
+      finalImageUrl = req.file.path;
+
+      if (oldImageUrl && oldImageUrl.includes("cloudinary.com")) {
+        const parts = oldImageUrl.split("/");
+        const fileName = parts[parts.length - 1]; 
+        const folder = parts[parts.length - 2];   
+        const publicId = `${folder}/${fileName.split(".")[0]}`; 
+
+        await cloudinary.uploader.destroy(publicId);
+      }
+    }
+
     const result = await pool.query(
       `UPDATE products
        SET name = $1,
@@ -135,11 +186,8 @@ router.put("/products/:id", auth, admin, upload.single("image"), async (req, res
       [name, description, finalImageUrl, price, stock, id]
     );
 
-    if (result.rows.length === 0) {
-      return res.status(404).json({ error: "Product not found" });
-    }
-
     res.json(result.rows[0]);
+
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Could not update product" });
@@ -147,30 +195,46 @@ router.put("/products/:id", auth, admin, upload.single("image"), async (req, res
 });
 
 
-router.delete("/products/:id", auth, admin, async (req, res) => {
-  const { id } = req.params;
 
+
+
+router.delete("/products/:id", auth, admin, async (req, res) => {
   try {
-    const result = await pool.query(
-      `DELETE FROM products
-       WHERE id = $1
-       RETURNING *`,
+    const { id } = req.params;
+
+    const productRes = await pool.query(
+      "SELECT image_url FROM products WHERE id = $1",
       [id]
     );
 
-    if (result.rows.length === 0) {
+    if (productRes.rows.length === 0) {
       return res.status(404).json({ error: "Product not found" });
     }
 
-    res.json({
-      message: "Product deleted successfully",
-      deletedProduct: result.rows[0]
-    });
+    const imageUrl = productRes.rows[0].image_url;
+
+    if (imageUrl && imageUrl.includes("cloudinary.com")) {
+      // Exempel URL:
+      // https://res.cloudinary.com/<name>/image/upload/v123/products/abc123.png
+
+      const parts = imageUrl.split("/");
+      const fileName = parts[parts.length - 1]; 
+      const folder = parts[parts.length - 2];   
+
+      const publicId = `${folder}/${fileName.split(".")[0]}`; 
+      await cloudinary.uploader.destroy(publicId);
+    }
+
+    await pool.query("DELETE FROM products WHERE id = $1", [id]);
+
+    res.json({ message: "Product and image deleted successfully" });
+
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Could not delete product" });
   }
 });
+
 
 
 router.get("/products/:id/variants", auth, admin, async (req, res) => {

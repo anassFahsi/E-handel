@@ -16,7 +16,7 @@ const AdminOrders = () => {
       setLoading(true);
       const token = localStorage.getItem('token');
 
-      const res = await axios.get("http://localhost:3000/admin/orders", {
+      const res = await axios.get("/api/admin/orders", {
         params: { search, page, limit },
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -39,6 +39,9 @@ const AdminOrders = () => {
   useEffect(() => {
     setPage(1);
   }, [limit, search]);
+
+  if(loading) return <p>Laddar...</p>;
+  if(error) return <p>{error}</p>
 
   return (
     <div className="admin-orders-page">

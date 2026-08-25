@@ -16,7 +16,7 @@ const UserOrders = () => {
 
       try {
         const res = await axios.get(
-          "http://localhost:3000/orders",
+          "/api/orders",
           { headers: { Authorization: `Bearer ${token}` } }
         );
 
@@ -68,11 +68,7 @@ const UserOrders = () => {
 
                 <img
                 className="order-item-image"
-                src={
-                  item.image_url.startsWith("http")
-                    ? item.image_url
-                    : "http://localhost:3000" + item.image_url
-                }
+                src={item.image_url}
                 alt={item.product_name}
               />
             </li>

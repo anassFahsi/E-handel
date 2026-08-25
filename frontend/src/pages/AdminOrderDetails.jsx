@@ -22,7 +22,7 @@ const AdminOrderDetails = () => {
       const token = localStorage.getItem("token");
 
       const res = await axios.get(
-        `http://localhost:3000/admin/orders/${id}`,
+        `/api/admin/orders/${id}`,
         {
           headers: { Authorization: `Bearer ${token}` }
         }
@@ -52,7 +52,7 @@ const AdminOrderDetails = () => {
       const token = localStorage.getItem("token");
 
       const res = await axios.delete(
-        `http://localhost:3000/admin/orders/${id}`,
+        `/api/admin/orders/${id}`,
         {
           headers: { Authorization: `Bearer ${token}` }
         }
@@ -77,7 +77,7 @@ const AdminOrderDetails = () => {
       const token = localStorage.getItem("token");
 
       await axios.put(
-        `http://localhost:3000/admin/orders/${order.id}/status`,
+        `/api/admin/orders/${order.id}/status`,
         { status: orderStatus },
         {
           headers: { Authorization: `Bearer ${token}` }

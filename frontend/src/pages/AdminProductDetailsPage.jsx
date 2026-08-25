@@ -13,7 +13,7 @@ export default function ProductDetailsPage() {
 
   const fetchProduct = async () => {
     const token = localStorage.getItem('token');
-    const res = await axios.get(`http://localhost:3000/admin/products/${id}`, {
+    const res = await axios.get(`/api/admin/products/${id}`, {
       headers: { Authorization: `Bearer ${token}` }
     });
     setProduct(res.data);
@@ -33,17 +33,13 @@ export default function ProductDetailsPage() {
       <div className="product-details-card">
         <h3 className="section-title">{product.name}</h3>
 
-        <p><strong>Pris:</strong> {product.price} kr</p>
+        <p ><strong>Pris:</strong><span className="admin-product-price"> {product.price} kr</span></p>
         <p><strong>Beskrivning:</strong> {product.description}</p>
 
         {product.image_url && (
           <img
             className="product-details-image"
-            src={
-              product.image_url.startsWith('http')
-                ? product.image_url
-                : `http://localhost:3000${product.image_url}`
-            }
+            src={product.image_url}
             alt={product.name}
           />
         )}

@@ -93,6 +93,10 @@
   gap: 15px;
 }
 
+.admin-product-link{
+  text-decoration: none;
+}
+
 .admin-product-image {
   width: 80px;
   height: auto;
@@ -101,11 +105,12 @@
 
 .admin-product-name {
   font-weight: bold;
-  
+  margin: auto 8px;
 }
 
 .admin-product-price {
   color: #007bff;
+   
 }
 
 .admin-product-stock {

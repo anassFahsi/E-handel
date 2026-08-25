@@ -30,7 +30,7 @@ export default function AddProduct({ onProductAdded }) {
       return "Du måste välja en kategori.";
     }
     if (!imageFile) {
-      return "Du måste välja en produktbild.";
+     return "Du måste välja en produktbild.";
     }
     return null;
   };
@@ -54,16 +54,16 @@ export default function AddProduct({ onProductAdded }) {
     data.append("description", formData.description);
     data.append("category_id", formData.category_id);
     data.append("image", imageFile);
-
+  
     try {
       const token = localStorage.getItem("token");
 
-      await axios.post("http://localhost:3000/admin/products", data, {
+      await axios.post("/api/admin/products", data, {
         headers: {
           "Content-Type": "multipart/form-data",
           Authorization: `Bearer ${token}`
         }
-      });
+      })
 
       setSuccess(true);
       setTimeout(() => setSuccess(false), 2500);
@@ -80,7 +80,15 @@ export default function AddProduct({ onProductAdded }) {
       if (onProductAdded) onProductAdded();
     } catch (err) {
       console.error("Error adding product:", err);
-      setError("Kunde inte lägga till produkten.");
+
+if (err.response) {
+  console.log("Backend error:", err.response.data);
+  setError(err.response.data.error || "Kunde inte lägga till produkten.");
+} else {
+  setError("Nätverksfel eller servern svarar inte.");
+}
+
+   
     } finally {
       setLoading(false);
     }

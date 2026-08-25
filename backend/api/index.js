@@ -1,41 +1,33 @@
+import dotenv from "dotenv";
+dotenv.config();
 import express from 'express';
 import cors from 'cors';
-import pool from '../backend/db.js';
-import path from 'path';
+import pool from '../db.js';
 
-// Routers
-import ordersRouter from '../backend/routes/orders.js';
-import cartRouter from '../backend/routes/cart.js';
-import shippingRouter from '../backend/routes/shipping.js';
-import usersRouter from '../backend/routes/users.js';
-import reviewsRouter from '../backend/routes/reviews.js';
-import adminRouter from '../backend/routes/admin.js';   // <-- NY
-
+import ordersRouter from '../routes/orders.js';
+import cartRouter from '../routes/cart.js';
+import shippingRouter from '../routes/shipping.js';
+import usersRouter from '../routes/users.js';
+import reviewsRouter from '../routes/reviews.js';
+import adminRouter from '../routes/admin.js';   
 
 const app = express();
 app.use("/uploads", express.static("uploads"));
-/* -------------------------------------------
-   MIDDLEWARE
-------------------------------------------- */
+
 app.use(cors());
 app.use(express.json());
 
-/* -------------------------------------------
-   ROUTERS
-------------------------------------------- */
-app.use('/orders', ordersRouter);
-app.use('/', cartRouter);
-app.use('/', shippingRouter);
-app.use('/users', usersRouter);
-app.use('/reviews', reviewsRouter);
-app.use('/admin', adminRouter);   // <-- ALL ADMIN HÄR NU
+app.use('/api/orders', ordersRouter);
+app.use('/api/', cartRouter);
+app.use('/api/', shippingRouter);
+app.use('/api/users', usersRouter);
+app.use('/api/reviews', reviewsRouter);
+app.use('/api/admin', adminRouter);   
 
-/* -------------------------------------------
-   PUBLIC PRODUCTS ENDPOINTS (FRONTEND)
-------------------------------------------- */
 
 // Get all products (public)
-app.get("/products", async (req, res) => {
+app.get("/api/products", async (req, res) => {
+  
   const { search, category, sort, page = 1, limit = 5 } = req.query;
   const offset = (Number(page) - 1) * Number(limit);
 
@@ -87,7 +79,7 @@ app.get("/products", async (req, res) => {
 });
 
 // Get one product (public)
-app.get("/products/:id", async (req, res) => {
+app.get("/api/products/:id", async (req, res) => {
   try {
     const result = await pool.query(
       "SELECT * FROM products WHERE id = $1",
@@ -107,7 +99,7 @@ app.get("/products/:id", async (req, res) => {
 });
 
 // Get all categories
-app.get('/categories',async(req,res)=>{
+app.get('/api/categories',async(req,res)=>{
   try{
     const result=await pool.query(`SELECT * FROM categories WHERE id>6`);
     res.json(result.rows);
@@ -119,9 +111,8 @@ app.get('/categories',async(req,res)=>{
 })
 
 
-
 // Get variants for products
-app.get('/products/:id/variants',async(req,res)=>{
+app.get('/api/products/:id/variants',async(req,res)=>{
   try{
      const result= await pool.query(`SELECT * FROM product_variants WHERE product_id=$1`,[req.params.id]);
      res.json(result.rows);
@@ -134,6 +125,6 @@ app.get('/products/:id/variants',async(req,res)=>{
 });
 
 
-//app.listen(3000, () => console.log('Server körs på port 3000'));
+
 
 export default app;

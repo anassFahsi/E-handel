@@ -4,22 +4,18 @@ const Footer = () => {
   return (
     <footer className="footer">
       <div className="footer-container">
-
-        {/* Sektion 1 – Brand */}
         <div className="footer-section">
           <h4>👗 FashionHub</h4>
-          <p>© {new Date().getFullYear()} Min E‑handel</p>
+          <p>© {new Date().getFullYear()} 👗 FashionHub</p>
           <p>Alla rättigheter reserverade</p>
         </div>
 
-        {/* Sektion 2 – Kontakt */}
         <div className="footer-section">
           <h4>Kontakt</h4>
-          <p>support@minehandel.se</p>
-          <p>Öppettider: Mån–Fre 09:00–17:00</p>
+          <p>support@FashionHub.se</p>
+          <p>Öppettider: Mån-Fre 09:00-17:00</p>
         </div>
 
-        {/* Sektion 3 – Sociala medier */}
         <div className="footer-section">
           <h4>Följ oss</h4>
           <p>📸 Instagram</p>
@@ -27,7 +23,6 @@ const Footer = () => {
           <p>🐦 Twitter</p>
         </div>
 
-        {/* Sektion 4 – Betalningsmetoder */}
         <div className="footer-section">
           <h4>Betalning</h4>
           <div className="payment-row">
@@ -41,7 +36,6 @@ const Footer = () => {
           </div>
         </div>
 
-        {/* Sektion 5 – Trygg e‑handel */}
         <div className="footer-section">
           <h4>Trygghet</h4>
           <p>🔒 Krypterade betalningar</p>
