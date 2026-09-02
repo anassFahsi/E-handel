@@ -25,7 +25,6 @@ export const AuthProvider = ({ children }) => {
         setIsAdmin(res.data.user.role === "admin");
         const admin=res.data.user.role === "admin";
         if (admin) {
-          console.log('is:true')
             navigate("/admin/profile");
         } else {
             navigate("/users/profile");

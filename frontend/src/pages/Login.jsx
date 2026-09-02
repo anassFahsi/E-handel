@@ -10,8 +10,6 @@ export default function Login() {
 
   const { login } = useContext(AuthContext);
 
- 
- 
   const [loginError, setLoginError] = useState(null);
 
   const handleLogin = async () => {

@@ -41,8 +41,8 @@ const AddVariant = ({ productId, onVariantAdded }) => {
     }
 
     const token = localStorage.getItem("token");
-
-    await axios.post(
+    try{
+      await axios.post(
       `/api/admin/products/${productId}/variants`,
       formData,
       { headers: { Authorization: `Bearer ${token}` } }
@@ -54,6 +54,14 @@ const AddVariant = ({ productId, onVariantAdded }) => {
     setFormData({ size: "", color: "", stock: "" });
 
     if (onVariantAdded) onVariantAdded();
+    }
+    catch(error){
+      console.error(error);
+      setError('Kunde inte lägga till varianten');
+     setTimeout(() => {
+      setError(null)
+     }, 1500);
+    }
   };
 
   const handleReset = () => {
@@ -89,7 +97,7 @@ const AddVariant = ({ productId, onVariantAdded }) => {
 
         <input
           className={`form-input ${error?.includes("Lagerantal") ? "input-error" : ""}`}
-          type="number"
+          type="number" min={1}
           name="stock"
           value={formData.stock}
           placeholder="Lagerantal"
@@ -101,7 +109,11 @@ const AddVariant = ({ productId, onVariantAdded }) => {
             Lägg till variant
           </button>
 
-          <button className="btn btn-secondary" type="button" onClick={handleReset}>
+          <button
+            className="btn btn-secondary"
+            type="button"
+            onClick={handleReset}
+          >
             Reset
           </button>
         </div>
@@ -111,4 +123,6 @@ const AddVariant = ({ productId, onVariantAdded }) => {
 };
 
 export default AddVariant;
+
+
 

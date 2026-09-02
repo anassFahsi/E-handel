@@ -28,7 +28,6 @@ const Cart = ({ sessionId, handleCartCount }) => {
   }, [sessionId]);
 
   const removeItem = async (itemId) => {
-    if (!confirm("Är du säker på att du vill ta bort produkten?")) return;
 
     try {
       await axios.delete(`/api/cart/items/${itemId}`);
