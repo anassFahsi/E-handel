@@ -9,7 +9,8 @@ import cartRouter from '../routes/cart.js';
 import shippingRouter from '../routes/shipping.js';
 import usersRouter from '../routes/users.js';
 import reviewsRouter from '../routes/reviews.js';
-import adminRouter from '../routes/admin.js';   
+import adminRouter from '../routes/admin.js';  
+import currencyRouter from '../routes/currency.js' ;
 
 const app = express();
 app.use("/uploads", express.static("uploads"));
@@ -23,6 +24,10 @@ app.use('/api/', shippingRouter);
 app.use('/api/users', usersRouter);
 app.use('/api/reviews', reviewsRouter);
 app.use('/api/admin', adminRouter);   
+app.use('/api/currency', currencyRouter);
+
+
+
 
 
 // Get all products (public)

@@ -2,6 +2,7 @@ import { useContext, useState } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { Link } from "react-router-dom";
 import "../styles/header.css";
+import { useCurrency } from "../context/CurrencyContext";
 
 const Header = ({ cartCount }) => {
   const { isAdmin, token, logout } = useContext(AuthContext);
@@ -9,9 +10,20 @@ const Header = ({ cartCount }) => {
 
   const toggleMenu = () => setMenuOpen(!menuOpen);
   const closeMenu = () => setMenuOpen(false);
+  const {currency, setCurrency}=useCurrency();
+
+
+
 
   return (
     <header className={`header ${menuOpen ? "menu-open" : ""}`}>
+
+      <select className='currency' value={currency} onChange={(e) => setCurrency(e.target.value)}>
+      <option value="SEK">SEK</option>
+      <option value="EUR">EUR</option>
+      <option value="USD">USD</option>
+      <option value="DKK">DKK</option>
+    </select>
 
       <nav className="nav-left desktop-only">
         <Link className="nav-link" to="/">Produkter</Link>
@@ -24,7 +36,8 @@ const Header = ({ cartCount }) => {
           </>
         )}
       </nav>
-
+        
+      
       <div className="logo">👗 FashionHub</div>
 
       <nav className="nav-right desktop-only">
@@ -53,7 +66,13 @@ const Header = ({ cartCount }) => {
 
       <div className={`mobile-menu mobile-only ${menuOpen ? "open" : ""}`}>
         <button className="close-menu" onClick={closeMenu}>✕</button>
-
+        
+        <select className='currency-mobile' value={currency}   onChange={(e) => setCurrency(e.target.value)}>
+          <option value="SEK">SEK</option>
+          <option value="EUR">EUR</option>
+          <option value="USD">USD</option>
+          <option value="DKK">DKK</option>
+        </select>
         <Link className="mobile-link" to="/" onClick={closeMenu}>Produkter</Link>
 
        <Link className="mobile-link-cart" to="/cart" onClick={closeMenu}>

@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
+import { useCurrency } from "../context/CurrencyContext";
 
 const Cart = ({ sessionId, handleCartCount }) => {
   const navigate = useNavigate();
   const [total, setTotal] = useState(0);
   const [items, setItems] = useState([]);
-
+  const {currency, convert}=useCurrency();
   // POPUPS
   const [cartSuccess, setCartSuccess] = useState(null);
   const [cartError, setCartError] = useState(null);
@@ -101,7 +102,7 @@ const Cart = ({ sessionId, handleCartCount }) => {
         {items.map(item => (
           <li key={item.id} className="cart-item">
             <span className="cart-item-text">
-              {item.quantity} x {item.name} - {item.price} kr
+              {item.quantity} x {item.name} - {convert(Number(item.price)).toFixed(2)} {currency}
             </span>
 
             <div className="cart-item-actions">
@@ -113,7 +114,7 @@ const Cart = ({ sessionId, handleCartCount }) => {
         ))}
       </ul>
 
-      <h2 className="cart-total">Totalt: {total} kr</h2>
+      <h2 className="cart-total">Totalt: {convert(total).toFixed(2)} {currency}</h2>
 
       <Link to="/checkout">
         <button className="btn btn-primary" disabled={total === 0}>

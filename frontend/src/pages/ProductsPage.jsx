@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
+import { useCurrency } from "../context/CurrencyContext";
 
 const Products = () => {
   const navigate = useNavigate();
   const [params] = useSearchParams();
 
-  
+  const {convert, currency}=useCurrency();
   const [search, setSearch] = useState(params.get("search") || "");
   const [category, setCategory] = useState(params.get("category") || "");
   const [sort, setSort] = useState(params.get("sort") || "newest");
@@ -157,7 +158,7 @@ const Products = () => {
                 alt={p.name}
               />
               <strong className="product-name">{p.name}</strong>
-              <span className="product-price">{p.price} kr</span>
+              <span className="product-price">{convert(p.price).toFixed(2)} {currency}</span>
 
               
             

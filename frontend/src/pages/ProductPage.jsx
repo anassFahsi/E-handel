@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import ProductVariants from "../components/ProductVariants";
+import { useCurrency } from "../context/CurrencyContext";
 
 const ProductPage = ({ addToCart }) => {
   const { id } = useParams();
@@ -14,14 +15,13 @@ const ProductPage = ({ addToCart }) => {
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState("");
   const [canReview, setCanReview] = useState(false);
-
  
   const [cartSuccess, setCartSuccess] = useState(false);
   const [cartError, setCartError] = useState(null);
 
   const [reviewSuccess, setReviewSuccess] = useState(false);
   const [reviewError, setReviewError] = useState(null);
-
+ const {currency, convert}=useCurrency();
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -129,7 +129,7 @@ const ProductPage = ({ addToCart }) => {
       />
 
       <p className="product-description">{product.description}</p>
-      <p className="product-price">Pris: {Number(product.price)} kr</p>
+      <p className="product-price">Pris: {Number(convert(product.price)).toFixed(2)} {currency}</p>
 
       <ProductVariants
         productId={product.id}

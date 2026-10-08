@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import '../styles/checkout.css'
+import { useCurrency } from "../context/CurrencyContext";
 
 export default function Checkout({ sessionId, fetchCartCount }) {
   const [form, setForm] = useState({
@@ -9,7 +10,7 @@ export default function Checkout({ sessionId, fetchCartCount }) {
     email: "",
     address: "",
   });
-
+  const {currency, convert}=useCurrency();
   const [items, setItems] = useState([]);
   const [subtotal, setSubtotal] = useState(0);
 
@@ -143,18 +144,18 @@ export default function Checkout({ sessionId, fetchCartCount }) {
 
           <div className="summary-item">
             <span>Delsumma:</span>
-            <span>{subtotal} kr</span>
+            <span>{convert(subtotal).toFixed(2)} {currency}</span>
           </div>
 
           {selectedShipping && (
             <div className="summary-item">
               <span>Frakt:</span>
-              <span>{selectedShipping.price} kr ({selectedShipping.delivery_days} dagar)</span>
+              <span>{convert(Number(selectedShipping.price)).toFixed(2)} {currency} ({selectedShipping.delivery_days} dagar)</span>
             </div>
           )}
 
           <div className="summary-total">
-            Totalt: {grandTotal} kr
+            Totalt: {convert(grandTotal).toFixed(2)} {currency}
           </div>
         </div>
 
@@ -179,7 +180,7 @@ export default function Checkout({ sessionId, fetchCartCount }) {
           >
             {shippingMethods.map(method => (
               <option key={method.id} value={method.id}>
-                {method.name} - {method.price} kr ({method.delivery_days} dagar)
+                {method.name} - {convert(Number(method.price)).toFixed(2)} {currency} ({method.delivery_days} dagar)
               </option>
             ))}
           </select>

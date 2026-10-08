@@ -1,15 +1,43 @@
-# FashionHub
+# 🛍️ E‑handel – React & Node.js
 
-Ett fullstack-projekt byggt med React + Vite och Node/Express.
+En modern e‑handelsapplikation byggd med **React (frontend)** och **Node.js/Express (backend)**.  
+Projektet innehåller produktlistning, kundvagn, checkout‑flöde och kommunikation med ett REST‑API.
 
-## Funktioner
-- Produktlista
-- Kundvagn
-- Inloggning / Registrering
-- Admin-panel för produkter och ordrar
+---
 
-## Teknik
-- Frontend: React + Vite
-- Backend: Node.js + Express
-- Databas: PostgreSQL
+## 🚀 Live Demo
+🔗 https://fashionhub-live.vercel.app
+
+---
+
+## 📦 Funktioner
+- Visa produkter  
+- Lägg till / ta bort från kundvagn  
+- Visa totalpris  
+- Checkout‑flöde  
+- API‑kommunikation mellan frontend och backend  
+
+---
+
+## 🧰 Teknisk stack
+**Frontend:** React, Vite, CSS  
+**Backend:** Node.js, Express  
+**Databas:** PostgreSQL  
+**Deployment:** Vercel (frontend + backend)
+
+---
+
+## ▶️ Utveckling lokalt
+
+```bash
+# Starta backend
+cd backend
+npm install
+node server.js
+
+# Starta frontend
+cd ../frontend
+npm install
+npm run dev
+
 
