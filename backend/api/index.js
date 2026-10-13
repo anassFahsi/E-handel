@@ -26,7 +26,12 @@ app.use('/api/reviews', reviewsRouter);
 app.use('/api/admin', adminRouter);   
 app.use('/api/currency', currencyRouter);
 
-
+// General error handling for all errors
+app.use((err,req,res,_next)=>{
+  const message=err instanceof Error?err.message:String(err);
+  console.error(`${req.method} ${req.originalUrl}: failed ${message}`);
+  res.status(500).json({error:'Something went wrong on the server'})
+})
 
 
 
