@@ -42,7 +42,7 @@ app.get("/api/products", async (req, res) => {
   const offset = (Number(page) - 1) * Number(limit);
 
   try {
-    let conditions = [];
+    let conditions = ['image_url IS NOT NULL'];
     let params = [];
 
     if (search) {

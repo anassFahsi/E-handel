@@ -3,7 +3,8 @@ import pool from "../db.js";
 import cloudinary from "../config/cloudinary.js";
 import { CloudinaryStorage } from "multer-storage-cloudinary";
 import multer from "multer";
-
+import {z} from 'zod';
+import { getSupplierCatalog } from "../integrations/supplierAdaper.js";
 
 
 import { auth } from "../middleware/auth.js";
@@ -436,6 +437,99 @@ router.put("/orders/:id/status", auth, admin, async (req, res) => {
     console.error(err);
     await pool.query("ROLLBACK");
     res.status(500).json({ error: "Kunde inte uppdatera orderstatus" });
+  }
+});
+
+
+async function getOrCreateCategory(categoryName){
+  const existingCategory=await pool.query(`SELECT id FROM categories WHERE name=$1`,[categoryName]);
+  if(existingCategory.rows.length>0){
+      return existingCategory.rows[0].id;
+  }
+  else{
+    const newCategory=await pool.query(`INSERT INTO categories (name) VALUES ($1) RETURNING id`,[categoryName]);
+    return newCategory.rows[0].id;
+  }
+};
+
+const ImportedProduct = z.object({
+supplierSku: z.string().min(1),
+name: z.string().min(1),
+categoryName: z.string().min(1),
+price: z.number().positive(),
+stock: z.number().nullable(),
+variants: z.array(z.string())
+});
+
+router.post("/products/import/:format", async (req, res) => {
+  const {format}=req.params;
+  if (format !=='csv' && format !=='xml' ){
+    res.status(400).json({ error: 'The format must be csv or xml' });
+    return;
+  }
+
+  try{
+    const candidates=await getSupplierCatalog(format);
+    let newProducts=0;
+    let updatedProducts=0;
+    let skippedProducts=[];
+    for (const candidate of candidates) {
+    const result = ImportedProduct.safeParse(candidate);
+
+    if (!result.success) {
+      skippedProducts.push({sku:candidate.supplierSku, reason: result.error.issues})
+      continue;
+    }
+    const product=result.data;
+    const categoryId=await getOrCreateCategory(product.categoryName);
+
+    const existingProduct = await pool.query(`SELECT id FROM 
+    products WHERE supplier_sku = $1`,[product.supplierSku]
+   );
+   if(existingProduct.rows.length>0){
+    updatedProducts++;
+   }
+   else{
+    newProducts++;
+   }
+    await pool.query(
+      `
+      INSERT INTO products (
+        supplier_sku,
+        name,
+        price,
+        stock,
+        category_id
+      )
+      VALUES ($1, $2, $3, $4, $5)
+
+      ON CONFLICT (supplier_sku)
+
+      DO UPDATE SET
+        name = EXCLUDED.name,
+        price = EXCLUDED.price,
+        stock = EXCLUDED.stock,
+        category_id = EXCLUDED.category_id
+      `,
+      [
+        product.supplierSku,
+        product.name,
+        product.price,
+        product.stock,
+        categoryId
+      ]
+    );
+
+  }
+  return res.json({
+  newProducts,
+  updatedProducts,
+  skippedCount: skippedProducts.length,
+  skippedProducts
+  });
+  }
+  catch(error){
+    return res.status(500).json({error:error.message})
   }
 });
 

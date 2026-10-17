@@ -33,11 +33,28 @@ Projektet innehåller produktlistning, kundvagn, checkout‑flöde och kommunika
 # Starta backend
 cd backend
 npm install
-node server.js
+npm run dev
 
 # Starta frontend
 cd ../frontend
 npm install
 npm run dev
 
+*******
+Produktimport
 
+Shoppen innehåller en produktimport som hämtar produkter från ett externt leverantörs-API i både CSV- och XML-format.
+
+Importen startas från adminsidan via:
+
+Importera CSV
+Importera XML
+
+Externa miljövariabler:
+Importen använder:
+SUPPLIER_API_URL=
+SUPPLIER_API_KEY=
+SUPPLIER_API_TIMEOUT_MS=
+SUPPLIER_BRANSCH=
+
+Se .env.example för samtliga variabler.

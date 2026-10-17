@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getRates } from "../integrations/currencyAdapter";
+import { getRates } from "../integrations/currencyAdapter.js";
 
 const router=Router();
 

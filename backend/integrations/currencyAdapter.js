@@ -1,5 +1,5 @@
 import {z} from 'zod';
-import { fetchJson } from '../lib/fetchJson';
+import { fetchJson } from '../lib/fetchJson.js';
 
 const BASE_URL='https://api.frankfurter.dev/v1';
 
