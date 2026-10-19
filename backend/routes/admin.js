@@ -5,10 +5,11 @@ import { CloudinaryStorage } from "multer-storage-cloudinary";
 import multer from "multer";
 import {z} from 'zod';
 import { getSupplierCatalog } from "../integrations/supplierAdaper.js";
-
-
+import  {indexProducts} from "../integrations/algoliaAdapter.js"
 import { auth } from "../middleware/auth.js";
 import { admin } from "../middleware/admin.js";
+import { indexProduct } from "../integrations/algoliaAdapter.js";
+import { deleteProduct } from "../integrations/algoliaAdapter.js";
 
 const router = express.Router();
 
@@ -106,8 +107,14 @@ router.post("/products", auth, admin, upload.single("image"), async (req, res) =
        RETURNING *`,
       [name, price, description, image_url, catId]
     );
+    const product = result.rows[0];
 
-    res.json(result.rows[0]);
+    await indexProduct({
+      ...product,
+      category_name: category_id,
+    });
+
+    res.json(product);
 
   } catch (error) {
     console.error(error);
@@ -186,18 +193,25 @@ router.put("/products/:id", auth, admin, upload.single("image"), async (req, res
        RETURNING *`,
       [name, description, finalImageUrl, price, stock, id]
     );
+    const updatedProduct = await pool.query(`
+      SELECT
+        p.*,
+        c.name AS category_name
+      FROM products p
+      LEFT JOIN categories c
+        ON c.id = p.category_id
+      WHERE p.id = $1
+     `, [id]);
+    await indexProduct(updatedProduct.rows[0]);
 
     res.json(result.rows[0]);
+   
 
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Could not update product" });
   }
 });
-
-
-
-
 
 router.delete("/products/:id", auth, admin, async (req, res) => {
   try {
@@ -215,8 +229,6 @@ router.delete("/products/:id", auth, admin, async (req, res) => {
     const imageUrl = productRes.rows[0].image_url;
 
     if (imageUrl && imageUrl.includes("cloudinary.com")) {
-      // Exempel URL:
-      // https://res.cloudinary.com/<name>/image/upload/v123/products/abc123.png
 
       const parts = imageUrl.split("/");
       const fileName = parts[parts.length - 1]; 
@@ -227,6 +239,7 @@ router.delete("/products/:id", auth, admin, async (req, res) => {
     }
 
     await pool.query("DELETE FROM products WHERE id = $1", [id]);
+    await deleteProduct(id);
 
     res.json({ message: "Product and image deleted successfully" });
 
@@ -533,5 +546,22 @@ router.post("/products/import/:format", async (req, res) => {
   }
 });
 
-export default router;
+router.post("/search/index", async (req, res) => {
+  const result = await pool.query(`
+    SELECT
+      p.*,
+      c.name AS category_name
+    FROM products p
+    LEFT JOIN categories c
+      ON c.id = p.category_id
+  `);
 
+  await indexProducts(result.rows);
+
+  res.json({
+    indexed: result.rows.length,
+  });
+});
+
+
+export default router;

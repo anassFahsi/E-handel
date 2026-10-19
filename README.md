@@ -11,19 +11,21 @@ Projektet innehåller produktlistning, kundvagn, checkout‑flöde och kommunika
 ---
 
 ## 📦 Funktioner
-- Visa produkter  
-- Lägg till / ta bort från kundvagn  
-- Visa totalpris  
-- Checkout‑flöde  
-- API‑kommunikation mellan frontend och backend  
+- Visa produkter
+- Produktsökning med Algolia
+- Lägg till / ta bort från kundvagn
+- Produktimport från extern leverantör (CSV/XML)
+- Checkout-flöde
+- API-kommunikation mellan frontend och backend
 
 ---
 
 ## 🧰 Teknisk stack
-**Frontend:** React, Vite, CSS  
-**Backend:** Node.js, Express  
-**Databas:** PostgreSQL  
-**Deployment:** Vercel (frontend + backend)
+- Frontend: React, Vite, CSS
+- Backend: Node.js, Express
+- Databas: PostgreSQL
+- Sökning: Algolia
+- Deployment: Vercel
 
 ---
 
@@ -41,7 +43,7 @@ npm install
 npm run dev
 
 *******
-Produktimport
+  ***  Produktimport
 
 Shoppen innehåller en produktimport som hämtar produkter från ett externt leverantörs-API i både CSV- och XML-format.
 
@@ -58,3 +60,23 @@ SUPPLIER_API_TIMEOUT_MS=
 SUPPLIER_BRANSCH=
 
 Se .env.example för samtliga variabler.
+
+***🔎 Produktsökning
+
+Shoppen använder Algolia för fritextsökning.
+
+Funktioner:
+
+Stavfelstolerant sökning (ex. hodie → hoodie)
+Pagination
+Validering av sökparametrar med Zod
+Synkronisering mot produktregistret vid:
+skapande av produkt
+uppdatering av produkt
+borttagning av produkt
+
+Externa miljövariabler:
+ALGOLIA_APP_ID=
+ALGOLIA_ADMIN_API_KEY=
+ALGOLIA_SEARCH_API_KEY=
+ALGOLIA_INDEX_NAME=

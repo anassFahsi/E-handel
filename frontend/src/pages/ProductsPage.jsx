@@ -33,12 +33,18 @@ const Products = () => {
   };
 
   const fetchProducts = async () => {
-    const res = await axios.get("/api/products", {
-      params: { search, category, sort, limit, page },
+    const res = await axios.get("/api/search", {
+      params: { q:search, page, pageSize: limit },
     });
 
-    setProducts(res.data.products.map((p) => ({ ...p, price: Number(p.price) })));
-    setTotalProducts(Number(res.data.productsCount));
+  setProducts(res.data.data.map((p) => (
+    {...p, price: Number(p.price),}))
+  );
+
+setTotalProducts(
+  Number(res.data.meta.total)
+);
+    setTotalProducts(Number(res.data.meta.total));
   };
 
   const fetchCategories = async () => {
@@ -154,7 +160,7 @@ const Products = () => {
             <Link to={`/products/${p.id}`} className="product-link">
               <img
             className="product-image"
-                src={p.image_url}
+                src={p.imageUrl}
                 alt={p.name}
               />
               <strong className="product-name">{p.name}</strong>
