@@ -154,7 +154,6 @@ const AdminOrderDetails = () => {
           value={orderStatus}
           onChange={(e) => setOrderStatus(e.target.value)}
         >
-          <option value="Beställd">Beställd</option>
           <option value="Behandlas">Behandlas</option>
           <option value="Levererad">Levererad</option>
           <option value="Återbetald">Återbetald</option>

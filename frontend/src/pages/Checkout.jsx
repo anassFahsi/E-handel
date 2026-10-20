@@ -105,6 +105,7 @@ export default function Checkout({ sessionId, fetchCartCount }) {
 
     try {
       const res = await axios.post("/api/orders", order);
+      
 
       if (res.data.success) {
         setItems([]);
