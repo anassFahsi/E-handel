@@ -15,17 +15,19 @@ Projektet innehåller produktlistning, kundvagn, checkout‑flöde och kommunika
 - Produktsökning med Algolia
 - Lägg till / ta bort från kundvagn
 - Produktimport från extern leverantör (CSV/XML)
-- Checkout-flöde
+- Betalning med Stripe Checkout
+- Orderhantering och lageruppdatering
 - API-kommunikation mellan frontend och backend
 
 ---
 
 ## 🧰 Teknisk stack
-- Frontend: React, Vite, CSS
-- Backend: Node.js, Express
-- Databas: PostgreSQL
-- Sökning: Algolia
-- Deployment: Vercel
+Frontend: React, Vite, CSS
+Backend: Node.js, Express
+Databas: PostgreSQL
+Sökning: Algolia
+Betalning: Stripe
+Deployment: Vercel
 
 ---
 
@@ -80,3 +82,27 @@ ALGOLIA_APP_ID=
 ALGOLIA_ADMIN_API_KEY=
 ALGOLIA_SEARCH_API_KEY=
 ALGOLIA_INDEX_NAME=
+
+💳 Betalning med Stripe
+
+Shoppen använder Stripe Checkout i testläge för säkra betalningar.
+
+Funktioner
+Stripe Checkout (hosted)
+Order skapas som Obetald innan betalning
+Priser hämtas från databasen på servern
+Stripe Checkout Session kopplas till ordern via client_reference_id
+Signaturverifierad webhook
+Order markeras som Betald först när Stripe bekräftar betalningen
+Lagersaldo minskas automatiskt efter genomförd betalning
+Utgångna betalningssessioner markeras som Avbrutna
+Bekräftelsesida som visar orderstatus
+
+Externa miljövariabler:
+STRIPE_SECRET_KEY=
+STRIPE_PUBLISHABLE_KEY=
+STRIPE_WEBHOOK_SECRET=
+CLIENT_URL=
+
+Testkort
+4242 4242 4242 4242

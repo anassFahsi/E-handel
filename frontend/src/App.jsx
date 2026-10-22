@@ -103,7 +103,7 @@ const App = () => {
         />
 
         <Route
-          path="/thankyou/:id"
+          path="/thankyou"
           element={<ThankYou />}
         />
 

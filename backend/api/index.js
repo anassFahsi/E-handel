@@ -4,7 +4,7 @@ import express from 'express';
 import cors from 'cors';
 import pool from '../db.js';
 import {z} from 'zod';
-
+import stripeWebhookRouter from '../routes/stripeWebhook.js';
 import ordersRouter from '../routes/orders.js';
 import cartRouter from '../routes/cart.js';
 import shippingRouter from '../routes/shipping.js';
@@ -18,6 +18,7 @@ const app = express();
 app.use("/uploads", express.static("uploads"));
 
 app.use(cors());
+app.use("/api/stripe/webhook",stripeWebhookRouter);
 app.use(express.json());
 
 app.use('/api/orders', ordersRouter);
