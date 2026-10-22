@@ -22,7 +22,7 @@ router.post(
             const orderId = session.client_reference_id;
 
             const orderRes = await pool.query(
-             `SELECT status
+             `SELECT status, cart_session_id
                FROM orders
                WHERE id = $1`,
                [orderId]
@@ -44,6 +44,12 @@ router.post(
                 await pool.query(`
                     UPDATE product_variants SET stock=stock - $1 WHERE id=$2`,[variant.quantity, variant.variant_id])
             }
+
+            const cartSessionId=orderRes.rows[0].cart_session_id;
+            if(cartSessionId){
+                 await pool.query(`DELETE FROM carts WHERE session_id = $1`,[cartSessionId])
+            }
+           
 
             break;
         }

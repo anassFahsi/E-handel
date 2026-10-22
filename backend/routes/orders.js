@@ -27,8 +27,8 @@ router.post("/checkout", async (req, res) => {
 
   const orderRes = await pool.query(
       `INSERT INTO orders 
-        (customer_name, customer_email, customer_address, total, shipping_method_id, shipping_price)
-       VALUES ($1, $2, $3, $4, $5, $6)
+        (customer_name, customer_email, customer_address, total, shipping_method_id, shipping_price, cart_session_id)
+       VALUES ($1, $2, $3, $4, $5, $6, $7)
        RETURNING id`,
       [
         customer.name,
@@ -36,7 +36,8 @@ router.post("/checkout", async (req, res) => {
         customer.address,
         0,                 
         shipping_method_id,
-        shippingPrice
+        shippingPrice,
+        sessionId
       ]
     );
 

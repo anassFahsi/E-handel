@@ -18,10 +18,8 @@ export default function Checkout({ sessionId, fetchCartCount }) {
   const [selectedShipping, setSelectedShipping] = useState(null);
 
   const [grandTotal, setGrandTotal] = useState(0);
-  const navigate = useNavigate();
 
-  
-  
+   
   const [checkoutError, setCheckoutError] = useState(null);
 
   useEffect(() => {
@@ -111,8 +109,6 @@ export default function Checkout({ sessionId, fetchCartCount }) {
         setItems([]);
         setSubtotal(0);
         await fetchCartCount();
-
-      navigate(`/thankyou/${res.data.orderId}`);
       
       }
     } catch (err) {
