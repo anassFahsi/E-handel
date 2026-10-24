@@ -12,13 +12,14 @@ const searchClient = algoliasearch( APP_ID,SEARCH_KEY);
 
 export async function indexProducts(products) {
   const records = products.map((product) => ({
+    id:Number(product.id),
     objectID: product.id,
     supplierSku: product.supplier_sku,
     name: product.name,
     price: Number(product.price),
     category: product.category_name,
     imageUrl: product.image_url,
-    description:product.description
+    description:product.description,
   }));
 
   return adminClient.saveObjects({
@@ -29,6 +30,7 @@ export async function indexProducts(products) {
 
 export async function indexProduct(product) {
   const records ={
+    id:Number(product.id),
     objectID: product.id,
     supplierSku: product.supplier_sku,
     name: product.name,
@@ -50,16 +52,41 @@ export async function indexProduct(product) {
 export async function searchProducts(
   query,
   page,
-  pageSize
+  pageSize,
+  category,
+  sort
 ) {
+  const searchParams = {
+  query,
+  page: page - 1,
+  hitsPerPage: pageSize,
+  
+};
+      if (category) {
+  searchParams.filters = `category:"${category}"`;
+}
+  let indexName = INDEX_NAME;
+
+if (sort === "price_asc") {
+  indexName = 'product_price_asc';
+}
+
+if (sort === "price_desc") {
+  indexName = 'product_price_desc';
+}
+
+if (sort === "newest") {
+  indexName = 'products_newest';
+}
+
+if (sort === "oldest") {
+  indexName = 'products_oldest';
+}
   const result = await searchClient.searchSingleIndex({
-    indexName: INDEX_NAME,
-    searchParams: {
-      query,
-      page: page - 1,
-      hitsPerPage: pageSize,
-    },
+    indexName,
+    searchParams
   });
+   console.log(indexName)
 
   return result;
 }

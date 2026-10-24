@@ -16,7 +16,8 @@ router.post(
         );
         switch (event.type) {
 
-        case "checkout.session.completed": {
+        case "checkout.session.completed":
+        case "checkout.session.async_payment_succeeded": {
 
             const session = event.data.object;
             const orderId = session.client_reference_id;
@@ -55,7 +56,7 @@ router.post(
         }
 
         case "checkout.session.expired": {
-            console.log('SESSION EXPIRED')
+          
             const session = event.data.object;
 
             const orderId = session.client_reference_id;

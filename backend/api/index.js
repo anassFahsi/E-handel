@@ -33,6 +33,8 @@ const SearchQuery = z.object({
   q: z.string().trim().default(""),
   page: z.coerce.number().int().min(1).default(1),
   pageSize: z.coerce.number().int().min(1).max(50).default(12),
+  category:z.string().trim().default(""),
+  sort:z.string().default("newest")
 });
 
 
@@ -128,12 +130,14 @@ app.get("/api/search", async (req, res) => {
   }
 
   try {
-    const { q, page, pageSize } = parsed.data;
+    const { q, page, pageSize, category , sort} = parsed.data;
 
     const result = await searchProducts(
       q,
       page,
-      pageSize
+      pageSize,
+      category,
+      sort
     );
     //console.log("hits:", result.hits.length);
    //console.log(result.hits[0]); 

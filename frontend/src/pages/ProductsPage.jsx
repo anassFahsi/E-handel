@@ -10,7 +10,7 @@ const Products = () => {
   const {convert, currency}=useCurrency();
   const [search, setSearch] = useState(params.get("search") || "");
   const [category, setCategory] = useState(params.get("category") || "");
-  const [sort, setSort] = useState(params.get("sort") || "newest");
+  const [sort, setSort] = useState(params.get("sort") || "oldest");
   const [page, setPage] = useState(Number(params.get("page")) || 1);
   const [limit, setLimit] = useState(Number(params.get("limit")) || 10);
 
@@ -34,18 +34,18 @@ const Products = () => {
 
   const fetchProducts = async () => {
     const res = await axios.get("/api/search", {
-      params: { q:search, page, pageSize: limit },
+      params: { q:search, page, pageSize: limit, category, sort},
     });
-
-  setProducts(res.data.data.map((p) => (
+    
+       setProducts(res.data.data.map((p) => (
     {...p, price: Number(p.price),}))
   );
 
-setTotalProducts(
-  Number(res.data.meta.total)
-);
-    setTotalProducts(Number(res.data.meta.total));
-  };
+    setTotalProducts(
+      Number(res.data.meta.total)
+    );
+        setTotalProducts(Number(res.data.meta.total));
+};
 
   const fetchCategories = async () => {
     try {
@@ -95,7 +95,7 @@ setTotalProducts(
     >
       <option value="">Alla kategorier</option>
       {categories.map((c) => (
-        <option key={c.id} value={c.id}>
+        <option key={c.id} value={c.name}>
           {c.name}
         </option>
       ))}

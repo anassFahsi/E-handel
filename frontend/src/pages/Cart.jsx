@@ -101,6 +101,7 @@ const Cart = ({ sessionId, handleCartCount }) => {
       <ul className="cart-items">
         {items.map(item => (
           <li key={item.id} className="cart-item">
+           <span ><img className="cart-item-image" src={item.image_url}></img></span>
             <span className="cart-item-text">
               {item.quantity} x {item.name} - {convert(Number(item.price)).toFixed(2)} {currency}
             </span>
