@@ -108,10 +108,10 @@ router.post("/checkout", async (req, res) => {
       line_items: lineItems,
 
       success_url:
-        `${process.env.CLIENT_URL}/thankyou?session_id={CHECKOUT_SESSION_ID}`,
+        `${process.env.CLIENT_URL}/#/thankyou?session_id={CHECKOUT_SESSION_ID}`,
 
       cancel_url:
-        `${process.env.CLIENT_URL}/checkout`,
+        `${process.env.CLIENT_URL}/#/checkout`,
     });
     await pool.query('COMMIT')
 
