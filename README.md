@@ -16,6 +16,7 @@ Projektet innehåller produktlistning, kundvagn, checkout‑flöde och kommunika
 - Lägg till / ta bort från kundvagn
 - Produktimport från extern leverantör (CSV/XML)
 - Betalning med Stripe Checkout
+- Bildlagring: Cloudinary
 - Orderhantering och lageruppdatering
 - API-kommunikation mellan frontend och backend
 
@@ -106,3 +107,21 @@ CLIENT_URL=
 
 Testkort
 4242 4242 4242 4242
+
+🖼️ Produktbilder
+Shoppen använder Cloudinary för lagring av produktbilder i molnet.
+
+Funktioner
+Uppladdning av produktbilder via backend
+Endast JPEG- och PNG-filer accepteras
+Maximal filstorlek: 4 MB
+Bilder lagras i Cloudinary
+Bildens URL sparas i databasen
+Bilder visas i produktlistan och på produktsidan
+Vid byte av bild laddas den nya bilden upp innan den gamla tas bort
+Den gamla bilden behålls om uppladdningen misslyckas
+Begripliga felmeddelanden vid ogiltig filtyp eller för stor fil
+Externa miljövariabler
+CLOUDINARY_CLOUD_NAME=
+CLOUDINARY_API_KEY=
+CLOUDINARY_API_SECRET=

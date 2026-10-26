@@ -47,7 +47,7 @@ const Products = () => {
         setTotalProducts(Number(res.data.meta.total));
 };
 
-  const fetchCategories = async () => {
+const fetchCategories = async () => {
     try {
       const res = await axios.get("/api/categories");
       setCategories(res.data);
