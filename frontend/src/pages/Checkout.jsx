@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import '../styles/checkout.css'
+import { useCurrency } from "../context/CurrencyContext";
 
 export default function Checkout({ sessionId, fetchCartCount }) {
   const [form, setForm] = useState({
@@ -9,7 +10,7 @@ export default function Checkout({ sessionId, fetchCartCount }) {
     email: "",
     address: "",
   });
-
+  const {currency, convert}=useCurrency();
   const [items, setItems] = useState([]);
   const [subtotal, setSubtotal] = useState(0);
 
@@ -17,10 +18,8 @@ export default function Checkout({ sessionId, fetchCartCount }) {
   const [selectedShipping, setSelectedShipping] = useState(null);
 
   const [grandTotal, setGrandTotal] = useState(0);
-  const navigate = useNavigate();
 
-  
-  
+   
   const [checkoutError, setCheckoutError] = useState(null);
 
   useEffect(() => {
@@ -103,14 +102,13 @@ export default function Checkout({ sessionId, fetchCartCount }) {
     console.log(order)
 
     try {
-      const res = await axios.post("/api/orders", order);
+      const res = await axios.post("/api/orders/checkout", order);
+      window.location.href=res.data.url;
 
       if (res.data.success) {
         setItems([]);
         setSubtotal(0);
         await fetchCartCount();
-
-      navigate(`/thankyou/${res.data.orderId}`);
       
       }
     } catch (err) {
@@ -143,18 +141,18 @@ export default function Checkout({ sessionId, fetchCartCount }) {
 
           <div className="summary-item">
             <span>Delsumma:</span>
-            <span>{subtotal} kr</span>
+            <span>{convert(subtotal).toFixed(2)} {currency}</span>
           </div>
 
           {selectedShipping && (
             <div className="summary-item">
               <span>Frakt:</span>
-              <span>{selectedShipping.price} kr ({selectedShipping.delivery_days} dagar)</span>
+              <span>{convert(Number(selectedShipping.price)).toFixed(2)} {currency} ({selectedShipping.delivery_days} dagar)</span>
             </div>
           )}
 
           <div className="summary-total">
-            Totalt: {grandTotal} kr
+            Totalt: {convert(grandTotal).toFixed(2)} {currency}
           </div>
         </div>
 
@@ -179,7 +177,7 @@ export default function Checkout({ sessionId, fetchCartCount }) {
           >
             {shippingMethods.map(method => (
               <option key={method.id} value={method.id}>
-                {method.name} - {method.price} kr ({method.delivery_days} dagar)
+                {method.name} - {convert(Number(method.price)).toFixed(2)} {currency} ({method.delivery_days} dagar)
               </option>
             ))}
           </select>

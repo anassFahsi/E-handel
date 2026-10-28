@@ -1,15 +1,16 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
+import { useCurrency } from "../context/CurrencyContext";
 
 const Products = () => {
   const navigate = useNavigate();
   const [params] = useSearchParams();
 
-  
+  const {convert, currency}=useCurrency();
   const [search, setSearch] = useState(params.get("search") || "");
   const [category, setCategory] = useState(params.get("category") || "");
-  const [sort, setSort] = useState(params.get("sort") || "newest");
+  const [sort, setSort] = useState(params.get("sort") || "oldest");
   const [page, setPage] = useState(Number(params.get("page")) || 1);
   const [limit, setLimit] = useState(Number(params.get("limit")) || 10);
 
@@ -32,15 +33,21 @@ const Products = () => {
   };
 
   const fetchProducts = async () => {
-    const res = await axios.get("/api/products", {
-      params: { search, category, sort, limit, page },
+    const res = await axios.get("/api/search", {
+      params: { q:search, page, pageSize: limit, category, sort},
     });
+    
+       setProducts(res.data.data.map((p) => (
+    {...p, price: Number(p.price),}))
+  );
 
-    setProducts(res.data.products.map((p) => ({ ...p, price: Number(p.price) })));
-    setTotalProducts(Number(res.data.productsCount));
-  };
+    setTotalProducts(
+      Number(res.data.meta.total)
+    );
+        setTotalProducts(Number(res.data.meta.total));
+};
 
-  const fetchCategories = async () => {
+const fetchCategories = async () => {
     try {
       const res = await axios.get("/api/categories");
       setCategories(res.data);
@@ -88,7 +95,7 @@ const Products = () => {
     >
       <option value="">Alla kategorier</option>
       {categories.map((c) => (
-        <option key={c.id} value={c.id}>
+        <option key={c.id} value={c.name}>
           {c.name}
         </option>
       ))}
@@ -153,11 +160,11 @@ const Products = () => {
             <Link to={`/products/${p.id}`} className="product-link">
               <img
             className="product-image"
-                src={p.image_url}
+                src={p.imageUrl}
                 alt={p.name}
               />
               <strong className="product-name">{p.name}</strong>
-              <span className="product-price">{p.price} kr</span>
+              <span className="product-price">{convert(p.price).toFixed(2)} {currency}</span>
 
               
             

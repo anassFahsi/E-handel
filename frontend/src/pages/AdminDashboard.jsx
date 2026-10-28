@@ -10,6 +10,8 @@ export default function AdminDashboard() {
   });
 
   const [latestOrders, setLatestOrders] = useState([]);
+  const [importReport, setImportReport] = useState(null);
+  const [importLoading, setImportLoading] = useState(false);
 
   const fetchDashboardData = async () => {
     try {
@@ -34,13 +36,40 @@ export default function AdminDashboard() {
     }
   };
 
+  const importProducts = async (format) => {
+  try {
+    setImportLoading(true);
+
+    const token = localStorage.getItem("token");
+
+    const res = await axios.post(
+      `/api/admin/products/import/${format}`,
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    setImportReport(res.data);
+    console.log(res.data)
+
+    fetchDashboardData();
+  } catch (err) {
+    console.error("Import failed", err);
+  } finally {
+    setImportLoading(false);
+  }
+};
+
   useEffect(() => {
     fetchDashboardData();
   }, []);
 
   return (
     <div className="admin-dashboard-page">
-  <h1 className="page-title">Admin Dashboard</h1>
+  <h1 className="page-title">Admin Panel</h1>
 
   <div className="dashboard-stats">
     <div className="stat-card">
@@ -60,6 +89,36 @@ export default function AdminDashboard() {
   </div>
 
   <hr className="divider" />
+  <div className="stat-card">
+       <h2>Importera produkter</h2>
+       <button type="button" className="btn btn-primary"
+        onClick={() => importProducts("csv")}
+        disabled={importLoading}>
+          importera CSV
+       </button>
+       <button type="button" className="btn btn-primary"
+        onClick={() => importProducts("xml")}
+        disabled={importLoading}>
+          importera XML
+       </button>
+      {importReport&&
+      <>
+        <p>Nya produkter: {importReport.newProducts}</p>
+        <p>Uppdaterade produkter: {importReport.updatedProducts}</p>
+        <p>Överhoppade produkter: {importReport.skippedCount}</p>
+        <ul>
+          {importReport.skippedProducts.map(p=>(<>
+           <li key={p.sku}>Produkt: {p.sku}
+            - Orsak: {p.reason[0]?.message}</li>
+          </>
+          ))}
+        </ul>
+        </>
+        }
+       
+  </div>
+ 
+<hr className="divider" />
 
   <h2 className="section-title">Senaste ordrar</h2>
 

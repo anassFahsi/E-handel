@@ -1,28 +1,15 @@
 import express from "express";
 import pool from "../db.js";
-import cloudinary from "../config/cloudinary.js";
-import { CloudinaryStorage } from "multer-storage-cloudinary";
-import multer from "multer";
-
-
-
+import {z} from 'zod';
+import { getSupplierCatalog } from "../integrations/supplierAdaper.js";
+import  {indexProducts, indexProduct, deleteProduct} from "../integrations/algoliaAdapter.js"
 import { auth } from "../middleware/auth.js";
 import { admin } from "../middleware/admin.js";
+import { handleUpload,removeProductImage } from "../integrations/storageAdapter.js";
+
 
 const router = express.Router();
 
-/* -------------------------------------------
-   CLOUDINARY STORAGE (ersätter diskStorage)
-------------------------------------------- */
-const storage = new CloudinaryStorage({
-  cloudinary,
-  params: {
-    folder: "products", // valfri mapp i Cloudinary
-    allowed_formats: ["jpg", "png", "jpeg", "webp"]
-  }
-});
-
-const upload = multer({ storage });
 
 /* -------------------------------------------
    ADMIN: DASHBOARD STATISTIK
@@ -79,11 +66,10 @@ router.get("/products", auth, admin, async (req, res) => {
 /* -------------------------------------------
    ADMIN: SKAPA PRODUKT (POST)
 ------------------------------------------- */
-router.post("/products", auth, admin, upload.single("image"), async (req, res) => {
+router.post("/products", auth, admin, handleUpload, async (req, res) => {
   
   try {
     const { name, price, description, category_id } = req.body;
-   console.log('req.file:',req.file)
     const image_url = req.file.path;
     if(!image_url)
       return res.status(400).json({error:'ingen bild laddades'})
@@ -105,8 +91,14 @@ router.post("/products", auth, admin, upload.single("image"), async (req, res) =
        RETURNING *`,
       [name, price, description, image_url, catId]
     );
+    const product = result.rows[0];
 
-    res.json(result.rows[0]);
+    await indexProduct({
+      ...product,
+      category_name: category_id,
+    });
+
+    res.json(product);
 
   } catch (error) {
     console.error(error);
@@ -142,7 +134,7 @@ router.get("/products/:id", auth, admin, async (req, res) => {
 /* -------------------------------------------
    ADMIN: UPPDATERA PRODUKT (PUT)
 ------------------------------------------- */
-router.put("/products/:id", auth, admin, upload.single("image"), async (req, res) => {
+router.put("/products/:id", auth, admin, handleUpload, async (req, res) => {
   const { id } = req.params;
   const { name, description, price, stock } = req.body;
 
@@ -185,18 +177,25 @@ router.put("/products/:id", auth, admin, upload.single("image"), async (req, res
        RETURNING *`,
       [name, description, finalImageUrl, price, stock, id]
     );
+    const updatedProduct = await pool.query(`
+      SELECT
+        p.*,
+        c.name AS category_name
+      FROM products p
+      LEFT JOIN categories c
+        ON c.id = p.category_id
+      WHERE p.id = $1
+     `, [id]);
+    await indexProduct(updatedProduct.rows[0]);
 
     res.json(result.rows[0]);
+   
 
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Could not update product" });
   }
 });
-
-
-
-
 
 router.delete("/products/:id", auth, admin, async (req, res) => {
   try {
@@ -214,18 +213,17 @@ router.delete("/products/:id", auth, admin, async (req, res) => {
     const imageUrl = productRes.rows[0].image_url;
 
     if (imageUrl && imageUrl.includes("cloudinary.com")) {
-      // Exempel URL:
-      // https://res.cloudinary.com/<name>/image/upload/v123/products/abc123.png
 
       const parts = imageUrl.split("/");
       const fileName = parts[parts.length - 1]; 
       const folder = parts[parts.length - 2];   
 
       const publicId = `${folder}/${fileName.split(".")[0]}`; 
-      await cloudinary.uploader.destroy(publicId);
+      await removeProductImage(publicId);
     }
 
     await pool.query("DELETE FROM products WHERE id = $1", [id]);
+    await deleteProduct(id);
 
     res.json({ message: "Product and image deleted successfully" });
 
@@ -439,5 +437,115 @@ router.put("/orders/:id/status", auth, admin, async (req, res) => {
   }
 });
 
-export default router;
 
+async function getOrCreateCategory(categoryName){
+  const existingCategory=await pool.query(`SELECT id FROM categories WHERE name=$1`,[categoryName]);
+  if(existingCategory.rows.length>0){
+      return existingCategory.rows[0].id;
+  }
+  else{
+    const newCategory=await pool.query(`INSERT INTO categories (name) VALUES ($1) RETURNING id`,[categoryName]);
+    return newCategory.rows[0].id;
+  }
+};
+
+const ImportedProduct = z.object({
+supplierSku: z.string().min(1),
+name: z.string().min(1),
+categoryName: z.string().min(1),
+price: z.number().positive(),
+stock: z.number().nullable(),
+variants: z.array(z.string())
+});
+
+router.post("/products/import/:format", async (req, res) => {
+  const {format}=req.params;
+  if (format !=='csv' && format !=='xml' ){
+    res.status(400).json({ error: 'The format must be csv or xml' });
+    return;
+  }
+
+  try{
+    const candidates=await getSupplierCatalog(format);
+    let newProducts=0;
+    let updatedProducts=0;
+    let skippedProducts=[];
+    for (const candidate of candidates) {
+    const result = ImportedProduct.safeParse(candidate);
+
+    if (!result.success) {
+      skippedProducts.push({sku:candidate.supplierSku, reason: result.error.issues})
+      continue;
+    }
+    const product=result.data;
+    const categoryId=await getOrCreateCategory(product.categoryName);
+
+    const existingProduct = await pool.query(`SELECT id FROM 
+    products WHERE supplier_sku = $1`,[product.supplierSku]
+   );
+   if(existingProduct.rows.length>0){
+    updatedProducts++;
+   }
+   else{
+    newProducts++;
+   }
+    await pool.query(
+      `
+      INSERT INTO products (
+        supplier_sku,
+        name,
+        price,
+        stock,
+        category_id
+      )
+      VALUES ($1, $2, $3, $4, $5)
+
+      ON CONFLICT (supplier_sku)
+
+      DO UPDATE SET
+        name = EXCLUDED.name,
+        price = EXCLUDED.price,
+        stock = EXCLUDED.stock,
+        category_id = EXCLUDED.category_id
+      `,
+      [
+        product.supplierSku,
+        product.name,
+        product.price,
+        product.stock,
+        categoryId
+      ]
+    );
+
+  }
+  return res.json({
+  newProducts,
+  updatedProducts,
+  skippedCount: skippedProducts.length,
+  skippedProducts
+  });
+  }
+  catch(error){
+    return res.status(500).json({error:error.message})
+  }
+});
+
+router.post("/search/index", async (req, res) => {
+  const result = await pool.query(`
+    SELECT
+      p.*,
+      c.name AS category_name
+    FROM products p
+    LEFT JOIN categories c
+      ON c.id = p.category_id
+  `);
+
+  await indexProducts(result.rows);
+
+  res.json({
+    indexed: result.rows.length,
+  });
+});
+
+
+export default router;

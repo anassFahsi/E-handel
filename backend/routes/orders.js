@@ -1,21 +1,17 @@
 import express from 'express';
 import pool from '../db.js';
 import { auth } from '../middleware/auth.js';
+import {stripe} from '../integrations/stripeAdapter.js';
 
 const router = express.Router();
-
 /* -------------------------------------------
-   USER: CREATE ORDER (checkout)
+   USER: CREATE ORDER
 ------------------------------------------- */
-
-router.post('/', async (req, res) => {
-  const { customer, cart, shipping_method_id, sessionId } = req.body;
-
-  try {
+router.post("/checkout", async (req, res) => {
+    const { customer, cart, shipping_method_id, sessionId } = req.body;
+    try {
     await pool.query('BEGIN');
-
- 
-    const shippingRes = await pool.query(
+       const shippingRes = await pool.query(
       `SELECT price FROM shipping_methods WHERE id = $1`,
       [shipping_method_id]
     );
@@ -31,8 +27,8 @@ router.post('/', async (req, res) => {
 
   const orderRes = await pool.query(
       `INSERT INTO orders 
-        (customer_name, customer_email, customer_address, total, shipping_method_id, shipping_price)
-       VALUES ($1, $2, $3, $4, $5, $6)
+        (customer_name, customer_email, customer_address, total, shipping_method_id, shipping_price, cart_session_id)
+       VALUES ($1, $2, $3, $4, $5, $6, $7)
        RETURNING id`,
       [
         customer.name,
@@ -40,12 +36,13 @@ router.post('/', async (req, res) => {
         customer.address,
         0,                 
         shipping_method_id,
-        shippingPrice
+        shippingPrice,
+        sessionId
       ]
     );
 
     const orderId = orderRes.rows[0].id;
-
+    const lineItems=[];
     for (const item of cart) {
 
       if (item.quantity > item.variant_stock) {
@@ -53,7 +50,6 @@ router.post('/', async (req, res) => {
         return res.json({ error: 'Not enough stock' });
       }
 
-     
       const priceRes = await pool.query(
         `SELECT price FROM products WHERE id = $1`,
         [item.product_id]
@@ -65,7 +61,6 @@ router.post('/', async (req, res) => {
       }
 
       const itemPrice = priceRes.rows[0].price;
-
       backendTotal += item.quantity * Number(itemPrice);
 
       await pool.query(
@@ -75,34 +70,65 @@ router.post('/', async (req, res) => {
         [orderId, item.product_id, item.variant_id, item.quantity, itemPrice]
       );
 
-      await pool.query(
-        `UPDATE product_variants SET stock = stock - $1 WHERE id = $2`,
-        [item.quantity, item.variant_id]
-      );
-    }
-
+      lineItems.push({
+        quantity: item.quantity,
+        price_data: {
+        currency: "sek",
+        unit_amount: Math.round(Number(itemPrice) * 100),
+        product_data: {
+          name: item.name,
+        },
+      },
+    });
+    }; 
+    lineItems.push({
+      quantity:1,
+      price_data:{
+         currency: "sek",
+         unit_amount: Math.round(shippingPrice)*100,
+          product_data: {
+              name: "frakt",
+            }
+          }
+        })
     backendTotal += Number(shippingPrice);
-
-    await pool.query(
+       await pool.query(
       `UPDATE orders SET total = $1 WHERE id = $2`,
       [backendTotal, orderId]
     );
 
-    await pool.query(
-      `DELETE FROM carts WHERE session_id = $1`,
-      [sessionId]
-    );
 
-    await pool.query('COMMIT');
+    const session = await stripe.checkout.sessions.create({
+      mode: "payment",
 
-    res.json({ success: true, orderId });
+      client_reference_id: String(orderId),
+
+      expires_at: Math.floor(Date.now() / 1000) + 30 * 60,
+
+      line_items: lineItems,
+
+      success_url:
+        `${process.env.CLIENT_URL}/#/thankyou?session_id={CHECKOUT_SESSION_ID}`,
+
+      cancel_url:
+        `${process.env.CLIENT_URL}/#/checkout`,
+    });
+    await pool.query('COMMIT')
+
+    res.json({
+      url: session.url,
+    });
 
   } catch (error) {
+    await pool.query("ROLLBACK");
     console.error(error);
-    await pool.query('ROLLBACK');
-    res.status(500).json({ error: 'Order creation failed' });
+
+    res.status(500).json({
+      error: error.message,
+    });
   }
 });
+
 
 
 /* -------------------------------------------
@@ -153,6 +179,42 @@ router.get('/', auth, async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Could not fetch orders" });
+  }
+});
+
+router.get("/checkout/session/:sessionId", async (req, res) => {
+  try {
+    const session = await stripe.checkout.sessions.retrieve(
+      req.params.sessionId
+    );
+
+    const orderId = session.client_reference_id;
+
+    const orderRes = await pool.query(
+      `SELECT *
+       FROM orders
+       WHERE id = $1`,
+      [orderId]
+    );
+
+    if (!orderRes.rows.length) {
+      return res.status(404).json({
+        error: "Order not found",
+      });
+    }
+
+    res.json({
+      sessionId: session.id,
+      paymentStatus: session.payment_status,
+      order: orderRes.rows[0],
+    });
+
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      error: "Could not fetch checkout session",
+    });
   }
 });
 

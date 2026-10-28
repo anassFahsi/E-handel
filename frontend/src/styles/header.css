@@ -29,7 +29,6 @@ body {
   color: #007bff;
 }
 
-
 .logo {
   flex: 1;
   text-align: center;
@@ -37,16 +36,13 @@ body {
   font-weight: bold;
 }
 
-
 .desktop-only {
   display: flex;
 }
 
-
 .mobile-only {
   display: none;
 }
-
 
 .nav-left {
   display: flex;
@@ -54,19 +50,18 @@ body {
   gap: 20px;
 }
 
-
 .nav-right {
   display: flex;
   align-items: center;
   gap: 20px;
 }
 
-
 .nav-cart {
   position: relative;
   font-size: 22px;
   text-decoration: none;
   color: #333;
+  padding-left: 20px;
 }
 
 .cart-count {
@@ -80,9 +75,14 @@ body {
   font-size: 12px;
 }
 
-
 .mobile-menu {
   display: none;
+}
+
+.currency{
+  width: 70px;
+  margin-right: 10px;
+  color: steelblue;
 }
 
 
@@ -92,7 +92,9 @@ body {
     display: none;
   }
 
-
+  .currency{
+    display: none;
+  }
   .mobile-only {
     display: block;
   }
@@ -175,4 +177,6 @@ body {
     display: none;
   }
 }
+
+
  

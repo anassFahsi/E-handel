@@ -6,11 +6,11 @@
     },
     "backend": {
       "root": "backend",
-      "entrypoint":"api/index.js"
+      "entrypoint": "api/index.js"
     }
   },
   "rewrites": [
-   {
+    {
       "source": "/api(/.*)?",
       "destination": {
         "type": "service",
@@ -23,6 +23,12 @@
         "type": "service",
         "service": "frontend"
       }
+    }
+  ],
+  "crons": [
+    {
+      "path": "/api/ping",
+      "schedule": "0 0 * * *"
     }
   ]
 }

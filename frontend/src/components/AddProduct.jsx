@@ -1,5 +1,6 @@
 import { useState } from "react";
 import axios from "axios";
+import { useEffect } from "react";
 
 export default function AddProduct({ onProductAdded }) {
   const [formData, setFormData] = useState({
@@ -11,10 +12,23 @@ export default function AddProduct({ onProductAdded }) {
 
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
-
+  const [categories, setCategories]=useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
+
+useEffect(()=>{
+    const fetchCategories = async () => {
+    try {
+      const res = await axios.get("/api/categories");
+      setCategories(res.data);
+      console.log(res.data)
+    } catch (error) {
+      console.error("Could not fetch categories", error);
+    }
+  };fetchCategories();
+},[])
+
 
   const validateForm = () => {
     if (!formData.name || formData.name.length < 2) {
@@ -151,12 +165,11 @@ if (err.response) {
             setFormData({ ...formData, category_id: e.target.value })
           }
         >
-          <option value="Basics">Basics</option>
-          <option value="T-Shirts">T-Shirts</option>
-          <option value="Casual">Casual</option>
-          <option value="Men">Herr</option>
-          <option value="Clothing">Kläder</option>
-          <option value="Women">Dam</option>
+          <option value="Basic">Basic</option>
+            {categories.map((c) => (
+         <option key={c.id} value={c.name}>
+          {c.name}
+         </option>))}
         </select>
 
         <input

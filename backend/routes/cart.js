@@ -117,6 +117,7 @@ router.get("/cart/:sessionId", async (req, res) => {
           ci.variant_id,
           p.id AS product_id,
           p.name,
+          p.image_url,
           p.price,
           pv.size,
           pv.color,

@@ -3,18 +3,22 @@ dotenv.config();
 import express from 'express';
 import cors from 'cors';
 import pool from '../db.js';
-
+import {z} from 'zod';
+import stripeWebhookRouter from '../routes/stripeWebhook.js';
 import ordersRouter from '../routes/orders.js';
 import cartRouter from '../routes/cart.js';
 import shippingRouter from '../routes/shipping.js';
 import usersRouter from '../routes/users.js';
 import reviewsRouter from '../routes/reviews.js';
-import adminRouter from '../routes/admin.js';   
+import adminRouter from '../routes/admin.js';  
+import currencyRouter from '../routes/currency.js' ;
+import { searchProducts } from "../integrations/algoliaAdapter.js";
 
 const app = express();
 app.use("/uploads", express.static("uploads"));
 
 app.use(cors());
+app.use("/api/stripe/webhook",stripeWebhookRouter);
 app.use(express.json());
 
 app.use('/api/orders', ordersRouter);
@@ -23,6 +27,24 @@ app.use('/api/', shippingRouter);
 app.use('/api/users', usersRouter);
 app.use('/api/reviews', reviewsRouter);
 app.use('/api/admin', adminRouter);   
+app.use('/api/currency', currencyRouter);
+
+const SearchQuery = z.object({
+  q: z.string().trim().default(""),
+  page: z.coerce.number().int().min(1).default(1),
+  pageSize: z.coerce.number().int().min(1).max(50).default(12),
+  category:z.string().trim().default(""),
+  sort:z.string().default("newest")
+});
+
+
+// General error handling for all errors
+app.use((err,req,res,_next)=>{
+  const message=err instanceof Error?err.message:String(err);
+  console.error(`${req.method} ${req.originalUrl}: failed ${message}`);
+  res.status(500).json({error:'Something went wrong on the server'})
+})
+
 
 
 // Get all products (public)
@@ -32,7 +54,7 @@ app.get("/api/products", async (req, res) => {
   const offset = (Number(page) - 1) * Number(limit);
 
   try {
-    let conditions = [];
+    let conditions = ['image_url IS NOT NULL'];
     let params = [];
 
     if (search) {
@@ -95,6 +117,54 @@ app.get("/api/products/:id", async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Could not fetch product" });
+  }
+});
+
+app.get("/api/search", async (req, res) => {
+  const parsed = SearchQuery.safeParse(req.query);
+
+  if (!parsed.success) {
+    return res.status(400).json({
+      error: parsed.error.issues,
+    });
+  }
+
+  try {
+    const { q, page, pageSize, category , sort} = parsed.data;
+
+    const result = await searchProducts(
+      q,
+      page,
+      pageSize,
+      category,
+      sort
+    );
+    //console.log("hits:", result.hits.length);
+   //console.log(result.hits[0]); 
+
+  return res.json({
+    data: result.hits.map((hit) => ({
+      id: Number(hit.objectID),
+      supplierSku: hit.supplierSku,
+      name: hit.name,
+      description: hit.description,
+      price: hit.price,
+      category: hit.category,
+      imageUrl: hit.imageUrl,
+    })),
+    meta: {
+      page,
+      pageSize,
+      total: result.nbHits,
+      totalPages: result.nbPages,
+   },
+  });
+  } catch (error) {
+    console.error(error);
+
+    return res.status(500).json({
+      error: "Could not search products",
+    });
   }
 });
 
