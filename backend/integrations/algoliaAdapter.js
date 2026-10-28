@@ -86,7 +86,6 @@ if (sort === "oldest") {
     indexName,
     searchParams
   });
-   console.log(indexName)
 
   return result;
 }

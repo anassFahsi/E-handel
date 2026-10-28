@@ -1,74 +1,15 @@
 import express from "express";
 import pool from "../db.js";
-import cloudinary from "../config/cloudinary.js";
-import { CloudinaryStorage } from "multer-storage-cloudinary";
-import multer from "multer";
 import {z} from 'zod';
 import { getSupplierCatalog } from "../integrations/supplierAdaper.js";
-import  {indexProducts} from "../integrations/algoliaAdapter.js"
+import  {indexProducts, indexProduct, deleteProduct} from "../integrations/algoliaAdapter.js"
 import { auth } from "../middleware/auth.js";
 import { admin } from "../middleware/admin.js";
-import { indexProduct } from "../integrations/algoliaAdapter.js";
-import { deleteProduct } from "../integrations/algoliaAdapter.js";
-import { removeProductImage } from "../integrations/storageAdapter.js";
+import { handleUpload,removeProductImage } from "../integrations/storageAdapter.js";
+
 
 const router = express.Router();
 
-/* -------------------------------------------
-   CLOUDINARY STORAGE
-------------------------------------------- */
-const storage = new CloudinaryStorage({
-  cloudinary,
-  params: {
-    folder: "products",
-    allowed_formats: ["jpg", "png", "jpeg"]
-  }
-});
-
-const upload = multer({
-  storage,
-  limits: {
-    fileSize: 4 * 1024 * 1024
-  }, 
-  fileFilter: (req, file, cb) => {
-
-    const allowedTypes = [
-      "image/jpeg",
-      "image/png"
-    ];
-
-    if (!allowedTypes.includes(file.mimetype)) {
-      return cb(
-        new Error(
-          "Endast JPEG och PNG är tillåtna"
-        )
-      );
-    }
-
-    cb(null, true);
-  }
-});
-
-const handleUpload = (req, res, next) => {
-  upload.single("image")(req, res, (err) => {
-
-    if (err instanceof multer.MulterError &&
-        err.code === "LIMIT_FILE_SIZE") {
-
-      return res.status(400).json({
-        error: "Bilden är för stor. Max 4 MB."
-      });
-    }
-
-    if (err) {
-      return res.status(400).json({
-        error: err.message
-      });
-    }
-
-    next();
-  });
-};
 
 /* -------------------------------------------
    ADMIN: DASHBOARD STATISTIK
@@ -129,7 +70,6 @@ router.post("/products", auth, admin, handleUpload, async (req, res) => {
   
   try {
     const { name, price, description, category_id } = req.body;
-   console.log('req.file:',req.file)
     const image_url = req.file.path;
     if(!image_url)
       return res.status(400).json({error:'ingen bild laddades'})
