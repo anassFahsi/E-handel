@@ -65,3 +65,14 @@
 .form-inline .form-input {
   flex: 1;
 }
+
+.login-form{
+  width: 40%;
+  margin: auto;
+}
+
+@media(max-width:600px){
+  .login-form{
+    width: 90%;
+  }
+}

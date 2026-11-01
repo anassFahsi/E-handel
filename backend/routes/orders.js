@@ -2,7 +2,7 @@ import express from 'express';
 import pool from '../db.js';
 import { auth } from '../middleware/auth.js';
 import {stripe} from '../integrations/stripeAdapter.js';
-import { findServicePoints } from '../integrations/postNordAdapter.js';
+import { findServicePoints, getDeliveryTime } from '../integrations/postNordAdapter.js';
 import { calculateShipping } from './shipping.js';
 
 const router = express.Router();
@@ -24,6 +24,7 @@ router.post("/checkout", async (req, res) => {
     }
     const shippingMethodName=shippingRes.rows[0].name;
     let servicePoint='';
+    
     if (shippingMethodName === "PostNord Ombud") {
 
       const nearby =
