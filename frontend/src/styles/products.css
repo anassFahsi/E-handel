@@ -4,7 +4,6 @@
   padding: 20px;
 }
 
-
 .products-filters {
   display: flex;
   flex-wrap: wrap;
@@ -111,5 +110,11 @@
 .pagination-btn:disabled:hover,
 .btn.btn-secondary:disabled:hover {
   background-color: #e0e0e0 !important;
+}
+
+.free-shipping{
+  margin-top:10px;
+  text-align:center;
+ background-color: #ccd;
 }
 

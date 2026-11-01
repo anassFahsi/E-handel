@@ -13,7 +13,10 @@ import reviewsRouter from '../routes/reviews.js';
 import adminRouter from '../routes/admin.js';  
 import currencyRouter from '../routes/currency.js' ;
 import { searchProducts } from "../integrations/algoliaAdapter.js";
+import { getDeliveryTime } from "../integrations/postNordAdapter.js";
 
+const result=await getDeliveryTime('16376');
+console.log(JSON.stringify(result,null,2))
 const app = express();
 app.use("/uploads", express.static("uploads"));
 
@@ -23,7 +26,7 @@ app.use(express.json());
 
 app.use('/api/orders', ordersRouter);
 app.use('/api/', cartRouter);
-app.use('/api/', shippingRouter);
+app.use('/api/shipping', shippingRouter);
 app.use('/api/users', usersRouter);
 app.use('/api/reviews', reviewsRouter);
 app.use('/api/admin', adminRouter);   

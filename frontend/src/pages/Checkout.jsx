@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
 import '../styles/checkout.css'
 import { useCurrency } from "../context/CurrencyContext";
+
 
 export default function Checkout({ sessionId, fetchCartCount }) {
   const [form, setForm] = useState({
@@ -13,10 +13,13 @@ export default function Checkout({ sessionId, fetchCartCount }) {
   const {currency, convert}=useCurrency();
   const [items, setItems] = useState([]);
   const [subtotal, setSubtotal] = useState(0);
+  const [postalCode, setPostalCode] = useState("");
+  const [servicePoints, setServicePoints] = useState([]);
+  const [selectedServicePoint, setSelectedServicePoint] = useState('');
 
   const [shippingMethods, setShippingMethods] = useState([]);
   const [selectedShipping, setSelectedShipping] = useState(null);
-
+  const [deliveryTime, setDeliveryTime] = useState(null);
   const [grandTotal, setGrandTotal] = useState(0);
 
    
@@ -37,6 +40,66 @@ export default function Checkout({ sessionId, fetchCartCount }) {
 
     fetchCart();
   }, [sessionId]);
+  
+useEffect(() => {
+  if (postalCode.length !== 5) {
+    
+    setServicePoints([]);
+    setDeliveryTime(null);
+    return;
+  }
+  const fetchShippingData = async () => {
+    try {
+      const [servicePointsRes, deliveryTimeRes] =
+        await Promise.all([
+
+          axios.get(
+            "/api/shipping/service-points",
+            {
+              params: { postalCode }
+            }
+          ),
+
+          axios.get(
+            "/api/shipping/delivery-time",
+            {
+              params: { postalCode }
+            }
+          )
+
+        ]);
+
+      setServicePoints(
+        servicePointsRes.data
+      );
+
+      setDeliveryTime(
+        new Date(deliveryTimeRes.data)
+          .toLocaleDateString(
+            "sv-SE",
+            {
+              weekday: "long",
+              day: "numeric",
+              month: "numeric"
+            }
+          )
+      );
+
+    } catch (err) {
+
+      console.error(err);
+
+      setServicePoints([]);
+      setDeliveryTime(null);
+
+    }
+  };
+
+  fetchShippingData();
+
+}, [postalCode]);
+
+  
 
   useEffect(() => {
     const fetchShipping = async () => {
@@ -56,7 +119,7 @@ export default function Checkout({ sessionId, fetchCartCount }) {
 
   useEffect(() => {
     if (selectedShipping) {
-      setGrandTotal(subtotal + Number(selectedShipping.price));
+      subtotal<500? setGrandTotal(subtotal + Number(selectedShipping.price)):setGrandTotal(subtotal);
     }
   }, [subtotal, selectedShipping]);
 
@@ -78,10 +141,16 @@ export default function Checkout({ sessionId, fetchCartCount }) {
     if (!form.address.trim()) return "Adress är obligatorisk";
     if (items.length === 0) return "Kundvagnen är tom";
     if (!selectedShipping) return "Välj ett fraktalternativ";
+    if (selectedShipping?.name === "PostNord Ombud" &&
+      !selectedServicePoint
+    ) {
+    return "Välj ett ombud";
+    }
     return null;
   };
 
   const handleSubmit = async (e) => {
+    console.log('selectedServicePoint',selectedServicePoint)
     e.preventDefault();
     const error = validateCheckout(form, items, selectedShipping);
 
@@ -95,9 +164,10 @@ export default function Checkout({ sessionId, fetchCartCount }) {
       customer: form,
       cart: items,
       shipping_method_id: selectedShipping.id,
-      shipping_price: selectedShipping.price,
-      total: grandTotal,
       sessionId: sessionId,
+      postalCode,
+      servicePointId:selectedServicePoint
+   
     };
     console.log(order)
 
@@ -109,11 +179,18 @@ export default function Checkout({ sessionId, fetchCartCount }) {
         setItems([]);
         setSubtotal(0);
         await fetchCartCount();
+        setSelectedServicePoint([]);
+        setDeliveryTime(null)
       
       }
     } catch (err) {
       console.error("Could not submit order", err);
-      setCheckoutError("Kunde inte skicka order");
+  
+      setCheckoutError(
+        err.response?.data?.error ||
+        "Kunde inte skicka order"
+      );
+
       setTimeout(() => setCheckoutError(null), 2500);
     }
   };
@@ -147,9 +224,14 @@ export default function Checkout({ sessionId, fetchCartCount }) {
           {selectedShipping && (
             <div className="summary-item">
               <span>Frakt:</span>
-              <span>{convert(Number(selectedShipping.price)).toFixed(2)} {currency} ({selectedShipping.delivery_days} dagar)</span>
+              <span>{subtotal>=500?'0,00':convert(Number(selectedShipping.price)).toFixed(2)} {currency}</span>
             </div>
           )}
+          {deliveryTime &&
+          <div className="summary-item">
+          <span>Beräknad leveranstid:</span>
+          <span>{deliveryTime}</span>
+          </div>}
 
           <div className="summary-total">
             Totalt: {convert(grandTotal).toFixed(2)} {currency}
@@ -177,10 +259,23 @@ export default function Checkout({ sessionId, fetchCartCount }) {
           >
             {shippingMethods.map(method => (
               <option key={method.id} value={method.id}>
-                {method.name} - {convert(Number(method.price)).toFixed(2)} {currency} ({method.delivery_days} dagar)
+                {method.name} - {convert(Number(method.price)).toFixed(2)} {currency}
               </option>
             ))}
           </select>
+
+          <label className="form-label">Postnummer</label>
+          <input className="form-input" name='postalcode'  value={postalCode}
+            onChange={(e) => {
+              setPostalCode(e.target.value);
+            }}/>
+
+            {selectedShipping?.name ==="PostNord Ombud"&&
+            <select value={selectedServicePoint} onChange={(e)=>setSelectedServicePoint(e.target.value)}>
+              <option value="">Valj ombud</option>
+              {servicePoints.map(point=><option key={point.id} value={point.id}>{point.name}</option>)}
+              </select>
+              }
 
           <button className="checkout-button" type="submit">
             Bekräfta order

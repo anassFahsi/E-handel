@@ -2,42 +2,88 @@ import express from 'express';
 import pool from '../db.js';
 import { auth } from '../middleware/auth.js';
 import {stripe} from '../integrations/stripeAdapter.js';
+import { findServicePoints } from '../integrations/postNordAdapter.js';
+import { calculateShipping } from './shipping.js';
 
 const router = express.Router();
 /* -------------------------------------------
    USER: CREATE ORDER
 ------------------------------------------- */
 router.post("/checkout", async (req, res) => {
-    const { customer, cart, shipping_method_id, sessionId } = req.body;
+    const { customer, cart, shipping_method_id, sessionId,postalCode, servicePointId } = req.body;
     try {
-    await pool.query('BEGIN');
-       const shippingRes = await pool.query(
-      `SELECT price FROM shipping_methods WHERE id = $1`,
+      const shippingRes = await pool.query(
+      `SELECT name, price
+      FROM shipping_methods
+      WHERE id = $1`,
       [shipping_method_id]
     );
 
     if (shippingRes.rows.length === 0) {
-      await pool.query('ROLLBACK');
       return res.status(400).json({ error: 'Invalid shipping method' });
     }
+    const shippingMethodName=shippingRes.rows[0].name;
+    let servicePoint='';
+    if (shippingMethodName === "PostNord Ombud") {
 
-    const shippingPrice = shippingRes.rows[0].price;
+      const nearby =
+        await findServicePoints(postalCode);
 
+       servicePoint =
+        nearby.find(
+          point =>
+            point.id === servicePointId
+        );
+
+      if (!servicePoint) {
+        console.log('ogiltigt ombud')
+        return res.status(400).json({
+          error:
+            "Välj ett giltigt ombud"
+        });
+      };
+      
+    }
+   
     let backendTotal = 0;
 
+    for (const item of cart) {
+
+      const priceRes = await pool.query(
+        `SELECT price
+        FROM products
+        WHERE id = $1`,
+        [item.product_id]
+      );
+
+        const itemPrice =
+          Number(priceRes.rows[0].price);
+
+        backendTotal +=
+          item.quantity * itemPrice;
+      }
+
+    const shippingPrice =calculateShipping(shippingMethodName,
+        backendTotal);
+
+    const total = backendTotal + shippingPrice;
+
+  await pool.query('BEGIN');
   const orderRes = await pool.query(
       `INSERT INTO orders 
-        (customer_name, customer_email, customer_address, total, shipping_method_id, shipping_price, cart_session_id)
-       VALUES ($1, $2, $3, $4, $5, $6, $7)
+        (customer_name, customer_email, customer_address, total, shipping_method_id, shipping_price, cart_session_id, service_point_id, service_point_name)
+       VALUES ($1, $2, $3, $4, $5, $6, $7,$8,$9)
        RETURNING id`,
       [
         customer.name,
         customer.email,
         customer.address,
-        0,                 
+        total,                 
         shipping_method_id,
         shippingPrice,
-        sessionId
+        sessionId,
+        servicePoint?.id??null,
+        servicePoint?.name??null,
       ]
     );
 
@@ -61,7 +107,6 @@ router.post("/checkout", async (req, res) => {
       }
 
       const itemPrice = priceRes.rows[0].price;
-      backendTotal += item.quantity * Number(itemPrice);
 
       await pool.query(
         `INSERT INTO order_items 
@@ -81,6 +126,7 @@ router.post("/checkout", async (req, res) => {
       },
     });
     }; 
+  
     lineItems.push({
       quantity:1,
       price_data:{
@@ -91,11 +137,6 @@ router.post("/checkout", async (req, res) => {
             }
           }
         })
-    backendTotal += Number(shippingPrice);
-       await pool.query(
-      `UPDATE orders SET total = $1 WHERE id = $2`,
-      [backendTotal, orderId]
-    );
 
 
     const session = await stripe.checkout.sessions.create({
