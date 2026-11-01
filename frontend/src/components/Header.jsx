@@ -112,6 +112,7 @@ const Header = ({ cartCount }) => {
         </Link>
 
     </header>
+    
   );
 };
 

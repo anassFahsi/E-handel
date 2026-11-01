@@ -87,6 +87,11 @@ body {
 
 
 @media (max-width: 600px) {
+  .free-shipping{
+    position: relative;
+    top: -20px;
+    align-items: center;
+  }
 
   .desktop-only {
     display: none;

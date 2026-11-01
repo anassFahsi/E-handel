@@ -12,6 +12,14 @@ const Cart = ({ sessionId, handleCartCount }) => {
   const [cartSuccess, setCartSuccess] = useState(null);
   const [cartError, setCartError] = useState(null);
 
+  const FREE_SHIPPING_LIMIT = 500;
+
+  const leftForFreeShipping =
+    Math.max(
+      0,
+      FREE_SHIPPING_LIMIT - total
+    );
+
   const fetchCart = async () => {
     try {
       const res = await axios.get(`/api/cart/${sessionId}`);
@@ -114,6 +122,17 @@ const Cart = ({ sessionId, handleCartCount }) => {
           </li>
         ))}
       </ul>
+
+      {total < FREE_SHIPPING_LIMIT ? (
+      <div className="free-shipping-message">
+        🚚 Fri frakt över 500 kr.
+        Du har {convert(leftForFreeShipping).toFixed(2)} {currency} kvar till fri frakt.
+      </div>
+    ) : (
+      <div className="free-shipping-success">
+        ✅ Du har kvalificerat dig för fri frakt!
+      </div>
+    )}
 
       <h2 className="cart-total">Totalt: {convert(total).toFixed(2)} {currency}</h2>
 

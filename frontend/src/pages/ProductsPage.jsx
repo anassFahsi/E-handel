@@ -66,162 +66,165 @@ const fetchCategories = async () => {
     fetchProducts();
   }, [search, category, sort, page, limit]);
 
- 
-
   return (
-    <div className="products-page">
+    <>
+     <div className='free-shipping'>🚚 Fri frakt vid köp över 500 kr</div>
+     <div className="products-page">
 
-  <div className="products-filters">
-    <input
-      className="filter-input"
-      type="text"
-      placeholder="Sök produkter..."
-      value={search}
-      onChange={(e) => {
-        setSearch(e.target.value);
-        setPage(1);
-        updateURL(1, category, e.target.value, sort, limit);
-      }}
-    />
-
-    <select
-      className="filter-select"
-      value={category}
-      onChange={(e) => {
-        setCategory(e.target.value);
-        setPage(1);
-        updateURL(1, e.target.value, search, sort, limit);
-      }}
-    >
-      <option value="">Alla kategorier</option>
-      {categories.map((c) => (
-        <option key={c.id} value={c.name}>
-          {c.name}
-        </option>
-      ))}
-    </select>
-
-    <select
-      className="filter-select"
-      value={sort}
-      onChange={(e) => {
-        setSort(e.target.value);
-        setPage(1);
-        updateURL(1, category, search, e.target.value, limit);
-      }}
-    >
-      <option value="newest">Nyast först</option>
-      <option value="oldest">Äldst först</option>
-      <option value="price_asc">Pris: Lågt → Högt</option>
-      <option value="price_desc">Pris: Högt → Lågt</option>
-    </select>
-
-    <select
-      className="filter-select"
-      value={limit}
-      onChange={(e) => {
-        const newLimit = Number(e.target.value);
-        setLimit(newLimit);
-        setPage(1);
-        updateURL(1, category, search, sort, newLimit);
-      }}
-    >
-      <option value="10">10 per sida</option>
-      <option value="15">15 per sida</option>
-      <option value="20">20 per sida</option>
-    </select>
-  </div>
-
-  {totalProducts === 0 && (
-    <div className="no-products">
-      <p className="no-products-text">Ingen produkt hittad</p>
-
-      <button
-        className="btn btn-secondary"
-        onClick={() => {
-          setSearch("");
-          setCategory("");
-          setSort("newest");
-          setLimit(10);
+    <div className="products-filters">
+      <input
+        className="filter-input"
+        type="text"
+        placeholder="Sök produkter..."
+        value={search}
+        onChange={(e) => {
+          setSearch(e.target.value);
           setPage(1);
-          updateURL(1, "", "", "newest", 10);
+          updateURL(1, category, e.target.value, sort, limit);
+        }}
+      />
+
+      <select
+        className="filter-select"
+        value={category}
+        onChange={(e) => {
+          setCategory(e.target.value);
+          setPage(1);
+          updateURL(1, e.target.value, search, sort, limit);
         }}
       >
-        Rensa filter
-      </button>
+        <option value="">Alla kategorier</option>
+        {categories.map((c) => (
+          <option key={c.id} value={c.name}>
+            {c.name}
+          </option>
+        ))}
+      </select>
+
+      <select
+        className="filter-select"
+        value={sort}
+        onChange={(e) => {
+          setSort(e.target.value);
+          setPage(1);
+          updateURL(1, category, search, e.target.value, limit);
+        }}
+      >
+        <option value="newest">Nyast först</option>
+        <option value="oldest">Äldst först</option>
+        <option value="price_asc">Pris: Lågt → Högt</option>
+        <option value="price_desc">Pris: Högt → Lågt</option>
+      </select>
+
+      <select
+        className="filter-select"
+        value={limit}
+        onChange={(e) => {
+          const newLimit = Number(e.target.value);
+          setLimit(newLimit);
+          setPage(1);
+          updateURL(1, category, search, sort, newLimit);
+        }}
+      >
+        <option value="10">10 per sida</option>
+        <option value="15">15 per sida</option>
+        <option value="20">20 per sida</option>
+      </select>
     </div>
-  )}
 
-  {totalProducts > 0 && (
-    <div className="products-list">
-      <ul className="product-grid">
-        {products.map((p) => (
-          <li key={p.id} className="product-card">
-            <Link to={`/products/${p.id}`} className="product-link">
-              <img
-            className="product-image"
-                src={p.imageUrl}
-                alt={p.name}
-              />
-              <strong className="product-name">{p.name}</strong>
-              <span className="product-price">{convert(p.price).toFixed(2)} {currency}</span>
-
-              
-            
-            </Link>
-          </li>
-        ))}
-      </ul>
-
-      <div className="pagination">
-        <button
-          className="btn btn-secondary"
-          disabled={page <= 1}
-          onClick={() => {
-            setPage(page - 1);
-            updateURL(page - 1);
-          }}
-        >
-          Föregående
-        </button>
-
-        {Array.from({ length: totalPages }, (_, i) => i + 1).map((num) => (
-          <button
-            key={num}
-            className={`btn pagination-btn ${num === page ? "active" : ""}`}
-            onClick={() => {
-              setPage(num);
-              updateURL(num);
-            }}
-            disabled={num === page}
-          >
-            {num}
-          </button>
-        ))}
+    {totalProducts === 0 && (
+      <div className="no-products">
+        <p className="no-products-text">Ingen produkt hittad</p>
 
         <button
           className="btn btn-secondary"
-          disabled={page >= totalPages}
           onClick={() => {
-            setPage(page + 1);
-            updateURL(page + 1);
+            setSearch("");
+            setCategory("");
+            setSort("newest");
+            setLimit(10);
+            setPage(1);
+            updateURL(1, "", "", "newest", 10);
           }}
         >
-          Nästa
+          Rensa filter
         </button>
       </div>
+    )}
 
-      <p className="pagination-info">
-        Sida {page} av {totalPages}
-      </p>
+    {totalProducts > 0 && (
+      <div className="products-list">
+        <ul className="product-grid">
+          {products.map((p) => (
+            <li key={p.id} className="product-card">
+              <Link to={`/products/${p.id}`} className="product-link">
+                <img
+              className="product-image"
+                  src={p.imageUrl}
+                  alt={p.name}
+                />
+                <strong className="product-name">{p.name}</strong>
+                <span className="product-price">{convert(p.price).toFixed(2)} {currency}</span>
 
-      <p className="pagination-info">
-        Visar {(page - 1) * limit + 1} - {Math.min(page * limit, totalProducts)} av{" "}
-        {totalProducts} produkter
-      </p>
-    </div>
-  )}
-</div>
+                
+              
+              </Link>
+            </li>
+          ))}
+        </ul>
+
+        <div className="pagination">
+          <button
+            className="btn btn-secondary"
+            disabled={page <= 1}
+            onClick={() => {
+              setPage(page - 1);
+              updateURL(page - 1);
+            }}
+          >
+            Föregående
+          </button>
+
+          {Array.from({ length: totalPages }, (_, i) => i + 1).map((num) => (
+            <button
+              key={num}
+              className={`btn pagination-btn ${num === page ? "active" : ""}`}
+              onClick={() => {
+                setPage(num);
+                updateURL(num);
+              }}
+              disabled={num === page}
+            >
+              {num}
+            </button>
+          ))}
+
+          <button
+            className="btn btn-secondary"
+            disabled={page >= totalPages}
+            onClick={() => {
+              setPage(page + 1);
+              updateURL(page + 1);
+            }}
+          >
+            Nästa
+          </button>
+        </div>
+
+        <p className="pagination-info">
+          Sida {page} av {totalPages}
+        </p>
+
+        <p className="pagination-info">
+          Visar {(page - 1) * limit + 1} - {Math.min(page * limit, totalProducts)} av{" "}
+          {totalProducts} produkter
+        </p>
+      </div>
+    )}
+  </div>
+</>
+   
+    
 
   );
 };
