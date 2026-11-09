@@ -12,8 +12,8 @@ import "./styles/cart.css";
 import "./styles/admin.css";
 import "./styles/variants.css";
 import "./styles/product-admin-details.css";
-
-
+import axios from 'axios';
+axios.defaults.withCredentials = true;
 
 
 

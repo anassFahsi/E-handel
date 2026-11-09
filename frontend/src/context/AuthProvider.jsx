@@ -6,56 +6,74 @@ import { AuthContext } from "./AuthContext";
 export const AuthProvider = ({ children }) => {
   const navigate = useNavigate();
   const [isAdmin, setIsAdmin] = useState(false);
-  const [token, setToken] = useState(localStorage.getItem("token"));
+  const [authenticated, setAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true); // 
 
   useEffect(() => {
-    const checkAdmin = async () => {
-      if (!token) {
-        setIsAdmin(false);
-        setLoading(false); 
-        return;
+   const checkAdmin = async () => {
+  try {
+    const res = await axios.get(
+      "/api/users/profile",
+      {
+        withCredentials: true
       }
+    );
 
-      try {
-        const res = await axios.get("/api/users/profile", {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+    setAuthenticated(true);
 
-        setIsAdmin(res.data.user.role === "admin");
-        const admin=res.data.user.role === "admin";
-        if (admin) {
-            navigate("/admin/profile");
-        } else {
-            navigate("/users/profile");
-        }
-      } catch {
-        setIsAdmin(false);
-      } finally {
-        setLoading(false); 
-      }
-    };
+    const admin = res.data.user.role === "admin";
+
+    setIsAdmin(admin);
+
+  } catch {
+    setAuthenticated(false);
+    setIsAdmin(false);
+  } finally {
+    setLoading(false);
+  }
+ };
 
     checkAdmin();
-  }, [token]);
+  }, []);
 
-  const login = (newToken) => {
-    localStorage.setItem("token", newToken);
-    setToken(newToken);
-  };
+ const login = async () => {
+  const res = await axios.get(
+    "/api/users/profile",
+    {
+      withCredentials: true
+    }
+  );
 
-  const logout = () => {
-    localStorage.removeItem("token");
-    setToken(null);
-    setIsAdmin(false);
-    navigate("/users/login", { replace: true });
-  };
+  setAuthenticated(true);
+  setIsAdmin(res.data.user.role === "admin");
+};
+
+ const logout = async () => {
+  try {
+    await axios.post(
+      "/api/users/logout",
+      {},
+      {
+        withCredentials: true
+      }
+    );
+  } catch (error) {
+    console.error(error);
+  }
+
+  setAuthenticated(false);
+  setIsAdmin(false);
+
+  navigate("/users/login", {
+    replace: true
+  });
+};
 
  
   if (loading) return null;
 
   return (
-    <AuthContext.Provider value={{ isAdmin, token, login, logout }}>
+    <AuthContext.Provider value={{ isAdmin, authenticated, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

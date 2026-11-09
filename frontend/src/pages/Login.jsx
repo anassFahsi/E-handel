@@ -14,13 +14,14 @@ export default function Login() {
 
   const handleLogin = async () => {
     try {
-      const res = await axios.post("/api/users/login", {
+      await axios.post("/api/users/login", {
         email,
         password
+      },{
+        withCredentials:true
       });
 
-      login(res.data.token);
-
+     await  login();
       navigate("/users/profile");
       
 

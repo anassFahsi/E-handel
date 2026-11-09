@@ -14,6 +14,8 @@ import adminRouter from '../routes/admin.js';
 import currencyRouter from '../routes/currency.js' ;
 import { searchProducts } from "../integrations/algoliaAdapter.js";
 import { getDeliveryTime } from "../integrations/postNordAdapter.js";
+import cookieParser from "cookie-parser";
+
 
 const result=await getDeliveryTime('16376');
 console.log(JSON.stringify(result,null,2))
@@ -23,6 +25,7 @@ app.use("/uploads", express.static("uploads"));
 app.use(cors());
 app.use("/api/stripe/webhook",stripeWebhookRouter);
 app.use(express.json());
+app.use(cookieParser());
 
 app.use('/api/orders', ordersRouter);
 app.use('/api/', cartRouter);

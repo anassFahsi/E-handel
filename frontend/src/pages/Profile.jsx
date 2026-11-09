@@ -5,6 +5,7 @@ import { AuthContext } from "../context/AuthContext";
 import  '../styles/profile.css';
 
 export default function Profile() {
+    console.log("PROFILE COMPONENT RENDERED");
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
   const { isAdmin } = useContext(AuthContext);
@@ -14,27 +15,22 @@ export default function Profile() {
   }
 
   useEffect(() => {
+     console.log("FETCH PROFILE START");
     const fetchProfile = async () => {
-      const token = localStorage.getItem("token");
-
-      if (!token) {
-        window.location.href = "/users/login";
-        return;
-      }
 
       try {
         const res = await axios.get("/api/users/profile", {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
+         withCredentials:true
         });
+         console.log("PROFILE SUCCESS", res.data);
 
         setUser(res.data.user);
       
-      } catch (err) {
-        if (err.response && err.response.status === 401) {
-          localStorage.removeItem("token");
-          navigate("/users/login");
+      
+      }  catch (err){
+         console.log(err.response?.data);
+        if(err.response && err.response.status===401){
+           navigate("/users/login");
         }
       }
     };
