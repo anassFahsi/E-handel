@@ -54,7 +54,6 @@ router.post('/login',async(req,res)=>{
       sameSite: "lax",
       maxAge: 2 * 60 * 60 * 1000
     });
-    console.log('cookie set')
 
     res.json({
       message: "Login successful"
@@ -69,8 +68,7 @@ router.post('/login',async(req,res)=>{
 
 // Profile (protected)
 router.get('/profile', auth, async (req, res) => {
-  console.log("PROFILE HIT");
-  console.log("cookies:", req.cookies);
+  
   try {
     const userRes = await pool.query(
       "SELECT * FROM users WHERE id = $1",

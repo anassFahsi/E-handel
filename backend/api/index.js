@@ -12,6 +12,7 @@ import usersRouter from '../routes/users.js';
 import reviewsRouter from '../routes/reviews.js';
 import adminRouter from '../routes/admin.js';  
 import currencyRouter from '../routes/currency.js' ;
+import authRouter from '../routes/auth.js';
 import { searchProducts } from "../integrations/algoliaAdapter.js";
 import { getDeliveryTime } from "../integrations/postNordAdapter.js";
 import cookieParser from "cookie-parser";
@@ -34,6 +35,7 @@ app.use('/api/users', usersRouter);
 app.use('/api/reviews', reviewsRouter);
 app.use('/api/admin', adminRouter);   
 app.use('/api/currency', currencyRouter);
+app.use('/api/auth', authRouter);
 
 const SearchQuery = z.object({
   q: z.string().trim().default(""),

@@ -71,6 +71,13 @@
   margin: auto;
 }
 
+.login-alt{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 80%;
+  margin: auto;
+}
 @media(max-width:600px){
   .login-form{
     width: 90%;

@@ -74,7 +74,7 @@ export default function ChangePassword() {
       )}
 
       <h2 className="page-title">Byt lösenord</h2>
-      <div className="form-login">
+      <div className="login-form">
         <form className="form" onSubmit={handleSubmit}>
         <label className="form-label">
           Nuvarande lösenord:

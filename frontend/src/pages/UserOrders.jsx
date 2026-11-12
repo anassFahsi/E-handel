@@ -1,23 +1,21 @@
 import axios from "axios";
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import '../styles/userOrders.css';
 
 const UserOrders = () => {
-  const navigate = useNavigate();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchOrders = async () => {
-      const token = localStorage.getItem("token");
-      if (!token) return navigate("/users/login");
+     
 
       try {
         const res = await axios.get(
-          "/api/orders",
-          { headers: { Authorization: `Bearer ${token}` } }
+          "/api/orders",{
+            withCredentials:true
+          }
         );
 
         setOrders(res.data);

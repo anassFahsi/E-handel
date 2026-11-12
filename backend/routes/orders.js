@@ -1,6 +1,7 @@
 import express from 'express';
 import pool from '../db.js';
-import { auth } from '../middleware/auth.js';
+import jwt from "jsonwebtoken";
+import { auth} from '../middleware/auth.js';
 import {stripe} from '../integrations/stripeAdapter.js';
 import { findServicePoints, getDeliveryTime } from '../integrations/postNordAdapter.js';
 import { calculateShipping } from './shipping.js';
@@ -10,7 +11,27 @@ const router = express.Router();
    USER: CREATE ORDER
 ------------------------------------------- */
 router.post("/checkout", async (req, res) => {
-    const { customer, cart, shipping_method_id, sessionId,postalCode, servicePointId } = req.body;
+  
+    let userId = null;
+
+  try {
+    const token = req.cookies.token;
+
+    if (token) {
+
+      const payload = jwt.verify(
+        token,
+        process.env.JWT_SECRET
+      );
+     
+        userId = payload.id;
+    }
+
+    } catch {
+      userId = null;
+    }
+
+    const { customer, cart, shipping_method_id, sessionId,postalCode, servicePointId, deliveryTime } = req.body;
     try {
       const shippingRes = await pool.query(
       `SELECT name, price
@@ -70,10 +91,11 @@ router.post("/checkout", async (req, res) => {
     const total = backendTotal + shippingPrice;
 
   await pool.query('BEGIN');
+  console.log('userId:',userId)
   const orderRes = await pool.query(
       `INSERT INTO orders 
-        (customer_name, customer_email, customer_address, total, shipping_method_id, shipping_price, cart_session_id, service_point_id, service_point_name)
-       VALUES ($1, $2, $3, $4, $5, $6, $7,$8,$9)
+        (customer_name, customer_email, customer_address, total, shipping_method_id, shipping_price, cart_session_id, service_point_id, service_point_name, estimated_delivery, user_id)
+       VALUES ($1, $2, $3, $4, $5, $6, $7,$8,$9,$10, $11)
        RETURNING id`,
       [
         customer.name,
@@ -85,6 +107,8 @@ router.post("/checkout", async (req, res) => {
         sessionId,
         servicePoint?.id??null,
         servicePoint?.name??null,
+        deliveryTime,
+        userId
       ]
     );
 
@@ -178,13 +202,13 @@ router.post("/checkout", async (req, res) => {
 ------------------------------------------- */
 router.get('/', auth, async (req, res) => {
   try {
-    const email = req.user.email;
+    const userId = req.user.id;
 
     const ordersRes = await pool.query(`
       SELECT * FROM orders
-      WHERE customer_email = $1
+      WHERE user_id = $1
       ORDER BY created_at DESC
-    `, [email]);
+    `, [userId]);
 
     const orders = ordersRes.rows;
 

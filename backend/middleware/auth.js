@@ -4,9 +4,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 export function auth(req, res, next) {
-  console.log("AUTH HIT");
   console.log("URL:", req.originalUrl);
-  console.log("Cookies:", req.cookies);
 
   const token = req.cookies.token;
 

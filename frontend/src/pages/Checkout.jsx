@@ -150,7 +150,6 @@ useEffect(() => {
   };
 
   const handleSubmit = async (e) => {
-    console.log('selectedServicePoint',selectedServicePoint)
     e.preventDefault();
     const error = validateCheckout(form, items, selectedShipping);
 
@@ -166,13 +165,13 @@ useEffect(() => {
       shipping_method_id: selectedShipping.id,
       sessionId: sessionId,
       postalCode,
-      servicePointId:selectedServicePoint
-   
+      servicePointId:selectedServicePoint,
+      deliveryTime
     };
     console.log(order)
 
     try {
-      const res = await axios.post("/api/orders/checkout", order);
+      const res = await axios.post("/api/orders/checkout", order, {withCredentials:true});
       window.location.href=res.data.url;
 
       if (res.data.success) {

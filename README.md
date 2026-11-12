@@ -262,3 +262,129 @@ Det finns även en beroenderisk om tjänsten får driftstörningar. Om Stripe el
 Persondata är också en viktig aspekt. Kundinformation skickas till exempelvis Stripe under betalningsprocessen, vilket innebär att GDPR och säker hantering av personuppgifter måste beaktas.
 
 Sammanfattningsvis ger externa tjänster mycket funktionalitet till låg utvecklingskostnad, men de innebär också att systemet blir beroende av externa leverantörer, deras tillgänglighet och deras villkor.
+
+# Autentisering
+
+## Kundinloggning med Google
+
+Shoppen använder Google OAuth 2.0 tillsammans med OpenID Connect för att låta kunder logga in med sina Google-konton.
+
+### Inloggningsflöde
+
+1. Kunden klickar på **"Fortsätt med Google"** i loginformuläret.
+2. Frontend skickar användaren till backend-routen /api/auth/google.
+3. Backend skapar ett slumpmässigt state-värde och en PKCE code_verifier.
+4. state och code_verifier sparas i httpOnly-cookies.
+5. Servern genererar en code_challenge från verifieraren och skickar användaren vidare till Googles inloggningssida.
+6. Kunden loggar in och godkänner åtkomst.
+7. Google skickar tillbaka användaren till shoppens callback-route tillsammans med en authorization code.
+8. Backend kontrollerar att state matchar det värde som sparades vid starten av inloggningen.
+9. Authorization code byts mot en ID-token genom ett server -till-server-anrop till Google.
+10. ID-token valideras och används för att identifiera användaren.
+11. Användaren hämtas eller skapas i databasen baserat på Googles unika sub.
+12. Shoppen skapar sin egen JWT och sparar den i en httpOnly-cookie.
+13. Kunden skickas tillbaka till shoppen som inloggad användare.
+
+### State och PKCE
+
+Två säkerhetsmekanismer används:
+
+#### State
+
+Ett slumpmässigt state-värde skapas när inloggningen startar.
+
+När Google skickar tillbaka användaren måste samma värde komma tillbaka i callbacken. Om värdet inte matchar avbryts inloggningen.
+
+State skyddar mot CSRF-attacker där en angripare försöker tvinga användaren att logga in med ett annat konto än sitt eget.
+
+#### PKCE
+
+Vid starten av inloggningen skapas en slumpmässig code_verifier.
+
+Servern skickar endast en hash (code_challenge) till Google.
+
+När authorization code senare byts mot tokens måste servern skicka den ursprungliga verifieraren. Google kontrollerar att verifieraren matchar den tidigare challenge som registrerats.
+
+Detta skyddar mot att någon stjäl authorization code och försöker använda den själv.
+
+### Tokens
+
+#### Googles ID\-token
+
+Google returnerar en ID-token som är en JWT.
+
+Den används endast för att identifiera användaren och läsa ut:
+
+- sub
+- email
+- email_verified
+- name
+
+Innan informationen används valideras tokenens innehåll med Zod och följande kontroller genomförs:
+
+- iss måste vara Google
+- aud måste vara shoppens Google Client ID
+- exp får inte ha passerat
+
+ID\-token sparas inte i databasen och skickas aldrig vidare till frontend.
+
+#### Googles Access Token
+
+Google returnerar även ett access token vid tokenutbytet.
+
+Shoppen använder inte Googles API:er efter inloggningen och access token används därför inte.
+
+Det sparas inte heller någonstans.
+
+### Identifiering av användare
+
+Google-användare identifieras med sub och inte med e\-postadress.
+
+Anledningen är att sub är Googles permanenta och unika identifierare för ett konto medan användaren kan byta e-postadress.
+
+Vid första inloggningen skapas en ny användare i databasen med:
+
+- google_sub
+- email
+- name
+
+Vid senare inloggningar hämtas samma användare genom google_sub.
+
+Konton slås inte ihop automatiskt enbart baserat på e-postadress.
+
+### JWT och inloggad session
+
+Efter att Google identifierat användaren skapar shoppen sin egen JWT.
+
+JWT:n innehåller användarens interna id, namn och e-postadress.
+
+Tokenen sparas i en httpOnly-cookie.
+
+Alla skyddade routes använder därefter shoppens egen JWT för autentisering.
+
+Google är endast inblandat under själva inloggningsprocessen.
+
+### Varför JWT?
+
+Shoppen använde redan JWT-baserad autentisering innan Google-login lades till.
+
+Genom att fortsätta använda JWT kunde både vanlig inloggning och Google-login återanvända samma autentiseringssystem och middleware.
+
+Efter callbacken fungerar båda inloggningssätten identiskt eftersom backend endast arbetar med shoppens egen JWT-cookie.
+
+### Mina sidor
+
+När en kund är inloggad kopplas nya ordrar till användarens konto via user_id.
+
+Mina sidor hämtar endast ordrar som tillhör den inloggade användaren.
+
+Om användaren inte är autentiserad returnerar servern statuskod 401.
+
+På så sätt kan kunder endast se sina egna beställningar.
+
+### Utloggning
+
+Vid utloggning rensas JWT-cookien av servern.
+
+Nästa begäran till en skyddad route saknar då giltig token och användaren betraktas som utloggad.
+
