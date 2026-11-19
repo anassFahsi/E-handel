@@ -3,9 +3,9 @@ import { AuthContext } from "../context/AuthContext";
 import { Link } from "react-router-dom";
 
 export default function AdminProfile() {
-  const { token, logout } = useContext(AuthContext);
+  const { authenticated, logout } = useContext(AuthContext);
 
-  if (!token) {
+  if (!authenticated) {
     return <p>Du måste vara inloggad som admin.</p>;
   }
 

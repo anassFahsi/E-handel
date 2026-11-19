@@ -5,7 +5,7 @@ import "../styles/header.css";
 import { useCurrency } from "../context/CurrencyContext";
 
 const Header = ({ cartCount }) => {
-  const { isAdmin, token, logout } = useContext(AuthContext);
+  const { isAdmin, authenticated, logout } = useContext(AuthContext);
   const [menuOpen, setMenuOpen] = useState(false);
 
   const toggleMenu = () => setMenuOpen(!menuOpen);
@@ -43,7 +43,7 @@ const Header = ({ cartCount }) => {
       <nav className="nav-right desktop-only">
         
 
-        {token ? (
+        {authenticated ? (
           <>
             <Link className="nav-link" to={isAdmin ? "/admin/profile" : "/users/profile"}>
               Profil
@@ -80,7 +80,7 @@ const Header = ({ cartCount }) => {
           {cartCount > 0 && <span className="cart-count">{cartCount}</span>}
         </Link>
 
-        {token ? (
+        {authenticated ? (
           <>
             <Link className="mobile-link" to={isAdmin ? "/admin/profile" : "/users/profile"} onClick={closeMenu}>
               Profil

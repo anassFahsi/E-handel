@@ -1,46 +1,18 @@
-import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
-import axios from "axios";
+import { useContext } from "react";
+import { AuthContext } from "../context/AuthContext";
 
 export default function AdminRoute({ children }) {
-  const token = localStorage.getItem("token");
-  const [loading, setLoading] = useState(true);
-  const [isAdmin, setIsAdmin] = useState(false);
+  const { authenticated, isAdmin } = useContext(AuthContext);
 
-  useEffect(() => {
-    const checkAdmin = async () => {
-      if (!token) {
-        setLoading(false);
-        return;
-      }
+  if (!authenticated) {
+    return <Navigate to="/users/login" replace />;
+  }
 
-      try {
-        const res = await axios.get("/api/users/profile", {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        });
-
-        if (res.data.user.role === "admin") {
-          setIsAdmin(true);
-        }
-      } catch (err) {
-        console.error("Admin check failed:", err);
-      }
-
-      setLoading(false);
-    };
-
-    checkAdmin();
-  }, [token]);
-
-  if (loading) return <p>Laddar...</p>;
-
-  if (!token) return <Navigate to="/users/login" replace />;
-
-  if (!isAdmin) return <Navigate to="/" replace />;
+  if (!isAdmin) {
+    return <Navigate to="/" replace />;
+  }
 
   return children;
 }
-
 

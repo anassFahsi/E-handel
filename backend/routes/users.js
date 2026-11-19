@@ -48,7 +48,16 @@ router.post('/login',async(req,res)=>{
         process.env.JWT_SECRET,
         {expiresIn:"2h"}
      );
-     res.json({token});
+     res.cookie("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 2 * 60 * 60 * 1000
+    });
+
+    res.json({
+      message: "Login successful"
+    });
     }
     catch(error){
         console.error(error);
@@ -59,9 +68,10 @@ router.post('/login',async(req,res)=>{
 
 // Profile (protected)
 router.get('/profile', auth, async (req, res) => {
+  
   try {
     const userRes = await pool.query(
-      "SELECT *FROM users WHERE id = $1",
+      "SELECT * FROM users WHERE id = $1",
       [req.user.id]
     );
 
@@ -72,6 +82,18 @@ router.get('/profile', auth, async (req, res) => {
     console.error(err);
     res.status(500).json({ error: "Could not fetch profile" });
   }
+});
+
+router.post("/logout", (req, res) => {
+  res.clearCookie("token", {
+    httpOnly: true,
+    sameSite: "strict",
+    secure: false
+  });
+
+  res.json({
+    message: "Logged out"
+  });
 });
 
 

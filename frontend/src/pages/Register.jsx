@@ -80,8 +80,8 @@ const Register = () => {
       )}
 
       <h2 className="page-title">Registrera dig</h2>
-
-      <input
+      <div className="login-form">
+        <input
         className="form-input"
         type="email"
         placeholder="E-post"
@@ -108,6 +108,8 @@ const Register = () => {
       <button className="btn btn-primary" onClick={handleRegister}>
         Registrera
       </button>
+      </div>
+      
     </div>
   );
 };

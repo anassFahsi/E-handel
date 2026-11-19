@@ -1,8 +1,9 @@
 import express from 'express';
 import pool from '../db.js';
-import { auth } from '../middleware/auth.js';
-import {stripe} from '../integrations/stripeAdapter.js';
-import { findServicePoints } from '../integrations/postNordAdapter.js';
+import jwt from "jsonwebtoken";
+import { auth} from '../middleware/auth.js';
+import {getCheckoutSession,createCheckoutSession} from '../integrations/stripeAdapter.js';
+import { findServicePoints} from '../integrations/postNordAdapter.js';
 import { calculateShipping } from './shipping.js';
 
 const router = express.Router();
@@ -10,7 +11,28 @@ const router = express.Router();
    USER: CREATE ORDER
 ------------------------------------------- */
 router.post("/checkout", async (req, res) => {
-    const { customer, cart, shipping_method_id, sessionId,postalCode, servicePointId } = req.body;
+  
+    let userId = null;
+
+  try {
+    const token = req.cookies.token;
+
+    if (token) {
+
+      const payload = jwt.verify(
+        token,
+        process.env.JWT_SECRET
+      );
+     
+        userId = payload.id;
+    }
+
+    } catch {
+      userId = null;
+    }
+
+    const { customer, cart, shipping_method_id, sessionId,postalCode, servicePointId, deliveryTime } = req.body;
+    
     try {
       const shippingRes = await pool.query(
       `SELECT name, price
@@ -24,6 +46,7 @@ router.post("/checkout", async (req, res) => {
     }
     const shippingMethodName=shippingRes.rows[0].name;
     let servicePoint='';
+    
     if (shippingMethodName === "PostNord Ombud") {
 
       const nearby =
@@ -56,6 +79,7 @@ router.post("/checkout", async (req, res) => {
         [item.product_id]
       );
 
+      
         const itemPrice =
           Number(priceRes.rows[0].price);
 
@@ -69,10 +93,11 @@ router.post("/checkout", async (req, res) => {
     const total = backendTotal + shippingPrice;
 
   await pool.query('BEGIN');
+ 
   const orderRes = await pool.query(
       `INSERT INTO orders 
-        (customer_name, customer_email, customer_address, total, shipping_method_id, shipping_price, cart_session_id, service_point_id, service_point_name)
-       VALUES ($1, $2, $3, $4, $5, $6, $7,$8,$9)
+        (customer_name, customer_email, customer_address, total, shipping_method_id, shipping_price, cart_session_id, service_point_id, service_point_name, estimated_delivery, user_id)
+       VALUES ($1, $2, $3, $4, $5, $6, $7,$8,$9,$10, $11)
        RETURNING id`,
       [
         customer.name,
@@ -84,14 +109,21 @@ router.post("/checkout", async (req, res) => {
         sessionId,
         servicePoint?.id??null,
         servicePoint?.name??null,
+        deliveryTime,
+        userId
       ]
     );
 
     const orderId = orderRes.rows[0].id;
     const lineItems=[];
+
     for (const item of cart) {
 
-      if (item.quantity > item.variant_stock) {
+      const variantStockRes= await pool.query(`SELECT stock FROM product_variants WHERE id=$1`,[item.variant_id]);
+
+      const variantStock=variantStockRes.rows[0].stock;
+
+      if (item.quantity > variantStock) {
         await pool.query('ROLLBACK');
         return res.json({ error: 'Not enough stock' });
       }
@@ -139,23 +171,16 @@ router.post("/checkout", async (req, res) => {
         })
 
 
-    const session = await stripe.checkout.sessions.create({
-      mode: "payment",
-
-      client_reference_id: String(orderId),
-
-      expires_at: Math.floor(Date.now() / 1000) + 30 * 60,
-
-      line_items: lineItems,
-
-      success_url:
-        `${process.env.CLIENT_URL}/#/thankyou?session_id={CHECKOUT_SESSION_ID}`,
-
-      cancel_url:
-        `${process.env.CLIENT_URL}/#/checkout`,
-    });
+    const session =await createCheckoutSession({
+      orderId,
+      lineItems,
+      successUrl:
+      `${process.env.CLIENT_URL}/#/thankyou?session_id={CHECKOUT_SESSION_ID}`,
+      cancelUrl:
+      `${process.env.CLIENT_URL}/#/checkout`
+  });
     await pool.query('COMMIT')
-
+    
     res.json({
       url: session.url,
     });
@@ -177,13 +202,13 @@ router.post("/checkout", async (req, res) => {
 ------------------------------------------- */
 router.get('/', auth, async (req, res) => {
   try {
-    const email = req.user.email;
+    const userId = req.user.id;
 
     const ordersRes = await pool.query(`
       SELECT * FROM orders
-      WHERE customer_email = $1
+      WHERE user_id = $1
       ORDER BY created_at DESC
-    `, [email]);
+    `, [userId]);
 
     const orders = ordersRes.rows;
 
@@ -225,18 +250,19 @@ router.get('/', auth, async (req, res) => {
 
 router.get("/checkout/session/:sessionId", async (req, res) => {
   try {
-    const session = await stripe.checkout.sessions.retrieve(
-      req.params.sessionId
+    const session =await getCheckoutSession(
+     req.params.sessionId
     );
 
-    const orderId = session.client_reference_id;
-
-    const orderRes = await pool.query(
-      `SELECT *
-       FROM orders
-       WHERE id = $1`,
-      [orderId]
-    );
+  const orderRes =
+   await pool.query(
+    `
+    SELECT *
+    FROM orders
+    WHERE id = $1
+    `,
+    [session.orderId]
+  );
 
     if (!orderRes.rows.length) {
       return res.status(404).json({
@@ -246,7 +272,7 @@ router.get("/checkout/session/:sessionId", async (req, res) => {
 
     res.json({
       sessionId: session.id,
-      paymentStatus: session.payment_status,
+      paymentStatus: session.paymentStatus,
       order: orderRes.rows[0],
     });
 

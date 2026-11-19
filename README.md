@@ -45,8 +45,10 @@ cd ../frontend
 npm install
 npm run dev
 
-*******
-  ***  Produktimport
+```
+--- 
+
+##   Produktimport
 
 Shoppen innehåller en produktimport som hämtar produkter från ett externt leverantörs-API i både CSV- och XML-format.
 
@@ -64,7 +66,7 @@ SUPPLIER_BRANSCH=
 
 Se .env.example för samtliga variabler.
 
-***🔎 Produktsökning
+## 🔎 Produktsökning
 
 Shoppen använder Algolia för fritextsökning.
 
@@ -84,11 +86,12 @@ ALGOLIA_ADMIN_API_KEY=
 ALGOLIA_SEARCH_API_KEY=
 ALGOLIA_INDEX_NAME=
 
-💳 Betalning med Stripe
+## 💳 Betalning med Stripe
 
 Shoppen använder Stripe Checkout i testläge för säkra betalningar.
 
-Funktioner
+Funktioner:
+
 Stripe Checkout (hosted)
 Order skapas som Obetald innan betalning
 Priser hämtas från databasen på servern
@@ -108,10 +111,11 @@ CLIENT_URL=
 Testkort
 4242 4242 4242 4242
 
-🖼️ Produktbilder
+## 🖼️ Produktbilder
 Shoppen använder Cloudinary för lagring av produktbilder i molnet.
 
-Funktioner
+Funktioner: 
+
 Uppladdning av produktbilder via backend
 Endast JPEG- och PNG-filer accepteras
 Maximal filstorlek: 4 MB
@@ -122,14 +126,15 @@ Vid byte av bild laddas den nya bilden upp innan den gamla tas bort
 Den gamla bilden behålls om uppladdningen misslyckas
 Begripliga felmeddelanden vid ogiltig filtyp eller för stor fil
 Externa miljövariabler
-CLOUDINARY_CLOUD_NAME=
-CLOUDINARY_API_KEY=
-CLOUDINARY_API_SECRET=
+CLOUD_NAME=
+CLOUD_API_KEY=
+CLOUD_API_SECRET=
 
-🚚 PostNord Integration (Labb 5)
+## 🚚 PostNord Integration (Labb 5)
 Shoppen använder PostNords API för att hämta närmaste ombud och beräknad leveranstid direkt i kassan.
 
-Funktioner
+Funktioner:
+
 Kunden anger sitt postnummer
 Närmaste PostNord-ombud hämtas via backend
 Kunden kan välja ett ombud från listan
@@ -141,7 +146,7 @@ Frakten ingår i Stripe Checkout
 Ombud och fraktinformation sparas på ordern
 PostNords svar valideras med Zod
 Timeout och felhantering används för alla API-anrop
-Miljövariabler
+Miljövariabler:
 POSTNORD_API_KEY=
 SHOP_POSTAL_CODE=
 
@@ -262,3 +267,228 @@ Det finns även en beroenderisk om tjänsten får driftstörningar. Om Stripe el
 Persondata är också en viktig aspekt. Kundinformation skickas till exempelvis Stripe under betalningsprocessen, vilket innebär att GDPR och säker hantering av personuppgifter måste beaktas.
 
 Sammanfattningsvis ger externa tjänster mycket funktionalitet till låg utvecklingskostnad, men de innebär också att systemet blir beroende av externa leverantörer, deras tillgänglighet och deras villkor.
+
+# Autentisering
+
+## Kundinloggning med Google
+
+Shoppen använder Google OAuth 2.0 tillsammans med OpenID Connect för att låta kunder logga in med sina Google-konton.
+Externa miljövariabler:
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+GOOGLE_CALLBACK_URL=
+### Inloggningsflöde
+
+1. Kunden klickar på **"Fortsätt med Google"** i loginformuläret.
+2. Frontend skickar användaren till backend-routen /api/auth/google.
+3. Backend skapar ett slumpmässigt state-värde och en PKCE code_verifier.
+4. state och code_verifier sparas i httpOnly-cookies.
+5. Servern genererar en code_challenge från verifieraren och skickar användaren vidare till Googles inloggningssida.
+6. Kunden loggar in och godkänner åtkomst.
+7. Google skickar tillbaka användaren till shoppens callback-route tillsammans med en authorization code.
+8. Backend kontrollerar att state matchar det värde som sparades vid starten av inloggningen.
+9. Authorization code byts mot en ID-token genom ett server -till-server-anrop till Google.
+10. ID-token valideras och används för att identifiera användaren.
+11. Användaren hämtas eller skapas i databasen baserat på Googles unika sub.
+12. Shoppen skapar sin egen JWT och sparar den i en httpOnly-cookie.
+13. Kunden skickas tillbaka till shoppen som inloggad användare.
+
+### State och PKCE
+
+Två säkerhetsmekanismer används:
+
+#### State
+
+Ett slumpmässigt state-värde skapas när inloggningen startar.
+
+När Google skickar tillbaka användaren måste samma värde komma tillbaka i callbacken. Om värdet inte matchar avbryts inloggningen.
+
+State skyddar mot CSRF-attacker där en angripare försöker tvinga användaren att logga in med ett annat konto än sitt eget.
+
+#### PKCE
+
+Vid starten av inloggningen skapas en slumpmässig code_verifier.
+
+Servern skickar endast en hash (code_challenge) till Google.
+
+När authorization code senare byts mot tokens måste servern skicka den ursprungliga verifieraren. Google kontrollerar att verifieraren matchar den tidigare challenge som registrerats.
+
+Detta skyddar mot att någon stjäl authorization code och försöker använda den själv.
+
+### Tokens
+
+#### Googles ID-token
+
+Google returnerar en ID-token som är en JWT.
+
+Den används endast för att identifiera användaren och läsa ut:
+
+- sub
+- email
+- email_verified
+- name
+
+Innan informationen används valideras tokenens innehåll med Zod och följande kontroller genomförs:
+
+- iss måste vara Google
+- aud måste vara shoppens Google Client ID
+- exp får inte ha passerat
+
+ID-token sparas inte i databasen och skickas aldrig vidare till frontend.
+
+#### Googles Access Token
+
+Google returnerar även ett access token vid tokenutbytet.
+
+Shoppen använder inte Googles API:er efter inloggningen och access token används därför inte.
+
+Det sparas inte heller någonstans.
+
+### Identifiering av användare
+
+Google-användare identifieras med sub och inte med e\-postadress.
+
+Anledningen är att sub är Googles permanenta och unika identifierare för ett konto medan användaren kan byta e-postadress.
+
+Vid första inloggningen skapas en ny användare i databasen med:
+
+- google_sub
+- email
+- name
+
+Vid senare inloggningar hämtas samma användare genom google_sub.
+
+Konton slås inte ihop automatiskt enbart baserat på e-postadress.
+
+### JWT och inloggad session
+
+Efter att Google identifierat användaren skapar shoppen sin egen JWT.
+
+JWT:n innehåller användarens interna id, namn och e-postadress.
+
+Tokenen sparas i en httpOnly-cookie.
+
+Alla skyddade routes använder därefter shoppens egen JWT för autentisering.
+
+Google är endast inblandat under själva inloggningsprocessen.
+
+### Varför JWT?
+
+Shoppen använde redan JWT-baserad autentisering innan Google-login lades till.
+
+Genom att fortsätta använda JWT kunde både vanlig inloggning och Google-login återanvända samma autentiseringssystem och middleware.
+
+Efter callbacken fungerar båda inloggningssätten identiskt eftersom backend endast arbetar med shoppens egen JWT-cookie.
+
+### Mina sidor
+
+När en kund är inloggad kopplas nya ordrar till användarens konto via user_id.
+
+Mina sidor hämtar endast ordrar som tillhör den inloggade användaren.
+
+Om användaren inte är autentiserad returnerar servern statuskod 401.
+
+På så sätt kan kunder endast se sina egna beställningar.
+
+### Utloggning
+
+Vid utloggning rensas JWT-cookien av servern.
+
+Nästa begäran till en skyddad route saknar då giltig token och användaren betraktas som utloggad.
+
+# Orderbekräftelse via e-post
+
+## Resend-integration
+
+Shoppen skickar orderbekräftelser via Resend när en order har betalats.
+
+Resend används som extern e-posttjänst eftersom webbshoppen inte har en egen e-postserver. Genom att använda Resend kan shoppen skicka e-post via ett HTTPS-anrop istället för att själv hantera SMTP, spamfilter och leveransproblem.
+
+API-nyckeln för Resend lagras endast på serversidan i en miljövariabel (RESEND_API_KEY) och exponeras aldrig för frontend eller webbläsaren.
+Externa miljövariabler:
+RESEND_API_KEY=
+EMAIL_FROM=
+
+## E-postadapter
+
+All kommunikation med Resend sker via en separat adapter:
+
+integrations/emailAdapter.js
+
+Det är den enda filen som känner till Resends URL och API-nyckel. På så sätt påverkas resten av systemet inte om leverantören skulle bytas ut i framtiden.
+
+Alla anrop använder timeout och felhantering för att undvika att servern låser sig om Resend inte svarar.
+
+## När skickas orderbekräftelsen?
+
+Orderbekräftelsen skickas från Stripe-webhooken efter att ordern har markerats som betald.
+
+Flödet ser ut så här:
+
+Kund genomför köp
+
+↓
+
+Stripe Checkout
+
+↓
+
+Stripe skickar webhook
+
+↓
+
+Order markeras som Betald
+
+↓
+
+Lager uppdateras
+
+↓
+
+Orderbekräftelse skickas via Resend
+
+Mejlet skickas alltså inte när kunden klickar på "Köp" eftersom kunden fortfarande kan avbryta betalningen innan den genomförs.
+
+## Innehåll i orderbekräftelsen
+
+Orderbekräftelsen innehåller:
+
+- Ordernummer
+- Kundens namn
+- Beställda produkter
+- Antal per produkt
+- Pris per produkt
+- Totalsumma
+
+Mejlet genereras både som HTML och som vanlig text för att fungera i olika e-postklienter.
+
+## Säkerhet
+
+Kunddata som visas i HTM-versionen av mejlet escapas innan den används. Detta förhindrar att HTML-kod eller skadligt innehåll injiceras i e-postmeddelandet.
+
+Resends svar valideras med Zod innan det används av systemet.
+
+## Idempotency Key
+
+För att undvika dubbla orderbekräftelser används en Idempotency-Key kopplad till ordern:
+
+order-confirmation/<orderId>Om Stripe skickar samma webhook flera gånger kommer Resend att känna igen förfrågan och inte skapa flera identiska mejl.
+
+## Felhantering
+
+Ett misslyckat mejlutskick påverkar inte betalningen.
+
+Om Resend inte svarar eller returnerar ett fel loggas felet på servern, men ordern förblir markerad som betald.
+
+På så sätt riskerar kunden inte att förlora en genomförd betalning på grund av ett problem i e-posttjänsten.
+
+## Testmiljö
+
+Projektet använder:
+
+onboarding@resend.dev
+
+som avsändaradress i utvecklings- och testmiljön.
+
+I detta läge kan Resend endast skicka mejl till den e-postadress som är kopplad till Resend-kontot. För att skicka till valfria mottagare krävs en verifierad egen domän.
+

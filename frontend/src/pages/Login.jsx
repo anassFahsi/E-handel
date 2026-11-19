@@ -1,26 +1,59 @@
-import { useState, useContext } from "react";
+import { useState, useEffect, useContext } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loginError, setLoginError] = useState(null);
   const navigate = useNavigate();
-
+  const [searchParams]=useSearchParams();
   const { login } = useContext(AuthContext);
 
-  const [loginError, setLoginError] = useState(null);
+  useEffect(() => {
+
+  const error =
+    searchParams.get("error");
+
+  if (!error) return;
+
+  if (error === "cancelled") {
+    setLoginError(
+      "Google-inloggningen avbröts."
+    );
+  }
+
+  if (error === "google") {
+    setLoginError(
+      "Kunde inte logga in med Google."
+    );
+  }
+
+  if (error === "state" || error==="pkce") {
+    setLoginError(
+      "Inloggningen kunde inte verifieras."
+    );
+  }
+
+  if (error === "not-verified") {
+    setLoginError(
+      "Google-kontot har ingen verifierad e-postadress."
+    );
+  }
+
+}, [searchParams]);
 
   const handleLogin = async () => {
     try {
-      const res = await axios.post("/api/users/login", {
+      await axios.post("/api/users/login", {
         email,
         password
+      },{
+        withCredentials:true
       });
 
-      login(res.data.token);
-
+     await  login();
       navigate("/users/profile");
       
 
@@ -30,6 +63,10 @@ export default function Login() {
       setTimeout(() => setLoginError(null), 2500);
     }
   };
+
+  const loginWithGoogle = () => {
+  window.location.href = "/api/auth/google";
+};
 
   return (
     <div className="login-page">
@@ -57,10 +94,15 @@ export default function Login() {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
+        <div className="login-alt">
 
-        <button className="btn btn-primary" onClick={handleLogin}>
-          Logga in
-        </button>
+        
+          <button className="btn btn-primary" onClick={handleLogin}>
+            Logga in
+          </button>
+          <p>Eller</p>
+          <button className="btn btn-primary" onClick={loginWithGoogle}>Fortsätt med Google</button>
+        </div> 
       </div>
     </div>
   );
