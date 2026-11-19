@@ -1,24 +1,26 @@
 import express from "express";
-import stripe from "../integrations/stripeAdapter.js";
+import {verifyWebhook} from "../integrations/stripeAdapter.js";
 import pool from "../db.js";
+import { sendOrderConfirmation } from "../integrations/emailAdapter.js";
 const router = express.Router();
 
 router.post(
   "/",
   express.raw({ type: "application/json" }),
   async (req, res) => {
-
+     
     try{
-        const event = stripe.webhooks.constructEvent(
-        req.body,
-        req.headers["stripe-signature"],
-        process.env.STRIPE_WEBHOOK_SECRET
-        );
+  
+       const event =verifyWebhook({ 
+        payload: req.body, 
+        signature: req.headers["stripe-signature"]
+       });
+         
         switch (event.type) {
 
         case "checkout.session.completed":
         case "checkout.session.async_payment_succeeded": {
-
+       
             const session = event.data.object;
             const orderId = session.client_reference_id;
 
@@ -46,10 +48,53 @@ router.post(
                     UPDATE product_variants SET stock=stock - $1 WHERE id=$2`,[variant.quantity, variant.variant_id])
             }
 
+            
+
             const cartSessionId=orderRes.rows[0].cart_session_id;
             if(cartSessionId){
                  await pool.query(`DELETE FROM carts WHERE session_id = $1`,[cartSessionId])
             }
+
+            const orderDetails = await pool.query(
+                `
+                SELECT *
+                FROM orders
+                WHERE id = $1
+                `,
+                [orderId]
+                );
+
+                const items = await pool.query(
+                `
+                SELECT
+                    oi.quantity,
+                    oi.price_at_purchase,
+                    p.name
+                FROM order_items oi
+                JOIN products p
+                    ON p.id = oi.product_id
+                WHERE oi.order_id = $1
+                `,
+                [orderId]
+                );
+            
+        try {
+            await sendOrderConfirmation({
+                orderId,
+                order: orderDetails.rows[0],
+                items: items.rows
+            });
+
+            }
+        catch (error) {
+
+            console.error(
+                "Failed to send email:",
+                error
+            );
+
+        }
+
            
 
             break;

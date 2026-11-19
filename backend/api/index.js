@@ -14,12 +14,9 @@ import adminRouter from '../routes/admin.js';
 import currencyRouter from '../routes/currency.js' ;
 import authRouter from '../routes/auth.js';
 import { searchProducts } from "../integrations/algoliaAdapter.js";
-import { getDeliveryTime } from "../integrations/postNordAdapter.js";
 import cookieParser from "cookie-parser";
 
 
-const result=await getDeliveryTime('16376');
-console.log(JSON.stringify(result,null,2))
 const app = express();
 app.use("/uploads", express.static("uploads"));
 
@@ -147,26 +144,17 @@ app.get("/api/search", async (req, res) => {
       category,
       sort
     );
-    //console.log("hits:", result.hits.length);
-   //console.log(result.hits[0]); 
 
   return res.json({
-    data: result.hits.map((hit) => ({
-      id: Number(hit.objectID),
-      supplierSku: hit.supplierSku,
-      name: hit.name,
-      description: hit.description,
-      price: hit.price,
-      category: hit.category,
-      imageUrl: hit.imageUrl,
-    })),
+    data: result.products,
     meta: {
       page,
       pageSize,
-      total: result.nbHits,
-      totalPages: result.nbPages,
-   },
+      total: result.total,
+      totalPages: result.totalPages,
+    },
   });
+
   } catch (error) {
     console.error(error);
 

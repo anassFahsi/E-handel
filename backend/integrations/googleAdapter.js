@@ -30,7 +30,6 @@ export function getAuthorizeUrl(state , codeChallenge) {
     code_challenge_method: 'S256'
   })
 
-  console.log("getAuthorizeUrl", `https://accounts.google.com/o/oauth2/v2/auth?${params}`)
   return `https://accounts.google.com/o/oauth2/v2/auth?${params}`
 }
 
@@ -52,8 +51,6 @@ export async function exchangeCode(code  , codeVerifier) {
     throw new Error(`Google refused the code: ${answer.error ?? response.status}`)
   }
 
-console.log('Response from Google Token request, a JWT:', answer)
-
 const claims = jwt.decode(answer.id_token)
  
 const parsed =
@@ -68,8 +65,6 @@ const googleUser = parsed.data;
   if (googleUser.iss !== 'https://accounts.google.com' && googleUser.iss !== 'accounts.google.com') {
     throw new Error('The ID token is not from Google')
   }
-
-  console.log('Response from Google Token request, Dcoded JWT:', claims)
 
   if (googleUser.aud !== CLIENT_ID) throw new Error('The ID token is for another app')
   if (!googleUser.exp || googleUser.exp * 1000 < Date.now()) throw new Error('The ID token has expired')

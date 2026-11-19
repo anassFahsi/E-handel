@@ -87,8 +87,24 @@ if (sort === "oldest") {
     searchParams
   });
 
-  return result;
+ return {
+  products: result.hits.map(hit => ({
+    id: Number(hit.objectID),
+    supplierSku: hit.supplierSku,
+    name: hit.name,
+    description: hit.description,
+    price: hit.price,
+    category: hit.category,
+    imageUrl: hit.imageUrl,
+   })),
+
+  total: result.nbHits,
+  totalPages: result.nbPages,
+  currentPage: page
+ };
 }
+
+
 
 export async function deleteProduct(productId) {
   await adminClient.deleteObject({

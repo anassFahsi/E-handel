@@ -87,7 +87,7 @@ export async function getSupplierCatalog(format) {
     );
 
    if (!response.ok) {
-        console.log("Status:", response.status);
+       
         console.log("StatusText:", response.statusText);
 
         const body = await response.text();

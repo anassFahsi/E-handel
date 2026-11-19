@@ -8,6 +8,7 @@ import { admin } from "../middleware/admin.js";
 import { handleUpload,removeProductImage } from "../integrations/storageAdapter.js";
 
 
+
 const router = express.Router();
 
 
@@ -162,7 +163,7 @@ router.put("/products/:id", auth, admin, handleUpload, async (req, res) => {
         const folder = parts[parts.length - 2];   
         const publicId = `${folder}/${fileName.split(".")[0]}`; 
 
-        await cloudinary.uploader.destroy(publicId);
+        await removeProductImage(publicId);
       }
     }
 
@@ -458,7 +459,7 @@ stock: z.number().nullable(),
 variants: z.array(z.string())
 });
 
-router.post("/products/import/:format", async (req, res) => {
+router.post("/products/import/:format", auth, admin, async (req, res) => {
   const {format}=req.params;
   if (format !=='csv' && format !=='xml' ){
     res.status(400).json({ error: 'The format must be csv or xml' });
@@ -530,7 +531,7 @@ router.post("/products/import/:format", async (req, res) => {
   }
 });
 
-router.post("/search/index", async (req, res) => {
+router.post("/search/index",auth, admin, async (req, res) => {
   const result = await pool.query(`
     SELECT
       p.*,

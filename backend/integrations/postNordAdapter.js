@@ -56,7 +56,7 @@ export async function findServicePoints(
 
   const parsed =
     PostNordAnswer.safeParse(json);
-    console.log(parsed)
+   
 
   if (!parsed.success) {
     throw new Error(
